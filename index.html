@@ -128,6 +128,7 @@
       <div class="nav-item" data-view="fotobruto"><span class="ico">FB</span> Foto / Bruto <span class="cnt" id="cnt-fotobruto">0</span></div>
       <div class="nav-item" data-view="amarracao"><span class="ico">AM</span> Amarração <span class="cnt" id="cnt-amarracao">0</span></div>
       <div class="nav-item" data-view="banho"><span class="ico">BA</span> Banho (Galvano) <span class="cnt" id="cnt-banho">0</span></div>
+      <div class="nav-item" data-view="qualidade"><span class="ico">QA</span> Qualidade <span class="cnt" id="cnt-qualidade">0</span></div>
       <div class="nav-item" data-view="expedicao"><span class="ico">EX</span> Expedição <span class="cnt" id="cnt-expedicao">0</span></div>
       <div class="nav-item" data-view="verniz"><span class="ico">VZ</span> Verniz (Terceiro) <span class="cnt" id="cnt-verniz">0</span></div>
       <div class="nav-sep">Tanques & Insumos</div>
@@ -262,10 +263,23 @@
             <div class="toolbar"><input type="text" id="buscaBa" placeholder="Buscar..."></div>
           </div>
           <div class="table-scroll"><table>
-            <thead><tr><th>Nº O.S.</th><th>Cliente</th><th>Recebido da Amarr.</th><th>Prazo setor</th><th>Linhas apont.</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Nº O.S.</th><th>Cliente</th><th>Recebido da Amarr.</th><th>Prazo setor</th><th>Lotes pesados</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tbodyBa"></tbody>
           </table></div>
           <div id="emptyBa" class="empty">Nenhuma O.S. no Banho. Encaminhe da Amarração para aparecer aqui.</div>
+        </div>
+      </section>
+      <section class="view" id="view-qualidade">
+        <div class="cards" id="cards-qu"></div>
+        <div class="panel">
+          <div class="panel-head"><span class="dot"></span><h2>Fila da Qualidade — O.S. pesadas no Banho</h2>
+            <div class="toolbar"><input type="text" id="buscaQu" placeholder="Buscar..."></div>
+          </div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Nº O.S.</th><th>Cliente</th><th>Recebido do Banho</th><th>Prazo setor</th><th>Peso banho</th><th>Apontamentos</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbodyQu"></tbody>
+          </table></div>
+          <div id="emptyQu" class="empty">Nenhuma O.S. na Qualidade. Conclua a pesagem no Banho para aparecer aqui.</div>
         </div>
         <div class="panel">
           <div class="panel-head"><span class="dot"></span><h2>Apontamento de produção</h2>
@@ -469,6 +483,7 @@
       <div class="grid">
         <div><label>Produto / Lote</label><input type="text" id="itProduto" placeholder="Ex.: brinco de argola"></div>
         <div><label>Peso do lote (Kg)</label><input type="number" step="0.001" id="itPeso" oninput="calcItem()"></div>
+        <div><label>Peso sem pedra (Kg)</label><input type="number" step="0.001" id="itPesoSemPedra" placeholder="= total se não houver pedra" oninput="calcItem()"></div>
         <div><label>Qtd de peças</label><input type="number" id="itQtd" min="0"></div>
         <div><label>Cor <span class="req" id="corStar" style="display:none">*</span></label><select id="itCor"><option value="">—</option><option>AU 18</option><option>AU 24</option><option>CHAMPANHE</option><option>VERDE</option><option>MONT</option><option>ROSE</option><option>PRATA</option><option>RODIO BRANCO</option><option>NIQUEL FREE</option><option>NÍQUEL</option><option>COBRE</option></select></div>
       </div>
@@ -478,7 +493,9 @@
         <div id="itCotBox" style="display:none"><label>Cotação Ouro (R$/g)</label><input type="number" step="0.01" id="itCotacao" oninput="calcItem()"></div>
         <div id="itCamBox" style="display:none"><label>Camada</label><select id="itCamada" onchange="calcItem()"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
         <div id="itMOBox" style="display:none"><label>MO — Fator Mão de Obra</label><input type="number" step="0.1" id="itMO" oninput="calcItem()"></div>
+        <div id="itEspecialBox" style="display:none"><label>Preço especial (R$/kg)</label><input type="number" step="0.01" id="itEspecialKg" oninput="calcItem()"></div>
       </div>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin:2px 0 4px;font-size:13px"><input type="checkbox" id="itEspecial" onchange="especialToggle()"> Tabela especial (preço fixo R$/kg) — ex.: Flash R$ 1.450/kg, 1 Milésimo R$ 2.000/kg</label>
       <div class="sec-title">Complementares (preço por grama)</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;font-size:13px">
         <label><input type="checkbox" id="c_grafite" onchange="calcItem()"> Grafite (0,60)</label>
@@ -497,6 +514,7 @@
       <div class="info-os" style="margin-top:16px">
         <div><b>Banho principal</b><span id="itVBanho">R$ 0,00</span></div>
         <div><b>Complementares</b><span id="itVCompl">R$ 0,00</span></div>
+        <div><b>Peso líquido (banho)</b><span id="itVLiq">—</span></div>
         <div><b>Preço do banho (item)</b><span id="itVTotal" style="font-weight:800">R$ 0,00</span></div>
       </div>
       <div class="actions"><button class="btn-primary" onclick="salvarItem()">Salvar item</button><button class="btn-ghost" onclick="closeItemModal()">Cancelar</button></div>
@@ -636,6 +654,22 @@
   <div style="max-width:90%"><img id="imgBig" style="max-width:100%;max-height:85vh;border-radius:10px"></div>
 </div>
 
+<div class="modal-bg" id="pesagemModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="pesTitle">Pesagem do banho</h3><button class="x" onclick="closePesagem()">×</button></div>
+    <div class="modal-body">
+      <div class="info-os" id="pesInfoOS"></div>
+      <input type="hidden" id="pesOsId">
+      <div class="sec-title">Lotes — peso recebido no banho (a pedra é fixa; o % recalcula com o novo peso)</div>
+      <div class="table-scroll" style="max-height:340px"><table>
+        <thead><tr><th>Lote</th><th>Banho / Cor</th><th>Peso comercial</th><th>Peso no banho (Kg)</th><th>Tempo</th><th>Líder</th><th>Pedra</th></tr></thead>
+        <tbody id="pesLotes"></tbody>
+      </table></div>
+      <div class="actions" style="margin-top:14px"><button class="btn-excel" onclick="concluirPesagem()">Concluir pesagem → Qualidade</button><button class="btn-ghost" onclick="closePesagem()">Fechar</button></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="apontModal">
   <div class="modal">
     <div class="modal-head"><h3 id="apontTitle">Apontar produção</h3><button class="x" onclick="closeApont()">×</button></div>
@@ -704,22 +738,22 @@ let dados=JSON.parse(localStorage.getItem(KEY)||'[]');
 let logoData=localStorage.getItem('magri_logo')||'';
 function logoTag(h){return logoData?'<img src="'+logoData+'" style="height:'+(h||46)+'px;vertical-align:middle;margin-right:12px">':'';}
 function aplicarLogoHeader(){var el=document.getElementById('appLogo');if(el)el.innerHTML=logoData?'<img src="'+logoData+'" style="width:100%;height:100%;object-fit:contain;border-radius:8px">':'M';}
-const DEFAULT_USERS=[{user:'admin',pass:'admin',role:'Admin'},{user:'Comercial',pass:'Comercial',role:'Comercial'},{user:'Foto',pass:'Foto',role:'Foto/Bruto'},{user:'Gancheira',pass:'Gancheira',role:'Amarração'},{user:'Banho',pass:'Banho',role:'Banho'},{user:'Expedição',pass:'Expedição',role:'Expedição'},{user:'Financeiro',pass:'Financeiro',role:'Financeiro'},{user:'Tablet',pass:'tablet',role:'Expedição'},{user:'Celular',pass:'celular',role:'Foto/Bruto'}];
+const DEFAULT_USERS=[{user:'admin',pass:'admin',role:'Admin'},{user:'Comercial',pass:'Comercial',role:'Comercial'},{user:'Foto',pass:'Foto',role:'Foto/Bruto'},{user:'Gancheira',pass:'Gancheira',role:'Amarração'},{user:'Banho',pass:'Banho',role:'Banho'},{user:'Qualidade',pass:'Qualidade',role:'Qualidade'},{user:'Expedição',pass:'Expedição',role:'Expedição'},{user:'Financeiro',pass:'Financeiro',role:'Financeiro'},{user:'Tablet',pass:'tablet',role:'Expedição'},{user:'Celular',pass:'celular',role:'Foto/Bruto'}];
 let usuarios=JSON.parse(localStorage.getItem('magri_users')||'null')||[];
 DEFAULT_USERS.forEach(function(du){if(!usuarios.find(function(u){return (u.user||'').toLowerCase()===du.user.toLowerCase();}))usuarios.push(du);});
 localStorage.setItem('magri_users',JSON.stringify(usuarios));
 function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usuarios));}
 let sessao=JSON.parse(localStorage.getItem('magri_session')||'null');
-const ALL_VIEWS=['gestao','comercial','fotobruto','amarracao','banho','expedicao','verniz','reforco','tanque','troca','resumo','catalogo','cobranca'];
-const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Expedição','Financeiro'];
-const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
+const ALL_VIEWS=['gestao','comercial','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','catalogo','cobranca'];
+const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Expedição','Financeiro'];
+const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
 let rolePerms=JSON.parse(localStorage.getItem('magri_roleperms')||'null')||{};
 ROLES_CONFIG.forEach(function(r){if(!rolePerms[r])rolePerms[r]=(ROLE_VIEWS_DEFAULT[r]||['gestao']).slice();});
 localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));
 function salvarRolePerms(){localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));}
 function viewsDoRole(role){if(role==='Admin')return ALL_VIEWS.concat(['usuarios']);return rolePerms[role]||[];}
 function togglePerm(role,view){if(!rolePerms[role])rolePerms[role]=[];var i=rolePerms[role].indexOf(view);if(i>-1)rolePerms[role].splice(i,1);else rolePerms[role].push(view);salvarRolePerms();aplicarPermissoes();}
-function renderPermissoes(){var box=document.getElementById('permBox');if(!box)return;var lab={gestao:'Gestão',comercial:'Comercial',fotobruto:'Foto/Bruto',amarracao:'Amarração',banho:'Banho',expedicao:'Expedição',verniz:'Verniz',reforco:'Reforço',tanque:'Tanque',troca:'Troca Tq',resumo:'Resumo',catalogo:'Catálogo',cobranca:'Cobrança'};var html='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:4px 6px">Papel</th>';ALL_VIEWS.forEach(function(v){html+='<th style="padding:4px 3px;white-space:nowrap">'+lab[v]+'</th>';});html+='</tr></thead><tbody>';ROLES_CONFIG.forEach(function(r){html+='<tr><td style="font-weight:700;padding:4px 6px">'+r+'</td>';ALL_VIEWS.forEach(function(v){var chk=(rolePerms[r]||[]).indexOf(v)>-1?'checked':'';html+='<td style="text-align:center"><input type="checkbox" '+chk+' onchange="togglePerm(\''+r+'\',\''+v+'\')"></td>';});html+='</tr>';});html+='<tr><td style="font-weight:700;color:#888;padding:4px 6px">Admin</td><td colspan="'+ALL_VIEWS.length+'" style="color:#888">acessa todas as abas (fixo)</td></tr></tbody></table>';box.innerHTML=html;}
+function renderPermissoes(){var box=document.getElementById('permBox');if(!box)return;var lab={gestao:'Gestão',comercial:'Comercial',fotobruto:'Foto/Bruto',amarracao:'Amarração',banho:'Banho',qualidade:'Qualidade',expedicao:'Expedição',verniz:'Verniz',reforco:'Reforço',tanque:'Tanque',troca:'Troca Tq',resumo:'Resumo',catalogo:'Catálogo',cobranca:'Cobrança'};var html='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:4px 6px">Papel</th>';ALL_VIEWS.forEach(function(v){html+='<th style="padding:4px 3px;white-space:nowrap">'+lab[v]+'</th>';});html+='</tr></thead><tbody>';ROLES_CONFIG.forEach(function(r){html+='<tr><td style="font-weight:700;padding:4px 6px">'+r+'</td>';ALL_VIEWS.forEach(function(v){var chk=(rolePerms[r]||[]).indexOf(v)>-1?'checked':'';html+='<td style="text-align:center"><input type="checkbox" '+chk+' onchange="togglePerm(\''+r+'\',\''+v+'\')"></td>';});html+='</tr>';});html+='<tr><td style="font-weight:700;color:#888;padding:4px 6px">Admin</td><td colspan="'+ALL_VIEWS.length+'" style="color:#888">acessa todas as abas (fixo)</td></tr></tbody></table>';box.innerHTML=html;}
 function fazerLogin(){var u=document.getElementById('loginUser').value.trim();var p=document.getElementById('loginPass').value;var f=usuarios.find(function(x){return x.user.toLowerCase()===u.toLowerCase()&&x.pass===p;});if(!f){document.getElementById('loginErro').style.display='block';return;}sessao={user:f.user,role:f.role};localStorage.setItem('magri_session',JSON.stringify(sessao));document.getElementById('loginErro').style.display='none';document.getElementById('loginPass').value='';document.getElementById('loginOverlay').style.display='none';aplicarPermissoes();}
 function logout(){sessao=null;localStorage.removeItem('magri_session');var lo=document.getElementById('loginOverlay');if(lo)lo.style.display='flex';}
 function aplicarPermissoes(){if(!sessao){var lo=document.getElementById('loginOverlay');if(lo)lo.style.display='flex';return;}var al=viewsDoRole(sessao.role);document.querySelectorAll('.nav-item').forEach(function(it){var v=it.dataset.view;if(v)it.style.display=(al.indexOf(v)>-1)?'':'none';});var at=document.querySelector('.nav-item.active');if(!at||at.style.display==='none'||al.indexOf(at.dataset.view)===-1){irParaView(al[0]||'gestao');}var ui=document.getElementById('userInfo');if(ui)ui.textContent=sessao.user+' \u00b7 '+sessao.role;}
@@ -777,7 +811,7 @@ function fmt(dstr){if(!dstr)return '';const p=(''+dstr).slice(0,10).split('-');r
 function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const PRAZO_SETOR=2;
 
-const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Processo de folheação'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor']};
+const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor']};
 document.querySelectorAll('.nav-item').forEach(function(it){
   it.addEventListener('click',function(){var v=it.dataset.view;if(!v)return;if(sessao){var al=viewsDoRole(sessao.role);if(al.indexOf(v)===-1)return;}irParaView(v);});
 });
@@ -802,11 +836,11 @@ function statusEntrega(o){
   if(diff===0)return {cls:'prazo-hoje',txt:'Vence hoje'};
   return {cls:'prazo-ok',txt:'Faltam '+diff+'d'};
 }
-function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.setor==='Amarração')return o.amRecebidoEm;if(o.setor==='Banho')return o.banhoRecebidoEm;if(o.setor==='Expedição')return o.expRecebidoEm;return o.dataEntrada;}
+function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.setor==='Amarração')return o.amRecebidoEm;if(o.setor==='Banho')return o.banhoRecebidoEm;if(o.setor==='Qualidade')return o.qualRecebidoEm;if(o.setor==='Expedição')return o.expRecebidoEm;return o.dataEntrada;}
 function farolSetor(recISO){var d=diasUteisEntre(recISO);if(!recISO)return {cls:'verde',cor:'var(--verde)',txt:'—',dias:0};if(d<=0)return {cls:'verde',cor:'var(--verde)',txt:'No prazo',dias:d};if(d<=2)return {cls:'amarelo',cor:'var(--amarelo)',txt:d+'d no setor',dias:d};return {cls:'vermelho',cor:'var(--vermelho)',txt:'Atrasada '+d+'d',dias:d};}
 function osEmProducao(){return dados.filter(function(o){return o.setor&&['Expedido','Comercial','Verniz'].indexOf(o.setor)===-1;});}
 function renderGestao(){
-  const SET=['Foto/Bruto','Amarração','Banho','Expedição'];
+  const SET=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição'];
   const emProd=osEmProducao();
   var box=document.getElementById('gvSetores');
   if(box){box.innerHTML=SET.map(function(sec){
@@ -965,9 +999,14 @@ const PRECO_COMPL={grafite:0.60,niquel:0.50,niquelfree:0.65,paladio:0.55,rodioBr
 const PRECO_PRATA={'Prata 10ML':1.00,'Prata 20ML':1.20,'Prata 30ML':1.60,'Prata 50ML':2.00,'Prata 70ML':2.45};
 const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioBranco:'Ródio Branco',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza'};
 function ehOuroBanho(b){return (b||'').indexOf('Ouro')===0;}
+function pesoLiqItem(it){var g=parseFloat(it.peso)||0;var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return g;var v=parseFloat(sp);if(isNaN(v))return g;return Math.max(0,Math.min(g,v));}
+function pedraKgItem(it){var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return 0;var t=parseFloat(it.peso)||0,v=parseFloat(sp);if(isNaN(v))return 0;return Math.max(0,t-v);}
+function fracMetalBanho(it){var pedra=pedraKgItem(it);if(pedra<=0)return 1;var pb=parseFloat(it.pesoBanho)||0;if(pb>0)return Math.max(0,(pb-pedra)/pb);var g=parseFloat(it.peso)||0;return g>0?Math.max(0,(g-pedra)/g):1;}
+function ehEspecial(it){return !!it.especial&&(parseFloat(it.especialKg)||0)>0;}
 function precoBanhoItem(it){
-  const pesoKg=parseFloat(it.peso)||0,pesoG=pesoKg*1000;let principal=0;const b=it.banho;
-  if(b==='Ouro Camada')principal=pesoKg*(parseFloat(it.cotacao)||0)*((parseFloat(it.mo)||0)+(parseFloat(it.camada)||0));
+  const pesoKg=pesoLiqItem(it),pesoG=pesoKg*1000;let principal=0;const b=it.banho;
+  if(ehEspecial(it))principal=pesoKg*(parseFloat(it.especialKg)||0);
+  else if(b==='Ouro Camada')principal=pesoKg*(parseFloat(it.cotacao)||0)*((parseFloat(it.mo)||0)+(parseFloat(it.camada)||0));
   else if(b==='Ouro Flash')principal=pesoKg*(parseFloat(it.cotacao)||0)*2;
   else if(b==='Ouro 1 Milésimo')principal=pesoKg*(parseFloat(it.cotacao)||0)*3;
   else if(PRECO_PRATA[b]!==undefined)principal=pesoG*PRECO_PRATA[b];
@@ -980,33 +1019,40 @@ function precoBanhoItem(it){
 function complResumo(it){var c=it.compl||{};return Object.keys(COMPL_LABEL).filter(function(k){return c[k];}).map(function(k){return COMPL_LABEL[k];});}
 function itBanhoRefresh(){
   const b=document.getElementById('itBanho').value;const ouro=ehOuroBanho(b);
-  document.getElementById('itCotBox').style.display=ouro?'block':'none';
-  document.getElementById('itCamBox').style.display=(b==='Ouro Camada')?'block':'none';
-  document.getElementById('itMOBox').style.display=(b==='Ouro Camada')?'block':'none';
+  var esp=document.getElementById('itEspecial')?document.getElementById('itEspecial').checked:false;
+  document.getElementById('itCotBox').style.display=(!esp&&ouro)?'block':'none';
+  document.getElementById('itCamBox').style.display=(!esp&&b==='Ouro Camada')?'block':'none';
+  document.getElementById('itMOBox').style.display=(!esp&&b==='Ouro Camada')?'block':'none';
+  var eb=document.getElementById('itEspecialBox');if(eb)eb.style.display=esp?'block':'none';
   var cs=document.getElementById('corStar');if(cs)cs.style.display=ouro?'inline':'none';
   calcItem();
 }
+function especialToggle(){var f=document.getElementById('itEspecialKg');if(document.getElementById('itEspecial').checked&&f&&!f.value){var b=document.getElementById('itBanho').value;if(b==='Ouro Flash')f.value='1450';else if(b==='Ouro 1 Milésimo')f.value='2000';}itBanhoRefresh();}
 function toggleRodioNegroItem(){document.getElementById('itRodioNegroBox').style.display=document.getElementById('c_rodioNegro').checked?'block':'none';calcItem();}
 function lerItemModal(){
   const g=id=>document.getElementById(id).value;
   const compl={};Object.keys(COMPL_LABEL).forEach(function(k){var el=document.getElementById('c_'+k);if(el)compl[k]=el.checked;});
   compl.rodioNegroPreco=g('itRodioNegroPreco');
-  return {produto:g('itProduto'),peso:g('itPeso'),qtd:g('itQtd'),cor:g('itCor'),banho:g('itBanho'),cotacao:g('itCotacao'),camada:g('itCamada'),mo:g('itMO'),compl:compl};
+  return {produto:g('itProduto'),peso:g('itPeso'),pesoSemPedra:g('itPesoSemPedra'),qtd:g('itQtd'),cor:g('itCor'),banho:g('itBanho'),cotacao:g('itCotacao'),camada:g('itCamada'),mo:g('itMO'),especial:document.getElementById('itEspecial').checked,especialKg:g('itEspecialKg'),compl:compl};
 }
 function calcItem(){
   const it=lerItemModal();const p=precoBanhoItem(it);
   document.getElementById('itVBanho').textContent=brl(p.principal);
   document.getElementById('itVCompl').textContent=brl(p.compl);
   document.getElementById('itVTotal').textContent=brl(p.total);
+  var _g=parseFloat(it.peso)||0,_liq=pesoLiqItem(it),_pd=Math.max(0,_g-_liq),_pct=_g>0?(_pd/_g*100):0;
+  var _el=document.getElementById('itVLiq');
+  if(_el)_el.textContent=(_g>0?(_liq.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' Kg'):'—')+(_pd>0?(' (pedra '+g2(_pct)+'%)'):'');
 }
 function openItemModal(idx){
   document.getElementById('itemIdx').value=idx;
   document.getElementById('itemModalTitle').textContent=idx<0?'Novo item / lote':'Editar item / lote';
   const it=(idx>=0)?itensTmp[idx]:{compl:{}};const c=it.compl||{};
   const setv=(id,v)=>{var el=document.getElementById(id);if(el)el.value=(v===undefined||v===null)?'':v;};
-  setv('itProduto',it.produto);setv('itPeso',it.peso);setv('itQtd',it.qtd);setv('itCor',it.cor);
+  setv('itProduto',it.produto);setv('itPeso',it.peso);setv('itPesoSemPedra',it.pesoSemPedra);setv('itQtd',it.qtd);setv('itCor',it.cor);
   document.getElementById('itBanho').value=it.banho||'Nenhum';
   setv('itCotacao',it.cotacao);document.getElementById('itCamada').value=it.camada||'2';setv('itMO',it.mo);
+  document.getElementById('itEspecial').checked=!!it.especial;setv('itEspecialKg',it.especialKg);
   Object.keys(COMPL_LABEL).forEach(function(k){var el=document.getElementById('c_'+k);if(el)el.checked=!!c[k];});
   setv('itRodioNegroPreco',c.rodioNegroPreco);
   toggleRodioNegroItem();itBanhoRefresh();
@@ -1242,9 +1288,16 @@ function amStatusChange(id,val){const o=dados.find(x=>x.id===id);if(!o)return;o.
 function amEncaminhar(id){const o=dados.find(x=>x.id===id);if(!o)return;if(o.amStatus!=='Concluído'){alert('Marque o status como Concluído antes de encaminhar para o Banho.');return;}o.setor='Banho';o.banhoRecebidoEm=hojeISO();o.banhoStatus=o.banhoStatus||'Recebido';salvar();render();alert('O.S. '+(o.numOS||'')+' encaminhada para o Banho.');}
 
 function banhoStatusChange(id,val){const o=dados.find(x=>x.id===id);if(!o)return;o.banhoStatus=val;o.banhoConcluidoEm=(val==='Concluído')?(o.banhoConcluidoEm||hojeISO()):'';salvar();render();}
+function qualStatusChange(id,val){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.qualStatus=val;o.qualConcluidoEm=(val==='Concluído')?(o.qualConcluidoEm||hojeISO()):'';salvar();render();}
+function renderPesLotes(osId){var o=dados.find(function(x){return x.id===osId;});if(!o)return;var tb=document.getElementById('pesLotes');if(!tb)return;tb.innerHTML='';var RESP=['RODOLFO','BRENDA','GRAZIELLY','JOSIANE','MARIELLA'];(o.itens||[]).forEach(function(it,i){var comercial=parseFloat(it.peso)||0;var pedra=pedraKgItem(it);var pb=parseFloat(it.pesoBanho)||0;var base=pb>0?pb:comercial;var pct=base>0?(pedra/base*100):0;var pedraTxt=pedra>0?(g2(pedra*1000)+' g \u00b7 '+g2(pct)+'%'):'\u2014';var lidOpts='<option value="">\u2014</option>'+RESP.map(function(n){return '<option'+((it.liderBanho===n)?' selected':'')+'>'+n+'</option>';}).join('');var tr=document.createElement('tr');tr.innerHTML='<td><b>Lote '+(i+1)+'</b></td><td>'+(it.banho||'')+(it.cor?(' / '+it.cor):'')+'</td><td>'+g2(comercial*1000)+' g</td>'+'<td><input type="number" step="0.001" value="'+(it.pesoBanho||'')+'" style="width:100px;padding:5px" onchange="pesSet('+i+',\'pesoBanho\',this.value)"></td>'+'<td><input type="text" value="'+(it.tempoBanho||'')+'" placeholder="ex.: 12 min" style="width:90px;padding:5px" onchange="pesSet('+i+',\'tempoBanho\',this.value)"></td>'+'<td><select style="padding:5px" onchange="pesSet('+i+',\'liderBanho\',this.value)">'+lidOpts+'</select></td>'+'<td>'+pedraTxt+'</td>';tb.appendChild(tr);});}
+function pesSet(i,campo,val){var o=dados.find(function(x){return x.id===document.getElementById('pesOsId').value;});if(!o||!o.itens[i])return;o.itens[i][campo]=val;salvar();renderPesLotes(o.id);}
+function abrirPesagem(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;document.getElementById('pesOsId').value=id;document.getElementById('pesTitle').textContent='Pesagem do banho — O.S. '+(o.numOS||'');document.getElementById('pesInfoOS').innerHTML='<div><b>Nº O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div><div><b>Recebido</b>'+fmt(o.banhoRecebidoEm)+'</div>';if((o.banhoStatus||'Recebido')==='Recebido'){o.banhoStatus='Em processo';salvar();}renderPesLotes(id);document.getElementById('pesagemModal').classList.add('show');}
+function closePesagem(){document.getElementById('pesagemModal').classList.remove('show');render();}
+function concluirPesagem(){var o=dados.find(function(x){return x.id===document.getElementById('pesOsId').value;});if(!o)return;if(!(o.itens||[]).length){alert('OS sem lotes.');return;}var falt=(o.itens||[]).filter(function(it){return !(it.pesoBanho);}).length;if(falt){if(!confirm(falt+' lote(s) sem peso do banho. Concluir mesmo assim?'))return;}o.banhoStatus='Concluído';o.banhoConcluidoEm=hojeISO();o.setor='Qualidade';o.qualRecebidoEm=hojeISO();o.qualStatus='Recebido';salvar();document.getElementById('pesagemModal').classList.remove('show');render();alert('Pesagem da O.S. '+(o.numOS||'')+' concluída e enviada para a Qualidade.');}
 let apSelItem=-1;
 function pesoInicialItem(it){if(it.subitens&&it.subitens.length){return it.subitens.reduce(function(sm,sb){return sm+(parseFloat(sb.peso)||0);},0);}return parseFloat(it.peso)||0;}
-function pesoApontadoItem(osId,idx){return apont.filter(function(a){return a.osId===osId&&a.itemIdx===idx;}).reduce(function(sm,a){return sm+(a.peso||0);},0);}
+function apPesoBruto(a){return (a.pesoBruto!==undefined&&a.pesoBruto!==null)?a.pesoBruto:(a.peso||0);}
+function pesoApontadoItem(osId,idx){return apont.filter(function(a){return a.osId===osId&&a.itemIdx===idx;}).reduce(function(sm,a){return sm+apPesoBruto(a);},0);}
 function camadaDoItem(it){if(!it)return 0;if(it.banho==='Ouro Camada')return parseFloat(it.camada)||0;var m=(it.banho||'').match(/(\d+)ML/);if(m)return parseFloat(m[1]);if(it.banho==='Ouro 1 Milésimo')return 1;return parseFloat(it.camada)||0;}
 function consomePrecor(banho){return banho==='Ouro Camada'||banho==='Ouro 1 Milésimo'||banho==='Folheação';}
 function popApTanques(it){var box=document.getElementById('apTanques');if(!box)return;var auto=tanquesDoItem(it);box.innerHTML=TANQUES_SALDO.map(function(t){var chk=(auto.indexOf(t)>-1)?' checked':'';return '<label><input type="checkbox" class="apTk" value="'+t+'"'+chk+'> '+t+'</label>';}).join('');document.getElementById('apTanquesHint').innerHTML=auto.length?('<b>Marcados automaticamente pelo produto:</b> '+auto.join(', ')+'. Ajuste se necessário.'):'Marque os tanques consumidos.';}
@@ -1252,15 +1305,17 @@ function apTanquesSel(){var a=[];var tks=document.querySelectorAll('#apTanques .
 function calcMetal(){
   const cam=parseFloat(document.getElementById('apCamada').value)||0;
   const p=parseFloat(document.getElementById('apPeso').value)||0;
-  const m=(cam-1)*p;
+  var frac=1;var osId=document.getElementById('apontOsId').value;var o=dados.find(function(x){return x.id===osId;});
+  if(o&&apSelItem>=0&&o.itens[apSelItem])frac=fracMetalBanho(o.itens[apSelItem]);
+  var net=p*frac;var m=(cam-1)*net;
   document.getElementById('apMetal').value=m?m.toFixed(3):'';
 }
 function abrirApont(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   document.getElementById('apontOsId').value=id;
   document.getElementById('apontTitle').textContent='Apontar produção — O.S. '+(o.numOS||'');
-  document.getElementById('apontInfoOS').innerHTML='<div><b>Nº O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div><div><b>Recebido</b>'+fmt(o.banhoRecebidoEm)+'</div>';
-  if((o.banhoStatus||'Recebido')==='Recebido'){o.banhoStatus='Em processo';salvar();}
+  document.getElementById('apontInfoOS').innerHTML='<div><b>Nº O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div><div><b>Recebido</b>'+fmt(o.qualRecebidoEm)+'</div>';
+  if((o.qualStatus||'Recebido')==='Recebido'){o.qualStatus='Em processo';salvar();}
   apSelItem=-1;document.getElementById('apEntrada').style.display='none';
   renderApItens(id);
   document.getElementById('apontModal').classList.add('show');
@@ -1283,7 +1338,8 @@ function abrirEntrada(idx){
   document.getElementById('apEntrada').style.display='block';
   document.getElementById('apEntradaTitle').textContent='Apontar — Lote '+(idx+1)+' ('+(it.banho||'')+(it.cor?' '+it.cor:'')+')';
   var ini=pesoInicialItem(it),ap=pesoApontadoItem(osId,idx),lim=ini*1.2;
-  document.getElementById('apEntradaInfo').innerHTML='Peso inicial: <b>'+ini.toFixed(3)+' kg</b> &nbsp;·&nbsp; Apontado: <b>'+ap.toFixed(3)+' kg</b> &nbsp;·&nbsp; Limite (120%): <b>'+lim.toFixed(3)+' kg</b> &nbsp;·&nbsp; Disponível: <b style="color:'+((lim-ap)<0.000001?'var(--vermelho)':'var(--verde)')+'">'+(lim-ap).toFixed(3)+' kg</b>';
+  var _fr=fracMetalBanho(it);var _pedNote=(_fr<1)?(' &nbsp;·&nbsp; <b style="color:var(--vermelho)">Pedra deduzida:</b> '+g2(pedraKgItem(it)*1000)+' g ('+g2((1-_fr)*100)+'%) — cálculos usam o peso líquido'):'';
+  document.getElementById('apEntradaInfo').innerHTML='Peso inicial: <b>'+ini.toFixed(3)+' kg</b> &nbsp;·&nbsp; Apontado: <b>'+ap.toFixed(3)+' kg</b> &nbsp;·&nbsp; Limite (120%): <b>'+lim.toFixed(3)+' kg</b> &nbsp;·&nbsp; Disponível: <b style="color:'+((lim-ap)<0.000001?'var(--vermelho)':'var(--verde)')+'">'+(lim-ap).toFixed(3)+' kg</b>'+_pedNote;
   document.getElementById('apData').value=hojeISO();
   document.getElementById('apCamada').value=camadaDoItem(it)||'';popApTanques(it);
   document.getElementById('apPeso').value='';document.getElementById('apMetal').value='';
@@ -1301,7 +1357,8 @@ function addApontLine(){
   if((ap+peso)>lim+0.000001){alert('O peso apontado ('+(ap+peso).toFixed(3)+' kg) ultrapassa o limite de 120% do lote ('+lim.toFixed(3)+' kg).\nDisponível: '+(lim-ap).toFixed(3)+' kg.');return;}
   const data=g('apData')||hojeISO();
   var _tk=apTanquesSel();
-  apont.push({id:'ap_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),osId:osId,itemIdx:apSelItem,data:data,mes:new Date(data+'T12:00:00').getMonth()+1,os:o.numOS,cliente:o.cliente,periodo:g('apPeriodo'),modo:g('apModo'),responsavel:g('apResp'),categoria:(it.banho&&it.banho.indexOf('Ouro')===0?'Folheação':'Banho'),tipo:it.banho,cor:it.cor,camada:g('apCamada'),tanques:_tk,tanque:_tk.join(', '),peso:peso,metal:(cam-1)*peso});
+  var _frac=fracMetalBanho(it);var _net=peso*_frac;
+  apont.push({id:'ap_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),osId:osId,itemIdx:apSelItem,data:data,mes:new Date(data+'T12:00:00').getMonth()+1,os:o.numOS,cliente:o.cliente,periodo:g('apPeriodo'),modo:g('apModo'),responsavel:g('apResp'),categoria:(it.banho&&it.banho.indexOf('Ouro')===0?'Folheação':'Banho'),tipo:it.banho,cor:it.cor,camada:g('apCamada'),tanques:_tk,tanque:_tk.join(', '),peso:_net,pesoBruto:peso,pedraKg:pedraKgItem(it),metal:(cam-1)*_net});
   salvarApont();
   document.getElementById('apPeso').value='';document.getElementById('apMetal').value='';
   abrirEntrada(apSelItem);renderApItens(osId);
@@ -1310,7 +1367,7 @@ function renderApontLinhas(osId,idx){
   const linhas=apont.filter(function(a){return a.osId===osId&&a.itemIdx===idx;});
   const tb=document.getElementById('apontLinhas');if(!tb)return;tb.innerHTML='';
   linhas.forEach(function(a){var tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(a.data)+'</td><td>'+(a.periodo||'')+'</td><td>'+(a.modo||'')+'</td><td>'+(a.responsavel||'')+'</td><td>'+(a.tanque||'')+'</td><td>'+(a.camada||'')+'</td><td>'+(a.peso?a.peso.toFixed(3):'')+'</td><td>'+(a.metal?a.metal.toFixed(3):'')+'</td><td class="row-act"><button class="btn-del" onclick="delApont(\''+a.id+'\','+idx+')">x</button></td>';
+    tr.innerHTML='<td>'+fmt(a.data)+'</td><td>'+(a.periodo||'')+'</td><td>'+(a.modo||'')+'</td><td>'+(a.responsavel||'')+'</td><td>'+(a.tanque||'')+'</td><td>'+(a.camada||'')+'</td><td>'+(apPesoBruto(a)?apPesoBruto(a).toFixed(3):'')+'</td><td>'+(a.metal?a.metal.toFixed(3):'')+'</td><td class="row-act"><button class="btn-del" onclick="delApont(\''+a.id+'\','+idx+')">x</button></td>';
     tb.appendChild(tr);});
 }
 function delApont(id,idx){const osId=document.getElementById('apontOsId').value;apont=apont.filter(a=>a.id!==id);salvarApont();if(apSelItem>=0)renderApontLinhas(osId,apSelItem);renderApItens(osId);render();}
@@ -1321,14 +1378,14 @@ function concluirBanho(){
   var incompletos=[];
   (o.itens||[]).forEach(function(it,i){var ini=pesoInicialItem(it),ap=pesoApontadoItem(osId,i);if(ap<ini-0.000001)incompletos.push(i+1);});
   if(incompletos.length){if(!confirm('Os lotes '+incompletos.join(', ')+' ainda não atingiram o peso inicial. Concluir mesmo assim?'))return;}
-  o.banhoStatus='Concluído';o.banhoConcluidoEm=hojeISO();o.setor='Expedição';o.expRecebidoEm=hojeISO();o.expStatus=o.expStatus||'Recebido';salvar();
+  o.qualStatus='Concluído';o.qualConcluidoEm=hojeISO();o.setor='Expedição';o.expRecebidoEm=hojeISO();o.expStatus=o.expStatus||'Recebido';salvar();
   document.getElementById('apontModal').classList.remove('show');render();
   alert('Apontamento da O.S. '+(o.numOS||'')+' concluído ('+n+' apontamento(s)) e encaminhada para Expedição.');
 }
 function exportApont(){
   if(!apont.length){alert('Nenhum apontamento para exportar.');return;}
   const cols=['Data','Mês','OS','Período','Modo','Cat','Cliente','Categoria','Tipo','Cor','Camada','Opcional','Anti Alérgico','Tanque','Peso','Metal'];
-  const lin=apont.map(a=>[fmt(a.data),a.mes,a.os,a.periodo,a.modo,a.cat,a.cliente,a.categoria,a.tipo,a.cor,a.camada,a.opcional,a.anti,a.tanque,a.peso,a.metal?a.metal.toFixed(3):'']);
+  const lin=apont.map(a=>[fmt(a.data),a.mes,a.os,a.periodo,a.modo,a.cat,a.cliente,a.categoria,a.tipo,a.cor,a.camada,a.opcional,a.anti,a.tanque,apPesoBruto(a),a.metal?a.metal.toFixed(3):'']);
   baixarXls('Banho_Apontamento_Magri',cols,lin);
 }
 function delReforco(id){reforcos=reforcos.filter(x=>x.id!==id);salvarReforco();render();}
@@ -1475,7 +1532,7 @@ function g2(v){return (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,max
 function catCorNome(cor){return cor||'';}
 function catBaseNome(it){var c=it.compl||{};var b=[];if(c.antialergico)b.push('Anti Alérgico');if(c.paladio)b.push('Paládio');if(c.niquel)b.push('Níquel');if(c.niquelfree)b.push('Níquel Free');return b.join(', ');}
 function catVernizNome(it){var c=it.compl||{};var v=[];if(c.cataforetico)v.push('Verniz Cataforético');if(c.protetor)v.push('Verniz Protetor');return v.join(', ');}
-function catBanhoUN(it,sb){var p=precoBanhoItem({peso:sb.peso,banho:it.banho,cotacao:it.cotacao,camada:it.camada,mo:it.mo,compl:it.compl}).total;var q=parseFloat(sb.qtd)||0;return q>0?p/q:0;}
+function catBanhoUN(it,sb){var pesoNet=(parseFloat(sb.peso)||0)*fracMetalItem(it);var p=precoBanhoItem({peso:pesoNet,banho:it.banho,cotacao:it.cotacao,camada:it.camada,mo:it.mo,especial:it.especial,especialKg:it.especialKg,compl:it.compl}).total;var q=parseFloat(sb.qtd)||0;return q>0?p/q:0;}
 function buildCatalogoHTML(o){
   var cards='';
   (o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){
@@ -1502,10 +1559,12 @@ function buildCatalogoHTML(o){
     '<div class="grid">'+cards+'</div></body></html>';
 }
 function gerarCatalogo(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o catálogo.');return;}w.document.write(buildCatalogoHTML(o));w.document.close();}
+function fracMetalItem(it){var g=parseFloat(it.peso)||0;return g>0?pesoLiqItem(it)/g:1;}
 function decompOrc(it){
-  var pesoKg=parseFloat(it.peso)||0,pesoG=pesoKg*1000;var b=it.banho;var metal=0,mo=0;
+  var pesoKg=pesoLiqItem(it),pesoG=pesoKg*1000;var b=it.banho;var metal=0,mo=0;
   var cot=parseFloat(it.cotacao)||0,cam=parseFloat(it.camada)||0,moF=parseFloat(it.mo)||0;
-  if(b==='Ouro Camada'){metal=pesoKg*cot*cam;mo=pesoKg*cot*moF;}
+  if(ehEspecial(it)){metal=pesoKg*(parseFloat(it.especialKg)||0);}
+  else if(b==='Ouro Camada'){metal=pesoKg*cot*cam;mo=pesoKg*cot*moF;}
   else if(b==='Ouro Flash'){metal=pesoKg*cot*2;}
   else if(b==='Ouro 1 Milésimo'){metal=pesoKg*cot*3;}
   else if(PRECO_PRATA[b]!==undefined){metal=pesoG*PRECO_PRATA[b];}
@@ -1519,11 +1578,12 @@ function linhasBanho(it,pesoKg){
   var pesoG=pesoKg*1000;var lines=[];var b=it.banho||'';
   var cot=parseFloat(it.cotacao)||0,cam=parseFloat(it.camada)||0,moF=parseFloat(it.mo)||0;
   var principal=0;
-  if(b==='Ouro Camada')principal=pesoKg*cot*(moF+cam);
+  if(ehEspecial(it))principal=pesoKg*(parseFloat(it.especialKg)||0);
+  else if(b==='Ouro Camada')principal=pesoKg*cot*(moF+cam);
   else if(b==='Ouro Flash')principal=pesoKg*cot*2;
   else if(b==='Ouro 1 Milésimo')principal=pesoKg*cot*3;
   else if(PRECO_PRATA[b]!==undefined)principal=pesoG*PRECO_PRATA[b];
-  if(b&&b!=='Nenhum')lines.push({nome:'Banho '+b,valor:principal});
+  if((b&&b!=='Nenhum')||ehEspecial(it))lines.push({nome:'Banho '+b+(ehEspecial(it)?' (tabela especial)':''),valor:principal});
   var c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])lines.push({nome:COMPL_LABEL[k],valor:pesoG*PRECO_COMPL[k]});});
   if(c.acetinado)lines.push({nome:'Acetinado',valor:pesoG*PRECO_ACETINADO});
@@ -1545,6 +1605,32 @@ function detalheItens(o,pesoFn,cortesiaOn){
   if((o.servicos||[]).length){rows+='<tr class="grp"><td>Serviços adicionais</td><td></td></tr>';(o.servicos||[]).forEach(function(x){rows+='<tr><td style="padding-left:18px">'+x.servico+(x.cor?' ('+x.cor+')':'')+(x.qtd?' — qtd '+x.qtd:'')+'</td><td style="text-align:right">R$ '+g2(x.valor)+'</td></tr>';});}
   return rows;
 }
+function buildOSFormHTML(o){
+  var hasCat=(o.itens||[]).some(function(it){return it.compl&&it.compl.cataforetico;});
+  var rows='';
+  (o.itens||[]).forEach(function(it,i){
+    var tot=parseFloat(it.peso)||0,liq=pesoLiqItem(it),pedra=Math.max(0,tot-liq),pct=tot>0?(pedra/tot*100):0;
+    var cam=(it.banho==='Ouro Camada')?(it.camada||'-'):'-';
+    var trat=complResumo(it);var tratTxt=trat.length?trat.join(', '):'\u2014';
+    rows+='<tr><td>'+(i+1)+'</td><td>'+(it.produto||'')+'</td><td>'+(it.banho||'')+'</td><td>'+(it.cor||'\u2014')+'</td><td>'+cam+'</td><td>'+(it.mo||'\u2014')+'</td><td>'+g2(tot*1000)+' g</td><td>'+g2(liq*1000)+' g</td><td>'+(pedra>0?(g2(pct)+'%'):'\u2014')+'</td><td>'+(it.qtd||'')+'</td><td>'+tratTxt+'</td><td style="text-align:center">'+((it.compl&&it.compl.cataforetico)?'SIM':'\u2014')+'</td></tr>';
+    (it.subitens||[]).forEach(function(sb){rows+='<tr class="sub"><td></td><td colspan="11">\u21b3 '+(sb.tipoPeca||'sub-item')+(sb.codigo?(' \u00b7 c\u00f3d '+sb.codigo):'')+(sb.peso?(' \u00b7 '+g2((parseFloat(sb.peso)||0)*1000)+' g'):'')+(sb.qtd?(' \u00b7 '+sb.qtd+' p\u00e7'):'')+'</td></tr>';});
+  });
+  if(!rows)rows='<tr><td colspan="12">Sem lotes cadastrados.</td></tr>';
+  var serv='';(o.servicos||[]).forEach(function(x){serv+='<tr><td>'+(x.servico||'')+'</td><td>'+(x.cor||'\u2014')+'</td><td>'+(x.qtd||'\u2014')+'</td></tr>';});
+  var servBlock=serv?('<h2>Servi\u00e7os adicionais</h2><table><thead><tr><th>Servi\u00e7o</th><th>Cor</th><th>Qtd</th></tr></thead><tbody>'+serv+'</tbody></table>'):'';
+  var obsBlock=o.observacao?('<h2>Observa\u00e7\u00f5es / Instru\u00e7\u00f5es</h2><div class="obs">'+o.observacao+'</div>'):'';
+  var setores=['Foto / Bruto','Amarra\u00e7\u00e3o / Gancheira','Banho / Galvanoplastia'];if(hasCat)setores.push('Verniz Catafor\u00e9tico');setores.push('Expedi\u00e7\u00e3o');
+  var signoff='<h2>Controle de setores</h2><table><thead><tr><th>Setor</th><th>Respons\u00e1vel</th><th>In\u00edcio</th><th>Conclus\u00e3o</th><th>OK</th></tr></thead><tbody>'+setores.map(function(x){return '<tr><td>'+x+'</td><td></td><td></td><td></td><td style="text-align:center">\u2610</td></tr>';}).join('')+'</tbody></table>';
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>O.S. '+(o.numOS||'')+' \u2014 Produ\u00e7\u00e3o</title>'+docCobCSS()+'<style>@page{size:A4 landscape;margin:12mm}table{font-size:11px}th,td{padding:4px 6px}tr.sub td{background:#fbfbf5;color:#666;font-style:italic}.obs{border:1px solid #ddd;padding:8px 10px;font-size:13px;white-space:pre-wrap}</style></head><body>'+
+    '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS \u2014 Ordem de Servi\u00e7o (Produ\u00e7\u00e3o)</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Etiqueta:</b> '+(o.etiqueta||'')+' &nbsp;|&nbsp; <b>Entrada:</b> '+fmt(o.dataEntrada)+' &nbsp;|&nbsp; <b>Previs\u00e3o entrega:</b> '+fmt(o.prevEntregaISO)+(hasCat&&o.prevCat?(' &nbsp;|&nbsp; <b>Prev. catafor\u00e9tico:</b> '+fmt(o.prevCat)):'')+'</div></div>'+
+    '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
+    '<h2>Detalhamento por lote \u2014 o que ser\u00e1 feito</h2>'+
+    '<table><thead><tr><th>#</th><th>Produto</th><th>Banho</th><th>Cor</th><th>Camada</th><th>M.O.</th><th>Peso total</th><th>Peso s/ pedra</th><th>% pedra</th><th>Qtd</th><th>Tratamentos</th><th>Cat.</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    servBlock+obsBlock+signoff+
+    '<div class="nota">Prazo m\u00e1ximo por setor: 2 dias \u00fateis entre recebimento e conclus\u00e3o. Documento interno de produ\u00e7\u00e3o \u2014 sem valores.</div>'+
+    '</body></html>';
+}
+function gerarFormularioOS(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;if(!(o.itens||[]).length){alert('Cadastre ao menos um item na OS.');return;}var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a O.S.');return;}w.document.write(buildOSFormHTML(o));w.document.close();}
 function buildOrcamentoHTML(o){
   var bm=0,bmo=0,bc=0,totBanho=0,totServ=0;
   (o.itens||[]).forEach(function(it){var d=decompOrc(it);bm+=d.metal;bmo+=d.mo;bc+=d.compl;totBanho+=d.total;});
@@ -1554,7 +1640,7 @@ function buildOrcamentoHTML(o){
   '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Orçamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Previsão de entrega:</b> '+fmt(o.prevEntregaISO)+'</div></div>'+
   '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
   '<h2>Detalhamento por item (peso declarado)</h2>'+
-  '<table><thead><tr><th>Item / Serviço escolhido</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+(detalheItens(o,function(it){return parseFloat(it.peso)||0;},false)||'<tr><td colspan="2">Sem itens.</td></tr>')+'</tbody></table>'+
+  '<table><thead><tr><th>Item / Serviço escolhido</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+(detalheItens(o,function(it){return pesoLiqItem(it);},false)||'<tr><td colspan="2">Sem itens.</td></tr>')+'</tbody></table>'+
   '<div class="tot">Metal aplicado: <b>R$ '+g2(bm)+'</b><br>Mão de obra: <b>R$ '+g2(bmo)+'</b><br>Complementares: <b>R$ '+g2(bc)+'</b><br>Serviços adicionais: <b>R$ '+g2(totServ)+'</b><br>Subtotal banho: <b>R$ '+g2(totBanho)+'</b><br><span class="grand">Total estimado: R$ '+g2(total)+'</span></div>'+
   '<div class="nota">* Valores estimados sobre o peso declarado. O valor final é confirmado após a pesagem pós-produção, pois a peça ganha peso no processo.</div>'+
   '</body></html>';
@@ -1573,11 +1659,13 @@ function renderCatalogo(){
   var cnt=document.getElementById('cnt-catalogo');if(cnt)cnt.textContent=lista.length;
 }
 function pesoBaseCobranca(it){return pesoFinalLote(it);}
+function pesoCobrItem(it){return Math.max(0,pesoBaseCobranca(it)-pedraKgItem(it));}
 function decompBanho(it){
   if(it.cortesia)return {metal:0,mo:0,compl:0,total:0};
-  var pesoKg=pesoBaseCobranca(it),pesoG=pesoKg*1000;var b=it.banho;var metal=0,mo=0;
+  var pesoKg=Math.max(0,pesoBaseCobranca(it)-pedraKgItem(it)),pesoG=pesoKg*1000;var b=it.banho;var metal=0,mo=0;
   var cot=parseFloat(it.cotacao)||0,cam=parseFloat(it.camada)||0,moF=parseFloat(it.mo)||0;
-  if(b==='Ouro Camada'){metal=pesoKg*cot*cam;mo=pesoKg*cot*moF;}
+  if(ehEspecial(it)){metal=pesoKg*(parseFloat(it.especialKg)||0);}
+  else if(b==='Ouro Camada'){metal=pesoKg*cot*cam;mo=pesoKg*cot*moF;}
   else if(b==='Ouro Flash'){metal=pesoKg*cot*2;}
   else if(b==='Ouro 1 Milésimo'){metal=pesoKg*cot*3;}
   else if(PRECO_PRATA[b]!==undefined){metal=pesoG*PRECO_PRATA[b];}
@@ -1598,7 +1686,7 @@ function renderCobModal(){
   o.descontoValor=document.getElementById('cobDesc').value;o.descontoObs=document.getElementById('cobObs').value;
   var tb=document.getElementById('cobLotes');if(tb){tb.innerHTML='';
     (o.itens||[]).forEach(function(it,i){var d=decompBanho(it);var tr=document.createElement('tr');
-      tr.innerHTML='<td style="text-align:center"><input type="checkbox" '+(it.cortesia?'checked':'')+' onchange="cobToggleCortesia('+i+')"></td><td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' / '+it.cor:'')+'</td><td>'+g2(pesoBaseCobranca(it)*1000)+' g</td><td>R$ '+g2(d.metal)+'</td><td>R$ '+g2(d.mo)+'</td><td>R$ '+g2(d.compl)+'</td><td'+(it.cortesia?' style="color:var(--verde);font-weight:700"':'')+'>'+(it.cortesia?'Cortesia':('R$ '+g2(d.total)))+'</td>';
+      tr.innerHTML='<td style="text-align:center"><input type="checkbox" '+(it.cortesia?'checked':'')+' onchange="cobToggleCortesia('+i+')"></td><td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' / '+it.cor:'')+'</td><td>'+g2(pesoCobrItem(it)*1000)+' g</td><td>R$ '+g2(d.metal)+'</td><td>R$ '+g2(d.mo)+'</td><td>R$ '+g2(d.compl)+'</td><td'+(it.cortesia?' style="color:var(--verde);font-weight:700"':'')+'>'+(it.cortesia?'Cortesia':('R$ '+g2(d.total)))+'</td>';
       tb.appendChild(tr);});}
   var b=breakdownOS(o);
   var r=document.getElementById('cobResumo');if(r)r.innerHTML='<div><b>Metal aplicado</b>R$ '+g2(b.metal)+'</div><div><b>Mão de obra</b>R$ '+g2(b.mo)+'</div><div><b>Complementares</b>R$ '+g2(b.compl)+'</div><div><b>Serviços adic.</b>R$ '+g2(b.serv)+'</div><div><b>Subtotal</b>R$ '+g2(b.subtotal)+'</div><div><b>Desconto</b>- R$ '+g2(b.desconto)+'</div><div style="font-size:15px"><b>Total a cobrar</b>R$ '+g2(b.total)+'</div>';
@@ -1610,7 +1698,7 @@ function buildCobrancaHTML(o){
   '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Cobrança / Fechamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Peso final total:</b> '+g2(pesoFinalTotalOS(o)*1000)+' g</div></div>'+
   '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
   '<h2>Detalhamento por item (peso final)</h2>'+
-  '<table><thead><tr><th>Item / Serviço escolhido</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+(detalheItens(o,pesoBaseCobranca,true)||'<tr><td colspan="2">Sem lotes.</td></tr>')+'</tbody></table>'+
+  '<table><thead><tr><th>Item / Serviço escolhido</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+(detalheItens(o,pesoCobrItem,true)||'<tr><td colspan="2">Sem lotes.</td></tr>')+'</tbody></table>'+
   '<div class="tot">Metal aplicado: <b>R$ '+g2(b.metal)+'</b><br>Mão de obra: <b>R$ '+g2(b.mo)+'</b><br>Complementares: <b>R$ '+g2(b.compl)+'</b><br>Serviços adicionais: <b>R$ '+g2(b.serv)+'</b><br>Subtotal: <b>R$ '+g2(b.subtotal)+'</b>'+(b.desconto>0?('<br>Desconto'+(o.descontoObs?' ('+o.descontoObs+')':'')+': <b>- R$ '+g2(b.desconto)+'</b>'):'')+'<br><span class="grand">Total a cobrar: R$ '+g2(b.total)+'</span></div>'+
   '</body></html>';
 }
@@ -1743,7 +1831,7 @@ function render(){
   const listaC=dados.filter(o=>!qC||JSON.stringify(o).toLowerCase().includes(qC));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
   listaC.forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td>'+resumoItens(o)+servicosResumo(o)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
+    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td>'+resumoItens(o)+servicosResumo(o)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
   let atras=0,hoje=0;dados.forEach(function(o){const s=statusEntrega(o);if(s.txt.indexOf('Atrasada')===0)atras++;if(s.txt==='Vence hoje')hoje++;});
@@ -1789,19 +1877,33 @@ function render(){
   const tbB=document.getElementById('tbodyBa');tbB.innerHTML='';
   document.getElementById('emptyBa').style.display=listaBa.length?'none':'block';
   listaBa.forEach(function(o){const concl=o.banhoStatus==='Concluído';const ps=prazoSetor(o.banhoRecebidoEm,concl);
-    const nlin=apont.filter(a=>a.osId===o.id).length;
+    const nlin=(o.itens||[]).filter(function(it){return it.pesoBanho!==undefined&&it.pesoBanho!=='';}).length+'/'+((o.itens||[]).length);
     const st=o.banhoStatus||'Recebido';
     const sel='<select onchange="banhoStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.banhoRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+nlin+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirApont(\''+o.id+'\')">Apontar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.banhoRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+nlin+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirPesagem(\''+o.id+'\')">Pesagem</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tbB.appendChild(tr);});
   const qAp=(document.getElementById('buscaApont').value||'').toLowerCase();
   const listaAp=apont.filter(a=>!qAp||JSON.stringify(a).toLowerCase().includes(qAp));
   const tbAp=document.getElementById('tbodyApont');tbAp.innerHTML='';
   document.getElementById('emptyApont').style.display=listaAp.length?'none':'block';
   listaAp.forEach(function(a){const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(a.data)+'</td><td>'+a.mes+'</td><td>'+(a.os||'')+'</td><td>'+a.periodo+'</td><td>'+a.modo+'</td><td>'+(a.cat||'')+'</td><td>'+(a.cliente||'')+'</td><td>'+a.categoria+'</td><td>'+(a.tipo||'')+'</td><td>'+(a.cor||'')+'</td><td>'+(a.camada||'')+'</td><td>'+(a.opcional||'')+'</td><td>'+(a.anti||'')+'</td><td>'+(a.tanque||'')+'</td><td>'+a.peso.toFixed(3)+'</td><td>'+(a.metal?a.metal.toFixed(3):'')+'</td><td class="row-act"><button class="btn-del" onclick="delApont(\''+a.id+'\',\''+a.osId+'\')">x</button></td>';
+    tr.innerHTML='<td>'+fmt(a.data)+'</td><td>'+a.mes+'</td><td>'+(a.os||'')+'</td><td>'+a.periodo+'</td><td>'+a.modo+'</td><td>'+(a.cat||'')+'</td><td>'+(a.cliente||'')+'</td><td>'+a.categoria+'</td><td>'+(a.tipo||'')+'</td><td>'+(a.cor||'')+'</td><td>'+(a.camada||'')+'</td><td>'+(a.opcional||'')+'</td><td>'+(a.anti||'')+'</td><td>'+(a.tanque||'')+'</td><td>'+apPesoBruto(a).toFixed(3)+'</td><td>'+(a.metal?a.metal.toFixed(3):'')+'</td><td class="row-act"><button class="btn-del" onclick="delApont(\''+a.id+'\',\''+a.osId+'\')">x</button></td>';
     tbAp.appendChild(tr);});
+  // QUALIDADE
+  const naQu=dados.filter(o=>o.setor==='Qualidade');
+  const buscaQuEl=document.getElementById('buscaQu');const qQu=(buscaQuEl?buscaQuEl.value:'').toLowerCase();
+  const listaQu=naQu.filter(o=>!qQu||JSON.stringify(o).toLowerCase().includes(qQu));
+  const tbQu=document.getElementById('tbodyQu');
+  if(tbQu){tbQu.innerHTML='';var eqEl=document.getElementById('emptyQu');if(eqEl)eqEl.style.display=listaQu.length?'none':'block';
+    listaQu.forEach(function(o){const concl=o.qualStatus==='Concluído';const ps=prazoSetor(o.qualRecebidoEm,concl);
+      const nap=apont.filter(a=>a.osId===o.id).length;
+      const pbT=(o.itens||[]).reduce(function(sm,it){return sm+(parseFloat(it.pesoBanho)||0);},0);
+      const st=o.qualStatus||'Recebido';
+      const sel='<select onchange="qualStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
+      const tr=document.createElement('tr');
+      tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.qualRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+g2(pbT*1000)+' g</td><td>'+nap+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirApont(\''+o.id+'\')">Apontar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+      tbQu.appendChild(tr);});}
   document.getElementById('tanques').innerHTML=TANQUES.map(t=>'<option value="'+t+'">').join('');
   const hj=hojeISO(),mesAtual=new Date().getMonth()+1;
   const volHoje=apont.filter(a=>a.data===hj).reduce((x,a)=>x+(a.peso||0),0);
@@ -1864,6 +1966,7 @@ function render(){
   document.getElementById('cnt-fotobruto').textContent=naFila.length;
   document.getElementById('cnt-amarracao').textContent=naAm.length;
   document.getElementById('cnt-banho').textContent=dados.filter(o=>o.setor==='Banho').length;
+  document.getElementById('cnt-qualidade').textContent=dados.filter(o=>o.setor==='Qualidade').length;
   document.getElementById('cnt-expedicao').textContent=dados.filter(o=>o.setor==='Expedição').length;
   renderGestao();renderResumo();renderTroca();renderVerniz();renderCatalogo();renderCobranca();renderUsuarios();
   document.getElementById('cnt-reforco').textContent=reforcos.length;
