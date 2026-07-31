@@ -18,14 +18,19 @@
   .side .brand{padding:20px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #3a3a3a;}
   .side .logo{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--ouro),var(--ouro-esc));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#1c1c1c;}
   .side .brand b{font-size:15px;} .side .brand span{font-size:11px;opacity:.6;display:block;}
-  .nav{padding:12px 10px;flex:1;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:9px;cursor:pointer;font-size:14px;color:#cfd2d8;margin-bottom:4px;transition:.15s;}
+  .nav{padding:12px 10px;flex:1;overflow-y:auto;min-height:0;}
+  .nav::-webkit-scrollbar{width:8px;}
+  .nav::-webkit-scrollbar-track{background:transparent;}
+  .nav::-webkit-scrollbar-thumb{background:#4a4a4a;border-radius:8px;}
+  .nav::-webkit-scrollbar-thumb:hover{background:#5f5f5f;}
+  .nav{scrollbar-width:thin;scrollbar-color:#4a4a4a transparent;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:9px;cursor:pointer;font-size:13.5px;color:#cfd2d8;margin-bottom:3px;transition:.15s;}
   .nav-item:hover{background:#333;color:#fff;}
   .nav-item.active{background:var(--ouro);color:#1c1c1c;font-weight:700;}
   .nav-item .ico{width:20px;text-align:center;}
   .nav-item .cnt{margin-left:auto;background:rgba(0,0,0,.25);padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;}
   .nav-item.active .cnt{background:rgba(0,0,0,.15);}
-  .nav-sep{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#666;padding:14px 14px 6px;}
+  .nav-sep{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#666;padding:10px 14px 5px;}
   .side .foot{padding:14px 18px;font-size:11px;color:#777;border-top:1px solid #3a3a3a;}
   .main{flex:1;min-width:0;}
   .topbar{background:#fff;padding:16px 28px;border-bottom:1px solid var(--cinza2);display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20;}
@@ -125,6 +130,7 @@
       <div class="nav-item" data-view="gestao"><span class="ico">GV</span> Gestão à Vista <span class="cnt" id="cnt-gestao">0</span></div>
       <div class="nav-sep">Fluxo da O.S.</div>
       <div class="nav-item active" data-view="comercial"><span class="ico">CO</span> Comercial <span class="cnt" id="cnt-comercial">0</span></div>
+      <div class="nav-item" data-view="clientes"><span class="ico">CL</span> Clientes <span class="cnt" id="cnt-clientes">0</span></div>
       <div class="nav-item" data-view="fotobruto"><span class="ico">FB</span> Foto / Bruto <span class="cnt" id="cnt-fotobruto">0</span></div>
       <div class="nav-item" data-view="amarracao"><span class="ico">AM</span> Amarração <span class="cnt" id="cnt-amarracao">0</span></div>
       <div class="nav-item" data-view="banho"><span class="ico">BA</span> Banho (Galvano) <span class="cnt" id="cnt-banho">0</span></div>
@@ -137,6 +143,7 @@
       <div class="nav-item" data-view="troca"><span class="ico">TT</span> Troca de Tanque <span class="cnt" id="cnt-troca">0</span></div>
       <div class="nav-sep">Indicadores</div>
       <div class="nav-item" data-view="resumo"><span class="ico">RS</span> Resumo <span class="cnt" id="cnt-resumo">0</span></div>
+      <div class="nav-item" data-view="diretoria"><span class="ico">DIR</span> Diretoria</div>
       <div class="nav-item" data-view="catalogo"><span class="ico">CT</span> Catálogo <span class="cnt" id="cnt-catalogo">0</span></div>
       <div class="nav-item" data-view="cobranca"><span class="ico">$</span> Cobrança <span class="cnt" id="cnt-cobranca">0</span></div>
       <div class="nav-sep">Administração</div>
@@ -184,7 +191,7 @@
                 <div><label>Status Comercial</label><select id="statusComercial"><option>Recebido</option><option>Entregue</option><option>Não fechado</option></select></div>
                 <div><label>Prev. envio CAT</label><input type="date" id="prevCat" readonly><div class="hint">Auto: entrada + 10 dias úteis (só com cataforético)</div></div>
                 <div><label>Data previsão de entrega</label><input type="text" id="prevEntrega" readonly><div class="hint">15 dias úteis se houver item com cataforético; senão 10</div></div>
-                <div style="grid-column:1/-1"><label>Observação</label><input type="text" id="observacao" placeholder="Anotações da OS (opcional)"></div>
+                <div style="grid-column:1/-1"><label>Observação</label><textarea id="observacao" rows="2" placeholder="Anotações da OS (opcional)" style="width:100%;resize:vertical"></textarea></div>
               </div>
               <div class="sec-title">Itens / Lotes do serviço (a mesma OS pode ter vários lotes, cada um com sua especificação e cataforético próprio)</div>
               <div id="saldoPeso" style="font-size:13px;font-weight:700;margin-bottom:12px;padding:8px 12px;background:var(--cinza);border-radius:8px"></div>
@@ -196,10 +203,12 @@
               <div id="itensVazio" class="hint" style="padding:6px 2px">Nenhum item adicionado. Adicione pelo menos um item antes de cadastrar a O.S.</div>
               <div class="sec-title">Serviços adicionais (inserção manual)</div>
               <div class="grid">
-                <div><label>Serviço</label><select id="servTipo" onchange="servRefresh()"><option value="">—</option><option>Aplique de Ródio</option><option>Tarraxa</option><option>Tarraxamento</option><option>Engardenação</option></select></div>
+                <div><label>Serviço</label><select id="servTipo" onchange="servRefresh()"><option value="">—</option><option>Aplique de Ródio</option><option>Caneta de Ródio</option><option>Tarraxa</option><option>Tarraxamento</option><option>Engardenação</option><option>Colocação de pedra</option></select></div>
                 <div id="servCorBox" style="display:none"><label>Cor do ródio</label><select id="servCor" onchange="servPreview()"><option>Vermelho</option><option>Branco</option><option>Negro</option></select></div>
                 <div><label id="servQtdLabel">Quantidade</label><input type="number" id="servQtd" step="1" oninput="servPreview()"></div>
                 <div><label>Valor (R$)</label><input type="text" id="servValor" readonly></div>
+                <div><label>Desconto (R$)</label><input type="number" step="0.01" id="servDesc" oninput="servPreview()"></div>
+                <div><label>Cortesia</label><select id="servCortesia" onchange="servPreview()"><option value="">Não</option><option value="sim">Sim (cortesia)</option></select></div>
               </div>
               <div class="hint" id="servHint" style="padding:2px"></div>
               <div class="actions" style="margin-top:4px"><button type="button" class="btn-azul" onclick="addServico()">+ Adicionar serviço</button></div>
@@ -380,6 +389,17 @@
           </table></div>
           <div id="emptyVz" class="empty">Nenhuma O.S. no verniz no momento.</div>
         </div>
+        <div class="panel">
+          <div class="panel-head"><span class="dot"></span><h2>Gestão do Cataforético — envios, prazos e retornos (para cobrança)</h2>
+            <div class="toolbar"><select id="catRelFiltro" onchange="render()"><option value="todos">Todos</option><option value="pend">Pendentes (não retornaram)</option><option value="ret">Retornados</option></select><button class="btn-excel" onclick="exportCatRel()">Exportar</button></div>
+          </div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Nº O.S.</th><th>Cliente</th><th style="text-align:right">Peso enviado</th><th style="text-align:right">Valor cataf.</th><th>Enviado em</th><th>Prazo retorno</th><th>Situação prazo</th><th>Retornou em</th><th style="text-align:right">Dias no 3º</th><th>Status</th></tr></thead>
+            <tbody id="catRelTb"></tbody>
+          </table></div>
+          <div id="catRelTot" class="hint" style="padding:6px 2px;font-weight:700"></div>
+          <div id="catRelVazio" class="empty">Nenhum envio de cataforético registrado.</div>
+        </div>
       </section>
 
       <section class="view" id="view-resumo">
@@ -391,6 +411,43 @@
           <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Produtividade por responsável (mês)</h2></div><div class="panel-body"><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="rsResp"></tbody></table></div></div>
         </div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Consumo por tanque (mês)</h2><div class="toolbar"><button class="btn-excel" onclick="exportResumo()">Exportar</button></div></div><div class="panel-body"><div class="hint" style="margin-bottom:6px">Folheação por metal (Camada−1)×Peso; demais tanques por peso.</div><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="rsMetal"></tbody></table></div></div>
+      </section>
+      <section class="view" id="view-diretoria">
+        <div class="panel" style="margin-bottom:12px"><div class="panel-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <button class="btn-ghost" onclick="dirMesNav(-1)" style="padding:6px 12px;font-size:16px">‹</button>
+          <div id="dirMesLabel" style="font-weight:700;font-size:16px;min-width:150px;text-align:center"></div>
+          <button class="btn-ghost" onclick="dirMesNav(1)" style="padding:6px 12px;font-size:16px">›</button>
+          <button class="btn-azul" onclick="dirMesHoje()" style="padding:6px 12px">Mês atual</button>
+        </div></div>
+        <div class="cards" id="dir-cards"></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Ranking de clientes — volume banhado no mês</h2></div><div class="panel-body"><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="dirClientes"></tbody></table></div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Farol / SLA por setor (situação atual — máx. 2 dias úteis)</h2></div><div class="panel-body"><div class="cards" id="dirFarol"></div><div class="table-scroll" style="margin-top:10px"><table><thead><tr><th>Setor</th><th>Em produção</th><th>No prazo</th><th>Em atenção</th><th>Atrasadas</th><th>Tempo médio (dias úteis)</th></tr></thead><tbody id="dirSlaTb"></tbody></table></div></div></div>
+        <div class="grid-2">
+          <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Volume por tipo de banho (mês)</h2></div><div class="panel-body"><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="dirTipo"></tbody></table></div></div>
+          <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Volume banhado por dia (mês)</h2></div><div class="panel-body"><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="dirDia"></tbody></table></div></div>
+        </div>
+      </section>
+      <section class="view" id="view-clientes">
+        <div class="cards" id="cards-cli"></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Cadastro de cliente</h2></div><div class="panel-body">
+          <input type="hidden" id="cliEditIdx" value="-1">
+          <div class="grid">
+            <div><label>Nome *</label><input type="text" id="cliNome" placeholder="Nome / razão social"></div>
+            <div><label>CNPJ / CPF</label><input type="text" id="cliCnpj"></div>
+            <div><label>Telefone</label><input type="text" id="cliTel"></div>
+          </div>
+          <div class="actions"><button class="btn-primary" onclick="addCliente()">+ Adicionar / Salvar</button><button class="btn-ghost" onclick="limparCliForm()">Limpar</button></div>
+        </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Importar em massa</h2></div><div class="panel-body">
+          <div class="hint" style="margin-bottom:6px">Exporte do seu sistema em CSV com colunas <b>Nome; CNPJ; Telefone</b> (ou cole abaixo, um por linha). Clientes com nome já existente são atualizados.</div>
+          <div class="actions"><button class="btn-azul" onclick="document.getElementById('cliCsvInput').click()">Importar arquivo CSV</button><input type="file" id="cliCsvInput" accept=".csv,text/csv" style="display:none"></div>
+          <textarea id="cliPaste" rows="4" placeholder="Ex.: Joalheria X;12.345.678/0001-90;11999998888" style="width:100%;resize:vertical"></textarea>
+          <div class="actions"><button class="btn-azul" onclick="importarClientesColar()">Importar do texto colado</button></div>
+        </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Clientes cadastrados</h2><div class="toolbar"><input type="text" id="buscaCli" placeholder="Buscar..." oninput="render()"><button class="btn-excel" onclick="exportClientes()">Exportar</button></div></div>
+          <div class="table-scroll"><table><thead><tr><th>Nome</th><th>CNPJ / CPF</th><th>Telefone</th><th>Ações</th></tr></thead><tbody id="tbodyCli"></tbody></table></div>
+          <div id="emptyCli" class="empty">Nenhum cliente cadastrado.</div>
+        </div>
       </section>
 
       <section class="view" id="view-troca">
@@ -489,7 +546,7 @@
       </div>
       <div class="sec-title">Banho principal</div>
       <div class="grid">
-        <div><label>Tipo</label><select id="itBanho" onchange="itBanhoRefresh()"><option>Nenhum</option><option>Ouro Camada</option><option>Ouro Flash</option><option>Ouro 1 Milésimo</option><option>Prata 10ML</option><option>Prata 20ML</option><option>Prata 30ML</option><option>Prata 50ML</option><option>Prata 70ML</option></select></div>
+        <div><label>Tipo</label><select id="itBanho" onchange="itBanhoRefresh()"><option>Nenhum</option><option>Ouro Camada</option><option>Ouro Flash</option><option>Ouro 1 Milésimo</option><option>Prata 10ML</option><option>Prata 20ML</option><option>Prata 30ML</option><option>Prata 50ML</option><option>Prata 70ML</option><option>Ródio Branco</option></select></div>
         <div id="itCotBox" style="display:none"><label>Cotação Ouro (R$/g)</label><input type="number" step="0.01" id="itCotacao" oninput="calcItem()"></div>
         <div id="itCamBox" style="display:none"><label>Camada</label><select id="itCamada" onchange="calcItem()"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
         <div id="itMOBox" style="display:none"><label>MO — Fator Mão de Obra</label><input type="number" step="0.1" id="itMO" oninput="calcItem()"></div>
@@ -503,7 +560,6 @@
         <label><input type="checkbox" id="c_niquel" onchange="calcItem()"> Níquel (0,50)</label>
         <label><input type="checkbox" id="c_niquelfree" onchange="calcItem()"> Níquel Free (0,65)</label>
         <label><input type="checkbox" id="c_paladio" onchange="calcItem()"> Paládio (0,55)</label>
-        <label><input type="checkbox" id="c_rodioBranco" onchange="calcItem()"> Ródio Branco (4,00)</label>
         <label><input type="checkbox" id="c_rodioNegro" onchange="toggleRodioNegroItem()"> Ródio Negro (consulta)</label>
         <label><input type="checkbox" id="c_protetor" onchange="calcItem()"> Verniz Protetor (0,21)</label>
         <label><input type="checkbox" id="c_cataforetico" onchange="calcItem()"> Verniz Cataforético (0,42)</label>
@@ -625,12 +681,21 @@
         <thead><tr><th>Cortesia</th><th>Lote</th><th>Banho/Cor</th><th>Peso final</th><th>Metal</th><th>M.O.</th><th>Complem.</th><th>Total lote</th></tr></thead>
         <tbody id="cobLotes"></tbody>
       </table></div>
+      <div class="sec-title" style="margin-top:12px">Despesas / extras da cobrança (frete, motoboy, outras)</div>
+      <div class="grid">
+        <div style="grid-column:1/3"><label>Descrição</label><input type="text" id="cobExtraDesc" placeholder="Ex.: Frete / Motoboy"></div>
+        <div><label>Valor (R$)</label><input type="number" step="0.01" id="cobExtraValor"></div>
+        <div style="align-self:end"><button type="button" class="btn-azul" onclick="addCobExtra()">+ Adicionar</button></div>
+      </div>
+      <div class="table-scroll" style="max-height:130px"><table><thead><tr><th>Despesa</th><th style="text-align:right">Valor</th><th></th></tr></thead><tbody id="cobExtrasLista"></tbody></table></div>
+      <div class="sec-title" style="margin-top:12px">Caneta de ródio — pontos aplicados (nota do terceiro)</div>
+      <div class="table-scroll" style="max-height:130px"><table><thead><tr><th>Serviço</th><th>Cor</th><th>R$/ponto</th><th>Pontos</th><th>Nota terceiro</th><th style="text-align:right">Valor</th></tr></thead><tbody id="cobCanetas"></tbody></table></div>
       <div class="grid" style="margin-top:10px">
         <div><label>Desconto no total (R$)</label><input type="number" step="0.01" id="cobDesc" oninput="renderCobModal()"></div>
         <div style="grid-column:2/-1"><label>Observação (desconto/cortesia)</label><input type="text" id="cobObs"></div>
       </div>
       <div class="info-os" id="cobResumo" style="margin-top:12px"></div>
-      <div class="actions"><button class="btn-primary" onclick="salvarCob()">Salvar</button><button class="btn-azul" onclick="gerarCobranca()">Gerar PDF</button><button class="btn-ghost" onclick="closeCob()">Fechar</button></div>
+      <div class="actions"><button class="btn-primary" onclick="salvarCob()">Salvar</button><button class="btn-azul" onclick="gerarCobranca()">Gerar PDF</button><button class="btn-excel" onclick="enviarFinanceiro()">Enviar ao Financeiro (Ordem de Receb.)</button><button class="btn-ghost" onclick="closeCob()">Fechar</button></div>
     </div>
   </div>
 </div>
@@ -744,9 +809,9 @@ DEFAULT_USERS.forEach(function(du){if(!usuarios.find(function(u){return (u.user|
 localStorage.setItem('magri_users',JSON.stringify(usuarios));
 function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usuarios));}
 let sessao=JSON.parse(localStorage.getItem('magri_session')||'null');
-const ALL_VIEWS=['gestao','comercial','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','catalogo','cobranca'];
+const ALL_VIEWS=['gestao','comercial','clientes','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','diretoria','catalogo','cobranca'];
 const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Expedição','Financeiro'];
-const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
+const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','clientes','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
 let rolePerms=JSON.parse(localStorage.getItem('magri_roleperms')||'null')||{};
 ROLES_CONFIG.forEach(function(r){if(!rolePerms[r])rolePerms[r]=(ROLE_VIEWS_DEFAULT[r]||['gestao']).slice();});
 localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));
@@ -800,6 +865,11 @@ function salvarReforco(){localStorage.setItem(KEY_RF,JSON.stringify(reforcos));}
 const DOSES={'Protetor 300':15,'Anti Alérgico':5,'Garrafona':10,'Folheação':80,'Precor':7,'18':7,'24':7,'Free Gold':7,'Verde':7,'Mont':3.5};
 function doseAuto(){const t=document.getElementById('rfTanque').value;const d=DOSES[t];document.getElementById('rfDose').value=(d!==undefined)?d:'';}
 const CLIENTES=["AB BRUTOS","ABADIO ABREGO","ABADIO ARY","ADVANIL SILVA","AEB BRUTOS","ADEOLA GANIAT","ADEMIR RIBEIRO","ADONAI BRUTOS","ADRIANA SILVA","AGAPE","ALEX DE MORAIS","ALCIDES DE PAULA","ALINE TAVARES","ALFREDO NETO","ALMA DORADA"];
+const KEY_CLI='magri_clientes_v1';
+let clientesReg=JSON.parse(localStorage.getItem(KEY_CLI)||'null');
+if(!clientesReg){clientesReg=CLIENTES.map(function(n){return {nome:n,cnpj:'',telefone:''};});localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
+function salvarClientes(){localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
+function clientesNomes(){return clientesReg.map(function(c){return c.nome;}).filter(function(v,i,a){return a.indexOf(v)===i;});}
 function salvar(){localStorage.setItem(KEY,JSON.stringify(dados));}
 
 const feriadosFixos=['01-01','04-21','05-01','09-07','10-12','11-02','11-15','12-25'];
@@ -811,7 +881,7 @@ function fmt(dstr){if(!dstr)return '';const p=(''+dstr).slice(0,10).split('-');r
 function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const PRAZO_SETOR=2;
 
-const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor']};
+const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],clientes:['Clientes','Cadastro de clientes — nome, CNPJ e telefone'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],diretoria:['Diretoria','Painel gerencial — ranking de clientes, farol/SLA e produção'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor']};
 document.querySelectorAll('.nav-item').forEach(function(it){
   it.addEventListener('click',function(){var v=it.dataset.view;if(!v)return;if(sessao){var al=viewsDoRole(sessao.role);if(al.indexOf(v)===-1)return;}irParaView(v);});
 });
@@ -898,6 +968,35 @@ function renderResumo(){
   var mtPairs=Object.keys(mt).map(function(k){return [k,mt[k]];}).sort(function(x,y){return y[1]-x[1];});
   var e5=document.getElementById('rsMetal');if(e5)e5.innerHTML=mtPairs.length?barRows(mtPairs):'<tr><td class="hint" style="padding:8px">Sem consumo no mês.</td></tr>';
   var cnt=document.getElementById('cnt-resumo');if(cnt)cnt.textContent=apont.length;
+}
+var dirYM=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
+function dirMesNav(delta){var p=dirYM.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1+delta,1);dirYM=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');render();}
+function dirMesHoje(){var d=new Date();dirYM=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');render();}
+function renderDiretoria(){
+  var lbl=document.getElementById('dirMesLabel');if(!lbl)return;
+  var p=dirYM.split('-');lbl.textContent=(MESES[parseInt(p[1])]||'')+' '+p[0];
+  var apMes=apont.filter(function(a){return (''+a.data).slice(0,7)===dirYM;});
+  var volKg=apMes.reduce(function(s,a){return s+(a.peso||0);},0);
+  var metalG=apMes.reduce(function(s,a){var tks=a.tanques||(a.tanque?[a.tanque]:[]);return s+((tks.indexOf('Folheação')>-1)?(a.metal||0):0);},0);
+  var osSet={};apMes.forEach(function(a){if(a.osId)osSet[a.osId]=1;});var nOS=Object.keys(osSet).length;
+  var volFolh=0,volOutros=0;apMes.forEach(function(a){var isF=(a.categoria==='Folheação')||(a.tipo&&(''+a.tipo).indexOf('Ouro')===0);if(isF)volFolh+=(a.peso||0);else volOutros+=(a.peso||0);});
+  var cc=document.getElementById('dir-cards');if(cc)cc.innerHTML='<div class="card verde"><div class="n">'+volFolh.toFixed(2)+'</div><div class="l">Folheação banhada (kg)</div></div><div class="card"><div class="n">'+volOutros.toFixed(2)+'</div><div class="l">Outros banhos (kg)</div></div><div class="card"><div class="n">'+volKg.toFixed(2)+'</div><div class="l">Total banhado (kg)</div></div><div class="card azul"><div class="n">'+metalG.toFixed(2)+'</div><div class="l">Ouro/metal folheação (g)</div></div><div class="card"><div class="n">'+nOS+'</div><div class="l">O.S. banhadas</div></div><div class="card"><div class="n">'+apMes.length+'</div><div class="l">Apontamentos</div></div>';
+  var pc={};apMes.forEach(function(a){var k=a.cliente||'—';pc[k]=(pc[k]||0)+(a.peso||0);});
+  var cliPairs=Object.keys(pc).map(function(k){return [k,pc[k]];}).sort(function(x,y){return y[1]-x[1];});
+  var tbc=document.getElementById('dirClientes');
+  if(tbc){if(!cliPairs.length){tbc.innerHTML='<tr><td class="hint" style="padding:8px">Sem banhos no mês.</td></tr>';}else{var totv=cliPairs.reduce(function(s,pp){return s+pp[1];},0);var maxv=cliPairs[0][1]||0.0001;tbc.innerHTML=cliPairs.map(function(pp,i){var pct=totv>0?(pp[1]/totv*100):0;var bar=(pp[1]/maxv*100);return '<tr><td style="padding:5px 8px;white-space:nowrap"><b>'+(i+1)+'º</b> '+pp[0]+'</td><td style="padding:5px 8px;width:50%"><div style="background:var(--ouro);height:14px;border-radius:3px;width:'+bar.toFixed(0)+'%;min-width:2px"></div></td><td style="padding:5px 8px;text-align:right;font-weight:700;white-space:nowrap">'+g3(pp[1])+' kg</td><td style="padding:5px 8px;text-align:right;color:#888;white-space:nowrap">'+g2(pct)+'%</td></tr>';}).join('');}}
+  var SET=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição'];var emProd=osEmProducao();
+  var fcards='',slrows='';
+  SET.forEach(function(sec){var lista=emProd.filter(function(o){return o.setor===sec;});var v=0,a=0,r=0,tsum=0;lista.forEach(function(o){var ff=farolSetor(setorRecebido(o));if(ff.cls==='verde')v++;else if(ff.cls==='amarelo')a++;else r++;tsum+=Math.max(0,ff.dias);});var tmed=lista.length?(tsum/lista.length):0;var bord=r>0?'var(--vermelho)':(a>0?'var(--amarelo)':'var(--verde)');
+    fcards+='<div class="card" style="border-left-color:'+bord+'"><div style="font-weight:700;margin-bottom:6px">'+sec+' <span style="color:#9ca3af;font-weight:400">('+lista.length+')</span></div><div style="display:flex;gap:12px;font-weight:700"><span style="color:var(--verde)">● '+v+'</span><span style="color:var(--amarelo)">● '+a+'</span><span style="color:var(--vermelho)">● '+r+'</span></div></div>';
+    slrows+='<tr><td>'+sec+'</td><td>'+lista.length+'</td><td style="color:var(--verde);font-weight:700">'+v+'</td><td style="color:var(--amarelo);font-weight:700">'+a+'</td><td style="color:var(--vermelho);font-weight:700">'+r+'</td><td style="text-align:right">'+tmed.toFixed(1)+'</td></tr>';});
+  var fc=document.getElementById('dirFarol');if(fc)fc.innerHTML=fcards;var stb=document.getElementById('dirSlaTb');if(stb)stb.innerHTML=slrows;
+  var pt={};apMes.forEach(function(a){var k=a.tipo||'—';pt[k]=(pt[k]||0)+(a.peso||0);});
+  var tipoPairs=Object.keys(pt).map(function(k){return [k,pt[k]];}).sort(function(x,y){return y[1]-x[1];});
+  var et=document.getElementById('dirTipo');if(et)et.innerHTML=tipoPairs.length?barRows(tipoPairs):'<tr><td class="hint" style="padding:8px">Sem banhos no mês.</td></tr>';
+  var pd={};apMes.forEach(function(a){var d=(''+a.data).slice(0,10);pd[d]=(pd[d]||0)+(a.peso||0);});
+  var diaPairs=Object.keys(pd).sort().map(function(d){return [fmt(d),pd[d]];});
+  var ed=document.getElementById('dirDia');if(ed)ed.innerHTML=diaPairs.length?barRows(diaPairs):'<tr><td class="hint" style="padding:8px">Sem banhos no mês.</td></tr>';
 }
 function exportResumo(){
   if(!apont.length){alert('Sem apontamentos para exportar.');return;}
@@ -995,9 +1094,10 @@ function recalc(){const de=document.getElementById('dataEntrada').value;const ha
 document.getElementById('dataEntrada').addEventListener('change',recalc);
 let itensTmp=[];
 let PRECO_ACETINADO=0;
-const PRECO_COMPL={grafite:0.60,niquel:0.50,niquelfree:0.65,paladio:0.55,rodioBranco:4.00,protetor:0.21,cataforetico:0.42,antialergico:0.07,limpeza:0.06};
+const PRECO_COMPL={grafite:0.60,niquel:0.50,niquelfree:0.65,paladio:0.55,protetor:0.21,cataforetico:0.42,antialergico:0.07,limpeza:0.06};
 const PRECO_PRATA={'Prata 10ML':1.00,'Prata 20ML':1.20,'Prata 30ML':1.60,'Prata 50ML':2.00,'Prata 70ML':2.45};
-const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioBranco:'Ródio Branco',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza'};
+const PRECO_RODIO_BRANCO=4.00;
+const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza'};
 function ehOuroBanho(b){return (b||'').indexOf('Ouro')===0;}
 function pesoLiqItem(it){var g=parseFloat(it.peso)||0;var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return g;var v=parseFloat(sp);if(isNaN(v))return g;return Math.max(0,Math.min(g,v));}
 function pedraKgItem(it){var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return 0;var t=parseFloat(it.peso)||0,v=parseFloat(sp);if(isNaN(v))return 0;return Math.max(0,t-v);}
@@ -1010,6 +1110,7 @@ function precoBanhoItem(it){
   else if(b==='Ouro Flash')principal=pesoKg*(parseFloat(it.cotacao)||0)*2;
   else if(b==='Ouro 1 Milésimo')principal=pesoKg*(parseFloat(it.cotacao)||0)*3;
   else if(PRECO_PRATA[b]!==undefined)principal=pesoG*PRECO_PRATA[b];
+  else if(b==='Ródio Branco')principal=pesoG*PRECO_RODIO_BRANCO;
   let compl=0;const c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
@@ -1094,36 +1195,48 @@ function renderItens(){
 function resumoItens(o){if(!o.itens||!o.itens.length)return '';return o.itens.map(function(it){return (it.produto?it.produto+': ':'')+(it.banho||'')+(it.cor?' '+it.cor:'')+(it.peso?' ('+it.peso+'kg)':'')+((it.compl&&it.compl.cataforetico)?' +CAT':'')+' '+brl(it.precoBanho||0);}).join(' · ');}
 function catResumo(o){if(!o.itens||!o.itens.length)return '';var v=o.itens.map(function(it){return (it.compl&&it.compl.cataforetico)?'S':'N';});if(v.every(function(x){return x==='S';}))return 'Sim';if(v.every(function(x){return x==='N';}))return 'Não';return 'Misto';}
 const PRECO_RODIO={'Vermelho':0.36,'Branco':0.36,'Negro':0.46};
-const PRECO_MILHEIRO={'Tarraxa':30,'Tarraxamento':20,'Engardenação':50};
+const PRECO_CANETA={'Amarelo':0.50,'Branco':0.38,'Preto':0.48,'Vermelho':0.48};
+const PRECO_MILHEIRO={};
+const PRECO_UNIDADE={'Tarraxa':0.03,'Tarraxamento':0.03,'Engardenação':0.03,'Colocação de pedra':1.00};
 let servicosTmp=[];
 function brl(v){return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function ehRodio(t){return t==='Aplique de Ródio';}
-function valorServico(tipo,cor,qtd){qtd=parseFloat(qtd)||0;if(ehRodio(tipo))return qtd*(PRECO_RODIO[cor]||0);return (qtd/1000)*(PRECO_MILHEIRO[tipo]||0);}
+function ehCaneta(t){return t==='Caneta de Ródio';}
+function corOptions(t){if(ehRodio(t))return ['Vermelho','Branco','Negro'];if(ehCaneta(t))return ['Amarelo','Branco','Preto','Vermelho'];return [];}
+function valorServico(tipo,cor,qtd){qtd=parseFloat(qtd)||0;if(ehRodio(tipo))return qtd*(PRECO_RODIO[cor]||0);if(ehCaneta(tipo))return qtd*(PRECO_CANETA[cor]||0);if(PRECO_UNIDADE[tipo]!==undefined)return qtd*PRECO_UNIDADE[tipo];return (qtd/1000)*(PRECO_MILHEIRO[tipo]||0);}
 function servRefresh(){
-  const t=document.getElementById('servTipo').value;
-  document.getElementById('servCorBox').style.display=ehRodio(t)?'block':'none';
-  document.getElementById('servQtdLabel').textContent=ehRodio(t)?'Qtd (pontos)':'Qtd (peças)';
-  document.getElementById('servHint').textContent=ehRodio(t)?'Ródio Vermelho/Branco: R$ 0,36 por ponto · Negro: R$ 0,46 por ponto':(t?('R$ '+(PRECO_MILHEIRO[t]||0).toFixed(2).replace('.',',')+' por milheiro (1000 peças)'):'');
+  const t=document.getElementById('servTipo').value;var showCor=ehRodio(t)||ehCaneta(t);
+  document.getElementById('servCorBox').style.display=showCor?'block':'none';
+  if(showCor){var opts=corOptions(t);document.getElementById('servCor').innerHTML=opts.map(function(c){return '<option>'+c+'</option>';}).join('');var lb=document.getElementById('servCorBox').querySelector('label');if(lb)lb.textContent=ehCaneta(t)?'Cor da caneta':'Cor do ródio';}
+  document.getElementById('servQtdLabel').textContent=showCor?'Qtd (pontos)':'Qtd (peças)';
+  var hint='';if(ehRodio(t))hint='Ródio Vermelho/Branco: R$ 0,36 por ponto · Negro: R$ 0,46 por ponto';else if(ehCaneta(t))hint='Caneta por ponto: Amarelo R$ 0,50 · Branco R$ 0,38 · Preto R$ 0,48 · Vermelho R$ 0,48. Deixe a quantidade em branco se os pontos só forem definidos na cobrança (nota do terceiro).';else if(t)hint='R$ '+(PRECO_UNIDADE[t]||0).toFixed(2).replace('.',',')+' por unidade';
+  document.getElementById('servHint').textContent=hint;
   servPreview();
 }
 function servPreview(){
   const t=document.getElementById('servTipo').value,c=document.getElementById('servCor').value,q=document.getElementById('servQtd').value;
-  document.getElementById('servValor').value=t?brl(valorServico(t,c,q)):'';
+  if(ehCaneta(t)&&(!q||parseFloat(q)<=0)){document.getElementById('servValor').value='a definir · R$ '+g2(PRECO_CANETA[c]||0)+'/ponto';return;}
+  var cheio=valorServico(t,c,q);var cort=document.getElementById('servCortesia').value==='sim';var desc=parseFloat(document.getElementById('servDesc').value)||0;var fin=cort?0:Math.max(0,cheio-desc);
+  document.getElementById('servValor').value=t?(brl(fin)+(cort?' (cortesia)':(desc>0?(' de '+brl(cheio)):''))):'';
 }
 function addServico(){
   const t=document.getElementById('servTipo').value;
   if(!t){alert('Selecione o serviço.');return;}
-  const c=ehRodio(t)?document.getElementById('servCor').value:'';
+  const isCaneta=ehCaneta(t);
+  const c=(ehRodio(t)||isCaneta)?document.getElementById('servCor').value:'';
   const q=parseFloat(document.getElementById('servQtd').value)||0;
-  if(q<=0){alert('Informe a quantidade.');return;}
-  servicosTmp.push({servico:t,cor:c,qtd:q,valor:valorServico(t,c,q)});
-  document.getElementById('servTipo').value='';document.getElementById('servQtd').value='';servRefresh();renderServicos();
+  const cort=document.getElementById('servCortesia').value==='sim';const desc=parseFloat(document.getElementById('servDesc').value)||0;
+  if(isCaneta){var pu=PRECO_CANETA[c]||0;if(q>0){var chC=q*pu;var fnC=cort?0:Math.max(0,chC-desc);servicosTmp.push({servico:t,cor:c,qtd:q,precoUnit:pu,valorCheio:chC,cortesia:cort,desconto:desc,valor:fnC,aDefinir:false});}else{servicosTmp.push({servico:t,cor:c,qtd:'',precoUnit:pu,valorCheio:0,cortesia:cort,desconto:desc,valor:0,aDefinir:true});}}
+  else{if(q<=0){alert('Informe a quantidade.');return;}var cheio=valorServico(t,c,q);var fin=cort?0:Math.max(0,cheio-desc);servicosTmp.push({servico:t,cor:c,qtd:q,valorCheio:cheio,cortesia:cort,desconto:desc,valor:fin});}
+  document.getElementById('servTipo').value='';document.getElementById('servQtd').value='';document.getElementById('servDesc').value='';document.getElementById('servCortesia').value='';servRefresh();renderServicos();
 }
 function delServico(i){servicosTmp.splice(i,1);renderServicos();}
 function renderServicos(){
   const tb=document.getElementById('servLista');if(!tb)return;tb.innerHTML='';
   servicosTmp.forEach(function(sv,i){const tr=document.createElement('tr');
-    tr.innerHTML='<td><b>'+sv.servico+'</b></td><td>'+(sv.cor||(ehRodio(sv.servico)?'':'milheiro'))+'</td><td>'+sv.qtd+'</td><td>'+brl(sv.valor)+'</td><td class="row-act"><button class="btn-del" onclick="delServico('+i+')">x</button></td>';
+    var _nt=sv.cortesia?' <span style="color:var(--verde);font-weight:700">(cortesia)</span>':(sv.desconto>0?(' <span class="hint">(-'+brl(sv.desconto)+')</span>'):'');
+    var _qt=sv.aDefinir?'a definir':sv.qtd;var _vt=sv.aDefinir?('a definir · R$ '+g2(sv.precoUnit||0)+'/ponto'):(brl(sv.valor)+_nt);
+    tr.innerHTML='<td><b>'+sv.servico+'</b></td><td>'+(sv.cor||(ehRodio(sv.servico)?'':'unidade'))+'</td><td>'+_qt+'</td><td>'+_vt+'</td><td class="row-act"><button class="btn-del" onclick="delServico('+i+')">x</button></td>';
     tb.appendChild(tr);});
   const tot=servicosTmp.reduce(function(sm,x){return sm+(x.valor||0);},0);
   const el=document.getElementById('servTotal');if(el)el.textContent=servicosTmp.length?('Total de serviços adicionais: '+brl(tot)):'';
@@ -1205,25 +1318,33 @@ function salvarFb(concluir){
   if(concluir){closeFb();alert('O.S. '+(o.numOS||'')+' concluída no Foto/Bruto e encaminhada para Amarração.');}
   else alert('Dados salvos.');
 }
-function gerarEtiqueta(){
-  const cor=document.getElementById('fbCor').value,cam=document.getElementById('fbCamada').value,
-        anti=document.getElementById('fbAnti').value,vern=document.getElementById('fbVerniz').value,
-        nota=document.getElementById('fbNota').value,letra=document.getElementById('fbLetra').value;
-  const id=document.getElementById('fbId').value;const o=dados.find(x=>x.id===id)||{};
+function etqCamadaItem(it){var b=it.banho||'';if(b==='Ouro Camada')return it.camada?(it.camada+' ML'):'';if(b==='Ouro Flash')return 'FLASH';if(b==='Ouro 1 Milésimo')return '1 ML';var m=b.match(/(\d+)ML/);if(m)return m[1]+' ML';return '';}
+function etqVernizItem(it){var c=it.compl||{};if(c.cataforetico)return 'CAT';if(c.protetor)return 'PROT 300';return '0';}
+function renderEtqCard(o,opt){
   var dt=new Date();var dtstr=fmt(hojeISO())+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
   var cel='border:1px solid #000;padding:3px 8px;font-size:14px;';
+  var extra=opt.sub?('<div style="font-size:12px;padding:3px 8px;border-top:1px solid #000">'+opt.sub+'</div>'):'';
   document.getElementById('etqContent').innerHTML=
     '<div style="width:300px;border:2px solid #000;font-family:Arial,sans-serif;background:#fff;margin:0 auto">'+(logoData?'<div style="text-align:center;padding:4px;border-bottom:1px solid #000"><img src="'+logoData+'" style="height:22px"></div>':'')+
-      '<div style="display:flex;justify-content:space-between;gap:10px;font-weight:bold;font-style:italic;font-size:18px;padding:4px 8px;border-bottom:1px solid #000"><span>'+(o.cliente||'')+'</span><span>'+((nota||o.numOS||'')+(letra||''))+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;gap:10px;font-weight:bold;font-style:italic;font-size:18px;padding:4px 8px;border-bottom:1px solid #000"><span>'+(o.cliente||'')+'</span><span>'+(((opt.nota||o.numOS||'')+(opt.letra||'')))+'</span></div>'+
       '<div style="font-weight:bold;font-style:italic;font-size:15px;padding:4px 8px;border-bottom:1px solid #000">'+dtstr+'</div>'+
       '<table style="width:100%;border-collapse:collapse">'+
-        '<tr><td style="'+cel+'">Cor</td><td style="'+cel+'text-align:right">'+(cor||'')+'</td></tr>'+
-        '<tr><td style="'+cel+'">Camada</td><td style="'+cel+'text-align:right">'+(cam||'')+'</td></tr>'+
-        '<tr><td style="'+cel+'">Ant</td><td style="'+cel+'text-align:right">'+(anti||'')+'</td></tr>'+
-        '<tr><td style="'+cel+'">Verniz</td><td style="'+cel+'text-align:right">'+(vern||'')+'</td></tr>'+
-      '</table>'+
+        '<tr><td style="'+cel+'">Cor</td><td style="'+cel+'text-align:right">'+(opt.cor||'')+'</td></tr>'+
+        '<tr><td style="'+cel+'">Camada</td><td style="'+cel+'text-align:right">'+(opt.cam||'')+'</td></tr>'+
+        '<tr><td style="'+cel+'">Ant</td><td style="'+cel+'text-align:right">'+(opt.anti||'')+'</td></tr>'+
+        '<tr><td style="'+cel+'">Verniz</td><td style="'+cel+'text-align:right">'+(opt.vern||'')+'</td></tr>'+
+      '</table>'+extra+
     '</div>';
   document.getElementById('etqModal').classList.add('show');
+}
+function gerarEtiqueta(){
+  const o=dados.find(x=>x.id===document.getElementById('fbId').value)||{};
+  renderEtqCard(o,{cor:document.getElementById('fbCor').value,cam:document.getElementById('fbCamada').value,anti:document.getElementById('fbAnti').value,vern:document.getElementById('fbVerniz').value,nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value});
+}
+function gerarEtiquetaLote(idx){
+  var o=osAtualFb();if(!o)return;var it=(o.itens||[])[idx];if(!it)return;
+  var anti=(it.compl&&it.compl.antialergico)?'SIM':'0';
+  renderEtqCard(o,{cor:it.cor||'',cam:etqCamadaItem(it),anti:anti,vern:etqVernizItem(it),nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value,sub:'Lote '+(idx+1)+(it.produto?(' — '+it.produto):'')+' · '+(it.banho||'')});
 }
 function verFoto(src){document.getElementById('imgBig').src=src;document.getElementById('imgModal').classList.add('show');}
 let sbFotoData='';
@@ -1270,7 +1391,7 @@ function delSubitem(idx,si){const o=osAtualFb();if(!o)return;const it=(o.itens||
 function renderSubitens(){
   const o=osAtualFb();if(!o)return;const tb=document.getElementById('sbLista');if(!tb)return;tb.innerHTML='';
   (o.itens||[]).forEach(function(it,i){(it.subitens||[]).forEach(function(sb,si){var tr=document.createElement('tr');
-    var fdi=sb.foto?'<img src="'+sb.foto+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+(sb.peso||'')+'</td><td>'+(sb.qtd||'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td class="row-act"><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
+    var fdi=sb.foto?'<img src="'+sb.foto+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+(sb.peso||'')+'</td><td>'+(sb.qtd||'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
     tb.appendChild(tr);});});
   updatePacoteTotais();
 }
@@ -1521,6 +1642,16 @@ function renderVerniz(){
   var cc=document.getElementById('cards-vz');if(cc)cc.innerHTML='<div class="card"><div class="n">'+naVz.length+'</div><div class="l">No verniz</div></div><div class="card azul"><div class="n">'+enviadas+'</div><div class="l">Aguardando retorno</div></div><div class="card vermelho"><div class="n">'+atras+'</div><div class="l">Atrasadas (+5 dú)</div></div>';
   var cnt=document.getElementById('cnt-verniz');if(cnt)cnt.textContent=naVz.length;
 }
+function pesoCatOS(o){var s=0;(o.itens||[]).forEach(function(it){if(it.compl&&it.compl.cataforetico)s+=pesoFinalLote(it);});return s;}
+function prazoCatStatus(o){var v=o.verniz||{};if(v.retornadoEm){var ok=v.prazoRetorno?(v.retornadoEm<=v.prazoRetorno):true;return ok?{cls:'verde',cor:'var(--verde)',txt:'No prazo'}:{cls:'vermelho',cor:'var(--vermelho)',txt:'Fora do prazo'};}return farolVerniz(v.enviadoEm);}
+function duEntre(aISO,bISO){if(!aISO||!bISO)return '';var a=new Date(aISO+'T00:00:00'),b=new Date(bISO+'T00:00:00');if(b<a)return 0;var c=0;var d=new Date(a);while(d<b){d.setDate(d.getDate()+1);var wd=d.getDay();if(wd!==0&&wd!==6)c++;}return c;}
+function catRelLista(){var filtro=(document.getElementById('catRelFiltro')||{}).value||'todos';var lista=dados.filter(function(o){return o.verniz&&o.verniz.enviadoEm;});lista=lista.filter(function(o){var ret=!!(o.verniz&&o.verniz.retornadoEm);if(filtro==='pend')return !ret;if(filtro==='ret')return ret;return true;});lista.sort(function(a,b){return (''+(b.verniz.enviadoEm||'')).localeCompare(''+(a.verniz.enviadoEm||''));});return lista;}
+function renderVernizRelatorio(){var tb=document.getElementById('catRelTb');if(!tb)return;var lista=catRelLista();var totPeso=0,totVal=0;tb.innerHTML='';
+  lista.forEach(function(o){var v=o.verniz||{};var pg=pesoCatOS(o)*1000;var val=pg*PRECO_COMPL.cataforetico;totPeso+=pg;totVal+=val;var ps=prazoCatStatus(o);var dias=duEntre(v.enviadoEm,v.retornadoEm||hojeISO());
+    var tr=document.createElement('tr');tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td style="text-align:right">'+g2(pg)+' g</td><td style="text-align:right">R$ '+g2(val)+'</td><td>'+fmt(v.enviadoEm)+'</td><td>'+fmt(v.prazoRetorno)+'</td><td style="color:'+ps.cor+';font-weight:700">'+ps.txt+'</td><td>'+(v.retornadoEm?fmt(v.retornadoEm):'—')+'</td><td style="text-align:right">'+dias+'</td><td>'+(v.status||'')+'</td>';tb.appendChild(tr);});
+  var vz=document.getElementById('catRelVazio');if(vz)vz.style.display=lista.length?'none':'block';
+  var tot=document.getElementById('catRelTot');if(tot)tot.textContent=lista.length?('Envios: '+lista.length+' · Peso total enviado: '+g2(totPeso)+' g · Valor cataforético total: R$ '+g2(totVal)):'';}
+function exportCatRel(){var lista=catRelLista();if(!lista.length){alert('Sem envios de cataforético.');return;}var cols=['Nº O.S.','Cliente','Peso enviado (g)','Valor cataforético (R$)','Enviado em','Prazo retorno','Situação prazo','Retornou em','Dias no terceiro','Status'];var lin=lista.map(function(o){var v=o.verniz||{};var pg=pesoCatOS(o)*1000;return [o.numOS,o.cliente,pg.toFixed(2),(pg*PRECO_COMPL.cataforetico).toFixed(2),fmt(v.enviadoEm),fmt(v.prazoRetorno),prazoCatStatus(o).txt,fmt(v.retornadoEm),duEntre(v.enviadoEm,v.retornadoEm||hojeISO()),v.status||''];});baixarXls('Cataforetico_Gestao_Magri',cols,lin);}
 function exportVz(){
   var l=dados.filter(function(o){return o.setor==='Verniz'||(o.verniz&&o.verniz.enviadoEm);});if(!l.length){alert('Nada para exportar.');return;}
   var cols=['Nº O.S.','Cliente','Enviado em','Prazo retorno','Retornado em','Reinspecionado','Obs. Defeitos','Status'];
@@ -1529,6 +1660,7 @@ function exportVz(){
 }
 var CORNOME={'AU 18':'Ouro 18','AU 24':'Ouro 24','CHAMPANHE':'Champagne','VERDE':'Verde','MONT':'Ouro Montblanc','ROSE':'Rosé','PRATA':'Prata','RODIO BRANCO':'Ródio Branco','NIQUEL FREE':'Níquel Free','NÍQUEL':'Níquel','COBRE':'Cobre'};
 function g2(v){return (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function g3(v){return (v||0).toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});}
 function catCorNome(cor){return cor||'';}
 function catBaseNome(it){var c=it.compl||{};var b=[];if(c.antialergico)b.push('Anti Alérgico');if(c.paladio)b.push('Paládio');if(c.niquel)b.push('Níquel');if(c.niquelfree)b.push('Níquel Free');return b.join(', ');}
 function catVernizNome(it){var c=it.compl||{};var v=[];if(c.cataforetico)v.push('Verniz Cataforético');if(c.protetor)v.push('Verniz Protetor');return v.join(', ');}
@@ -1568,6 +1700,7 @@ function decompOrc(it){
   else if(b==='Ouro Flash'){metal=pesoKg*cot*2;}
   else if(b==='Ouro 1 Milésimo'){metal=pesoKg*cot*3;}
   else if(PRECO_PRATA[b]!==undefined){metal=pesoG*PRECO_PRATA[b];}
+  else if(b==='Ródio Branco'){metal=pesoG*PRECO_RODIO_BRANCO;}
   var compl=0;var c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
@@ -1577,32 +1710,33 @@ function decompOrc(it){
 function linhasBanho(it,pesoKg){
   var pesoG=pesoKg*1000;var lines=[];var b=it.banho||'';
   var cot=parseFloat(it.cotacao)||0,cam=parseFloat(it.camada)||0,moF=parseFloat(it.mo)||0;
-  var principal=0;
-  if(ehEspecial(it))principal=pesoKg*(parseFloat(it.especialKg)||0);
-  else if(b==='Ouro Camada')principal=pesoKg*cot*(moF+cam);
-  else if(b==='Ouro Flash')principal=pesoKg*cot*2;
-  else if(b==='Ouro 1 Milésimo')principal=pesoKg*cot*3;
-  else if(PRECO_PRATA[b]!==undefined)principal=pesoG*PRECO_PRATA[b];
-  if((b&&b!=='Nenhum')||ehEspecial(it))lines.push({nome:'Banho '+b+(ehEspecial(it)?' (tabela especial)':''),valor:principal});
+  if(ehEspecial(it)){lines.push({nome:'Banho '+b+' (tabela especial)',valor:pesoKg*(parseFloat(it.especialKg)||0),cat:(ehOuroBanho(b)?'metal':'servico')});}
+  else if(b==='Ouro Camada'){lines.push({nome:'Ouro (camada '+(cam||'')+' × cotação)',valor:pesoKg*cot*cam,cat:'metal'});if(moF>0)lines.push({nome:'Mão de obra (fator '+moF+')',valor:pesoKg*cot*moF,cat:'servico'});}
+  else if(b==='Ouro Flash')lines.push({nome:'Banho Ouro Flash (2× cotação)',valor:pesoKg*cot*2,cat:'metal'});
+  else if(b==='Ouro 1 Milésimo')lines.push({nome:'Banho Ouro 1 Milésimo (3× cotação)',valor:pesoKg*cot*3,cat:'metal'});
+  else if(PRECO_PRATA[b]!==undefined)lines.push({nome:'Banho '+b,valor:pesoG*PRECO_PRATA[b],cat:'servico'});
+  else if(b==='Ródio Branco')lines.push({nome:'Banho Ródio Branco',valor:pesoG*PRECO_RODIO_BRANCO,cat:'servico'});
   var c=it.compl||{};
-  Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])lines.push({nome:COMPL_LABEL[k],valor:pesoG*PRECO_COMPL[k]});});
-  if(c.acetinado)lines.push({nome:'Acetinado',valor:pesoG*PRECO_ACETINADO});
-  if(c.rodioNegro)lines.push({nome:'Ródio Negro',valor:pesoG*(parseFloat(c.rodioNegroPreco)||0)});
+  Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])lines.push({nome:COMPL_LABEL[k],valor:pesoG*PRECO_COMPL[k],cat:'servico'});});
+  if(c.acetinado)lines.push({nome:'Acetinado',valor:pesoG*PRECO_ACETINADO,cat:'servico'});
+  if(c.rodioNegro)lines.push({nome:'Ródio Negro',valor:pesoG*(parseFloat(c.rodioNegroPreco)||0),cat:'servico'});
   return lines;
 }
-function docCobCSS(){return '<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;padding:20px;color:#1a1a1a}h1{font-size:20px;margin:0;color:#a9862f}.head{border-bottom:2px solid #c8a24a;padding-bottom:10px;margin-bottom:16px}.head .sub{font-size:13px;color:#555;margin-top:4px}h2{font-size:14px;color:#a9862f;margin:18px 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px}th{background:#f4f5f7;text-align:left;padding:6px 8px;border:1px solid #ddd}td{padding:6px 8px;border:1px solid #eee}.grp td{background:#faf3e0;font-weight:bold}.tot{margin-top:14px;text-align:right;font-size:14px;line-height:1.7}.tot .grand{font-size:20px;font-weight:bold;color:#a9862f}.nota{font-size:11px;color:#888;margin-top:14px}.imprimir{margin:14px 0;text-align:center}button{background:#c8a24a;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px}@media print{.imprimir{display:none}@page{size:A4;margin:14mm}}</style>';}
+function docCobCSS(){return '<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;padding:20px;color:#1a1a1a}h1{font-size:20px;margin:0;color:#a9862f}.head{border-bottom:2px solid #c8a24a;padding-bottom:10px;margin-bottom:16px}.head .sub{font-size:13px;color:#555;margin-top:4px}h2{font-size:14px;color:#a9862f;margin:18px 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1.5px solid #555}th{background:#f4f5f7;text-align:left;padding:6px 8px;border:1px solid #888}td{padding:6px 8px;border:1px solid #999}.grp td{background:#faf3e0;font-weight:bold}.tot{margin-top:14px;text-align:right;font-size:14px;line-height:1.7}.tot .grand{font-size:20px;font-weight:bold;color:#a9862f}.nota{font-size:11px;color:#888;margin-top:14px}.imprimir{margin:14px 0;text-align:center}button{background:#c8a24a;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px}.itemh{font-weight:bold;font-size:12.5px;margin:12px 0 3px}.num{text-align:right}.ctr{text-align:center}tr.tl td,tr.bloco td{background:#fff2a8;font-weight:bold}table.fin{max-width:420px;margin-left:auto}table.fin td{font-size:13px}@media print{.imprimir{display:none}@page{size:A4;margin:12mm}}</style>';}
 function detalheItens(o,pesoFn,cortesiaOn){
   var rows='';
   (o.itens||[]).forEach(function(it,i){
     var pb=pesoFn(it);
     var hdr='Lote '+(i+1)+(it.produto?' — '+it.produto:'')+' · '+(it.banho||'')+(it.cor?' '+it.cor:'')+' · '+g2(pb*1000)+' g';
-    rows+='<tr class="grp"><td>'+hdr+'</td><td></td></tr>';
-    if(cortesiaOn&&it.cortesia){rows+='<tr><td style="padding-left:18px;color:#3f8f3f">Cortesia (sem cobrança)</td><td style="text-align:right">R$ 0,00</td></tr>';return;}
-    var lns=linhasBanho(it,pb);var sub=0;
-    lns.forEach(function(l){sub+=l.valor;rows+='<tr><td style="padding-left:18px">'+l.nome+'</td><td style="text-align:right">R$ '+g2(l.valor)+'</td></tr>';});
-    rows+='<tr><td style="text-align:right;font-style:italic">Subtotal do lote</td><td style="text-align:right"><b>R$ '+g2(sub)+'</b></td></tr>';
+    if(cortesiaOn&&it.cortesia){rows+='<tr class="grp"><td>'+hdr+'</td><td style="text-align:right">—</td><td style="text-align:right;color:#3f8f3f">Cortesia</td></tr>';return;}
+    var lns=linhasBanho(it,pb);var subO=0,subS=0;
+    lns.forEach(function(l){if(l.cat==='metal')subO+=l.valor;else subS+=l.valor;});
+    var sub=subO+subS;var rkg=pb>0?('R$ '+g2(sub/pb)+'/kg'):'—';
+    rows+='<tr class="grp"><td>'+hdr+'</td><td style="text-align:right">'+rkg+'</td><td></td></tr>';
+    lns.forEach(function(l){rows+='<tr><td style="padding-left:16px">'+l.nome+(l.cat==='metal'?' <span class="hint">(ouro)</span>':' <span class="hint">(serv.)</span>')+'</td><td></td><td style="text-align:right">R$ '+g2(l.valor)+'</td></tr>';});
+    rows+='<tr><td style="text-align:right;font-style:italic">Subtotal — <span style="color:#a9862f">à vista R$ '+g2(subO)+'</span> · conclusão R$ '+g2(subS)+'</td><td></td><td style="text-align:right"><b>R$ '+g2(sub)+'</b></td></tr>';
   });
-  if((o.servicos||[]).length){rows+='<tr class="grp"><td>Serviços adicionais</td><td></td></tr>';(o.servicos||[]).forEach(function(x){rows+='<tr><td style="padding-left:18px">'+x.servico+(x.cor?' ('+x.cor+')':'')+(x.qtd?' — qtd '+x.qtd:'')+'</td><td style="text-align:right">R$ '+g2(x.valor)+'</td></tr>';});}
+  if((o.servicos||[]).length){rows+='<tr class="grp"><td>Serviços adicionais (na conclusão)</td><td></td><td></td></tr>';(o.servicos||[]).forEach(function(x){var nt=x.cortesia?' — cortesia':(x.desconto>0?(' — desc. R$ '+g2(x.desconto)):'');var qd=x.aDefinir?' — qtd a definir':(x.qtd?' — qtd '+x.qtd:'');var vd=x.aDefinir?('a definir (R$ '+g2(x.precoUnit||0)+'/ponto)'):(x.cortesia?'Cortesia':('R$ '+g2(x.valor)));rows+='<tr><td style="padding-left:16px">'+x.servico+(x.cor?' ('+x.cor+')':'')+qd+nt+'</td><td></td><td style="text-align:right">'+vd+'</td></tr>';});}
   return rows;
 }
 function buildOSFormHTML(o){
@@ -1631,18 +1765,45 @@ function buildOSFormHTML(o){
     '</body></html>';
 }
 function gerarFormularioOS(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;if(!(o.itens||[]).length){alert('Cadastre ao menos um item na OS.');return;}var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a O.S.');return;}w.document.write(buildOSFormHTML(o));w.document.close();}
+function fatoresGold(it){var b=it.banho||'';if(ehEspecial(it))return null;if(b==='Ouro Camada')return {camadaF:parseFloat(it.camada)||0,moF:parseFloat(it.mo)||0};if(b==='Ouro 1 Milésimo')return {camadaF:1,moF:2};if(b==='Ouro Flash')return {camadaF:0,moF:2};return null;}
+function rowsDoLote(it,pb){var rows=[];var b=it.banho||'';var cot=parseFloat(it.cotacao)||0;var pesoG=pb*1000;var fg=fatoresGold(it);
+  if(ehEspecial(it)){var v=pb*(parseFloat(it.especialKg)||0);rows.push({tipo:'Banho '+b+' (especial)',fator:'',cor:it.cor||'',camada:'',vlkg:(parseFloat(it.especialKg)||0),peso:pb,serv:v,ouro:0,total:v});}
+  else if(fg){var ouro=pb*cot*fg.camadaF,serv=pb*cot*fg.moF;rows.push({tipo:'Banho Ouro',fator:fg.moF,cor:it.cor||'',camada:(fg.camadaF||''),vlkg:cot*(fg.camadaF+fg.moF),peso:pb,serv:serv,ouro:ouro,total:ouro+serv});}
+  else if(PRECO_PRATA[b]!==undefined){var v=pesoG*PRECO_PRATA[b];rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:PRECO_PRATA[b]*1000,peso:pb,serv:v,ouro:0,total:v});}
+  else if(b==='Ródio Branco'){var v=pesoG*PRECO_RODIO_BRANCO;rows.push({tipo:'Banho Ródio Branco',fator:'',cor:it.cor||'',camada:'',vlkg:PRECO_RODIO_BRANCO*1000,peso:pb,serv:v,ouro:0,total:v});}
+  var c=it.compl||{};Object.keys(PRECO_COMPL).forEach(function(k){if(c[k]){var v=pesoG*PRECO_COMPL[k];rows.push({tipo:COMPL_LABEL[k],fator:'',cor:'',camada:'',vlkg:PRECO_COMPL[k]*1000,peso:pb,serv:v,ouro:0,total:v});}});
+  if(c.acetinado){var v=pesoG*PRECO_ACETINADO;rows.push({tipo:'Acetinado',fator:'',cor:'',camada:'',vlkg:PRECO_ACETINADO*1000,peso:pb,serv:v,ouro:0,total:v});}
+  if(c.rodioNegro){var rn=parseFloat(c.rodioNegroPreco)||0;var v=pesoG*rn;rows.push({tipo:'Ródio Negro',fator:'',cor:'',camada:'',vlkg:rn*1000,peso:pb,serv:v,ouro:0,total:v});}
+  return rows;}
+function tabelaLotesHTML(o,pesoFn,cortesiaOn){var html='';var ouroTot=0,totLotes=0;
+  (o.itens||[]).forEach(function(it,i){var pb=pesoFn(it);
+    html+='<div class="itemh">Item '+(i+1)+(it.produto?' — '+it.produto:'')+'</div>';
+    if(cortesiaOn&&it.cortesia){html+='<table><thead><tr><th>Tipo</th><th class="num">Total</th></tr></thead><tbody><tr><td style="color:#3f8f3f">Cortesia (sem cobrança)</td><td class="num">R$ 0,00</td></tr></tbody></table>';return;}
+    var rows=rowsDoLote(it,pb);var tl=0,ol=0;
+    html+='<table><thead><tr><th class="num">Peso Kg</th><th>Tipo</th><th class="ctr">Camada</th><th class="ctr">Cor</th><th class="ctr">MO</th><th class="num">Vl. Kg</th><th class="num">Valor Serviço</th><th class="num">Valor Ouro</th><th class="num">Total</th></tr></thead><tbody>';
+    rows.forEach(function(r){tl+=r.total;ol+=r.ouro;html+='<tr><td class="num">'+g3(r.peso)+'</td><td>'+r.tipo+'</td><td class="ctr">'+(r.camada!==''?r.camada:'')+'</td><td class="ctr">'+(r.cor||'')+'</td><td class="ctr">'+(r.fator!==''?g2(r.fator):'')+'</td><td class="num">'+g2(r.vlkg)+'</td><td class="num">'+(r.serv?('R$ '+g2(r.serv)):'')+'</td><td class="num">'+(r.ouro?('R$ '+g2(r.ouro)):'—')+'</td><td class="num">R$ '+g2(r.total)+'</td></tr>';});
+    html+='<tr class="tl"><td colspan="8">Total Lote</td><td class="num">R$ '+g2(tl)+'</td></tr></tbody></table>';
+    ouroTot+=ol;totLotes+=tl;});
+  return {html:html,ouro:ouroTot,totLotes:totLotes};}
+function servAdicHTML(o){if(!(o.servicos||[]).length)return {html:'',total:0};var t=0;var rows='';(o.servicos||[]).forEach(function(x){var cheio=(x.valorCheio!==undefined?x.valorCheio:x.valor)||0;var un=x.precoUnit||((x.qtd>0)?(cheio/x.qtd):cheio);var desc=x.cortesia?cheio:(x.desconto||0);t+=(x.valor||0);var qtdC=x.aDefinir?'a definir':(x.qtd||'');var valC=x.aDefinir?'a definir':(x.cortesia?'Cortesia':('R$ '+g2(x.valor)));rows+='<tr><td>'+(x.servico||'')+(x.cor?' ('+x.cor+')':'')+'</td><td class="num">'+qtdC+'</td><td class="num">R$ '+g2(un)+'</td><td class="num">'+(desc>0?('R$ '+g2(desc)):'')+'</td><td class="num">'+valC+'</td></tr>';});
+  var html='<div class="itemh">Serviços adicionais (na conclusão)</div><table><thead><tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Vlr Unit.</th><th class="num">Desconto</th><th class="num">Valor</th></tr></thead><tbody>'+rows+'<tr class="tl"><td colspan="4">Total Serviços Adicionais</td><td class="num">R$ '+g2(t)+'</td></tr></tbody></table>';return {html:html,total:t};}
 function buildOrcamentoHTML(o){
-  var bm=0,bmo=0,bc=0,totBanho=0,totServ=0;
-  (o.itens||[]).forEach(function(it){var d=decompOrc(it);bm+=d.metal;bmo+=d.mo;bc+=d.compl;totBanho+=d.total;});
-  (o.servicos||[]).forEach(function(x){totServ+=(x.valor||0);});
-  var total=totBanho+totServ;
-  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Orçamento O.S. '+(o.numOS||'')+'</title>'+docCobCSS()+'</head><body>'+
-  '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Orçamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Previsão de entrega:</b> '+fmt(o.prevEntregaISO)+'</div></div>'+
+  var cots=[];(o.itens||[]).forEach(function(it){if(ehOuroBanho(it.banho)&&!ehEspecial(it)){var c=parseFloat(it.cotacao)||0;if(c>0&&cots.indexOf(c)<0)cots.push(c);}});
+  var cotStr=cots.length?(cots.map(function(c){return 'R$ '+g2(c);}).join(' / ')+'/g'):'—';
+  var lt=tabelaLotesHTML(o,function(it){return pesoLiqItem(it);},false);
+  var sa=servAdicHTML(o);
+  var totalOrc=lt.totLotes+sa.total;var adiant=lt.ouro;var conclusao=totalOrc-adiant;
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Orçamento O.S. '+(o.numOS||'')+'</title>'+docCobCSS()+'<style>.marca-previa{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:120px;font-weight:800;color:rgba(169,134,47,.12);white-space:nowrap;z-index:-1;pointer-events:none;letter-spacing:10px;}</style>'+'</head><body>'+'<div class="marca-previa">Prévia</div>'+
+  '<div class="head">'+logoTag(64)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Orçamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Previsão de entrega:</b> '+fmt(o.prevEntregaISO)+' &nbsp;|&nbsp; <b>Cotação do ouro:</b> '+cotStr+'</div></div>'+
   '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
-  '<h2>Detalhamento por item (peso declarado)</h2>'+
-  '<table><thead><tr><th>Item / Serviço escolhido</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+(detalheItens(o,function(it){return pesoLiqItem(it);},false)||'<tr><td colspan="2">Sem itens.</td></tr>')+'</tbody></table>'+
-  '<div class="tot">Metal aplicado: <b>R$ '+g2(bm)+'</b><br>Mão de obra: <b>R$ '+g2(bmo)+'</b><br>Complementares: <b>R$ '+g2(bc)+'</b><br>Serviços adicionais: <b>R$ '+g2(totServ)+'</b><br>Subtotal banho: <b>R$ '+g2(totBanho)+'</b><br><span class="grand">Total estimado: R$ '+g2(total)+'</span></div>'+
-  '<div class="nota">* Valores estimados sobre o peso declarado. O valor final é confirmado após a pesagem pós-produção, pois a peça ganha peso no processo.</div>'+
+  '<h2>Detalhamento por item</h2>'+lt.html+sa.html+
+  '<table class="fin"><tbody>'+
+  '<tr class="tl"><td>Total Orçamento</td><td class="num">R$ '+g2(totalOrc)+'</td></tr>'+
+  '<tr class="tl"><td>À Vista</td><td class="num">R$ '+g2(adiant)+'</td></tr>'+
+  '<tr class="tl"><td>Na entrega</td><td class="num">R$ '+g2(conclusao)+'</td></tr>'+
+  '</tbody></table>'+
+  '<div class="nota">* O <b>metal (ouro)</b> é pago à vista; os <b>serviços</b> (mão de obra, complementares, prata, ródio e adicionais) na conclusão. Todos os itens aplicados estão listados, inclusive os sem custo. Valores estimados sobre o peso declarado; o valor final é confirmado após a pesagem pós-produção.</div>'+
+  '<div class="nota" style="margin-top:22px">De acordo com os itens e valores acima:<br><br>____________________________________  &nbsp;&nbsp; Data: ____ / ____ / ______<br>Cliente: '+(o.cliente||'')+'</div>'+
   '</body></html>';
 }
 function gerarOrcamento(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;if(!(o.itens||[]).length){alert('Cadastre ao menos um item na OS para gerar o orçamento.');return;}var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o orçamento.');return;}w.document.write(buildOrcamentoHTML(o));w.document.close();}
@@ -1669,6 +1830,7 @@ function decompBanho(it){
   else if(b==='Ouro Flash'){metal=pesoKg*cot*2;}
   else if(b==='Ouro 1 Milésimo'){metal=pesoKg*cot*3;}
   else if(PRECO_PRATA[b]!==undefined){metal=pesoG*PRECO_PRATA[b];}
+  else if(b==='Ródio Branco'){metal=pesoG*PRECO_RODIO_BRANCO;}
   var compl=0;var c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
@@ -1676,7 +1838,7 @@ function decompBanho(it){
   return {metal:metal,mo:mo,compl:compl,total:metal+mo+compl};
 }
 function banhoFinalItem(it){return decompBanho(it).total;}
-function breakdownOS(o){var m=0,mo=0,cp=0;(o.itens||[]).forEach(function(it){var d=decompBanho(it);m+=d.metal;mo+=d.mo;cp+=d.compl;});var serv=0;(o.servicos||[]).forEach(function(x){serv+=(x.valor||0);});var desc=parseFloat(o.descontoValor)||0;var sub=m+mo+cp+serv;return {metal:m,mo:mo,compl:cp,serv:serv,subtotal:sub,desconto:desc,total:sub-desc};}
+function breakdownOS(o){var m=0,mo=0,cp=0;(o.itens||[]).forEach(function(it){var d=decompBanho(it);m+=d.metal;mo+=d.mo;cp+=d.compl;});var serv=0;(o.servicos||[]).forEach(function(x){serv+=(x.valor||0);});var desc=parseFloat(o.descontoValor)||0;var extras=extrasTotalOS(o);var sub=m+mo+cp+serv+extras;return {metal:m,mo:mo,compl:cp,serv:serv,extras:extras,subtotal:sub,desconto:desc,total:sub-desc};}
 function totalCobrancaOS(o){return breakdownOS(o).total;}
 function abrirCob(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;document.getElementById('cobId').value=id;document.getElementById('cobTitle').textContent='Cobrança — O.S. '+(o.numOS||'');document.getElementById('cobInfo').innerHTML='<div><b>Nº O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div><div><b>Peso final total</b>'+g2(pesoFinalTotalOS(o)*1000)+' g</div>';document.getElementById('cobDesc').value=o.descontoValor||'';document.getElementById('cobObs').value=o.descontoObs||'';renderCobModal();document.getElementById('cobModal').classList.add('show');}
 function closeCob(){document.getElementById('cobModal').classList.remove('show');render();}
@@ -1688,21 +1850,42 @@ function renderCobModal(){
     (o.itens||[]).forEach(function(it,i){var d=decompBanho(it);var tr=document.createElement('tr');
       tr.innerHTML='<td style="text-align:center"><input type="checkbox" '+(it.cortesia?'checked':'')+' onchange="cobToggleCortesia('+i+')"></td><td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' / '+it.cor:'')+'</td><td>'+g2(pesoCobrItem(it)*1000)+' g</td><td>R$ '+g2(d.metal)+'</td><td>R$ '+g2(d.mo)+'</td><td>R$ '+g2(d.compl)+'</td><td'+(it.cortesia?' style="color:var(--verde);font-weight:700"':'')+'>'+(it.cortesia?'Cortesia':('R$ '+g2(d.total)))+'</td>';
       tb.appendChild(tr);});}
+  var te=document.getElementById('cobExtrasLista');if(te){te.innerHTML='';(o.extras||[]).forEach(function(x){var tr=document.createElement('tr');tr.innerHTML='<td>'+(x.descricao||'')+'</td><td style="text-align:right">R$ '+g2(parseFloat(x.valor)||0)+'</td><td class="row-act"><button class="btn-del" onclick="delCobExtra(\''+x.id+'\')">x</button></td>';te.appendChild(tr);});}
+  var tc=document.getElementById('cobCanetas');if(tc){tc.innerHTML='';var canetas=(o.servicos||[]).map(function(x,idx){return {x:x,idx:idx};}).filter(function(w){return w.x.servico==='Caneta de Ródio';});if(!canetas.length){tc.innerHTML='<tr><td colspan="6" class="hint">Nenhuma caneta de ródio nesta OS.</td></tr>';}else{canetas.forEach(function(w){var x=w.x;var tr=document.createElement('tr');tr.innerHTML='<td>'+x.servico+'</td><td>'+(x.cor||'')+'</td><td>R$ '+g2(x.precoUnit||0)+'</td><td><input type="number" step="1" style="width:90px" value="'+(x.aDefinir?'':(x.qtd||''))+'" onchange="cobSetCaneta('+w.idx+',this.value)"></td><td><input type="text" style="width:120px" value="'+((x.notaTerceiro||'').replace(/"/g,'&quot;'))+'" onchange="cobSetCanetaNota('+w.idx+',this.value)" placeholder="nº nota"></td><td style="text-align:right">'+(x.aDefinir?'a definir':('R$ '+g2(x.valor||0)))+'</td>';tc.appendChild(tr);});}}
   var b=breakdownOS(o);
-  var r=document.getElementById('cobResumo');if(r)r.innerHTML='<div><b>Metal aplicado</b>R$ '+g2(b.metal)+'</div><div><b>Mão de obra</b>R$ '+g2(b.mo)+'</div><div><b>Complementares</b>R$ '+g2(b.compl)+'</div><div><b>Serviços adic.</b>R$ '+g2(b.serv)+'</div><div><b>Subtotal</b>R$ '+g2(b.subtotal)+'</div><div><b>Desconto</b>- R$ '+g2(b.desconto)+'</div><div style="font-size:15px"><b>Total a cobrar</b>R$ '+g2(b.total)+'</div>';
+  var r=document.getElementById('cobResumo');if(r)r.innerHTML='<div><b>Metal aplicado</b>R$ '+g2(b.metal)+'</div><div><b>Mão de obra</b>R$ '+g2(b.mo)+'</div><div><b>Complementares</b>R$ '+g2(b.compl)+'</div><div><b>Serviços adic.</b>R$ '+g2(b.serv)+'</div><div><b>Despesas extras</b>R$ '+g2(b.extras||0)+'</div><div><b>Subtotal</b>R$ '+g2(b.subtotal)+'</div><div><b>Desconto</b>- R$ '+g2(b.desconto)+'</div><div style="font-size:15px"><b>Total a cobrar</b>R$ '+g2(b.total)+'</div>';
 }
 function salvarCob(){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o)return;o.descontoValor=document.getElementById('cobDesc').value;o.descontoObs=document.getElementById('cobObs').value;salvar();render();alert('Cobrança salva.');}
+function extrasTotalOS(o){return (o.extras||[]).reduce(function(s,x){return s+(parseFloat(x.valor)||0);},0);}
+function extrasHTML(o){var arr=o.extras||[];if(!arr.length)return {html:'',total:0};var t=0,rows='';arr.forEach(function(x){var v=parseFloat(x.valor)||0;t+=v;rows+='<tr><td>'+(x.descricao||'')+'</td><td class="num">R$ '+g2(v)+'</td></tr>';});var html='<div class="itemh">Despesas / extras (na entrega)</div><table><thead><tr><th>Despesa</th><th class="num">Valor</th></tr></thead><tbody>'+rows+'<tr class="tl"><td>Total despesas</td><td class="num">R$ '+g2(t)+'</td></tr></tbody></table>';return {html:html,total:t};}
+function addCobExtra(){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o)return;var d=document.getElementById('cobExtraDesc').value.trim();var v=parseFloat(document.getElementById('cobExtraValor').value)||0;if(!d){alert('Informe a descrição da despesa.');return;}if(v<=0){alert('Informe o valor.');return;}if(!o.extras)o.extras=[];o.extras.push({id:'ex_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),descricao:d,valor:v});document.getElementById('cobExtraDesc').value='';document.getElementById('cobExtraValor').value='';salvar();renderCobModal();}
+function delCobExtra(id){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o||!o.extras)return;o.extras=o.extras.filter(function(x){return x.id!==id;});salvar();renderCobModal();}
+function cobSetCaneta(idx,val){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o)return;var sv=(o.servicos||[])[idx];if(!sv)return;var q=parseFloat(val)||0;var pu=sv.precoUnit||0;if(q>0){sv.qtd=q;sv.aDefinir=false;sv.valorCheio=q*pu;sv.valor=sv.cortesia?0:Math.max(0,q*pu-(sv.desconto||0));}else{sv.qtd='';sv.aDefinir=true;sv.valorCheio=0;sv.valor=0;}salvar();renderCobModal();}
+function cobSetCanetaNota(idx,val){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o)return;var sv=(o.servicos||[])[idx];if(!sv)return;sv.notaTerceiro=val;salvar();}
 function buildCobrancaHTML(o){
-  var b=breakdownOS(o);
+  var cots=[];(o.itens||[]).forEach(function(it){if(ehOuroBanho(it.banho)&&!ehEspecial(it)){var c=parseFloat(it.cotacao)||0;if(c>0&&cots.indexOf(c)<0)cots.push(c);}});
+  var cotStr=cots.length?(cots.map(function(c){return 'R$ '+g2(c);}).join(' / ')+'/g'):'—';
+  var lt=tabelaLotesHTML(o,pesoCobrItem,true);
+  var sa=servAdicHTML(o);
+  var ex=extrasHTML(o);var totalOrc=lt.totLotes+sa.total+ex.total;var adiant=lt.ouro;var desc=parseFloat(o.descontoValor)||0;var conclusao=totalOrc-adiant-desc;var totalCobrar=totalOrc-desc;
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Cobrança O.S. '+(o.numOS||'')+'</title>'+docCobCSS()+'</head><body>'+
-  '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Cobrança / Fechamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Peso final total:</b> '+g2(pesoFinalTotalOS(o)*1000)+' g</div></div>'+
+  '<div class="head">'+logoTag(64)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Cobrança / Fechamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Peso final total:</b> '+g2(pesoFinalTotalOS(o)*1000)+' g &nbsp;|&nbsp; <b>Cotação do ouro:</b> '+cotStr+'</div></div>'+
   '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
-  '<h2>Detalhamento por item (peso final)</h2>'+
-  '<table><thead><tr><th>Item / Serviço escolhido</th><th style="text-align:right">Valor</th></tr></thead><tbody>'+(detalheItens(o,pesoCobrItem,true)||'<tr><td colspan="2">Sem lotes.</td></tr>')+'</tbody></table>'+
-  '<div class="tot">Metal aplicado: <b>R$ '+g2(b.metal)+'</b><br>Mão de obra: <b>R$ '+g2(b.mo)+'</b><br>Complementares: <b>R$ '+g2(b.compl)+'</b><br>Serviços adicionais: <b>R$ '+g2(b.serv)+'</b><br>Subtotal: <b>R$ '+g2(b.subtotal)+'</b>'+(b.desconto>0?('<br>Desconto'+(o.descontoObs?' ('+o.descontoObs+')':'')+': <b>- R$ '+g2(b.desconto)+'</b>'):'')+'<br><span class="grand">Total a cobrar: R$ '+g2(b.total)+'</span></div>'+
+  '<h2>Detalhamento por item (peso final)</h2>'+lt.html+sa.html+ex.html+
+  '<table class="fin"><tbody>'+
+  '<tr class="tl"><td>Total</td><td class="num">R$ '+g2(totalOrc)+'</td></tr>'+
+  '<tr class="tl"><td>À Vista</td><td class="num">R$ '+g2(adiant)+'</td></tr>'+
+  (desc>0?('<tr><td>Desconto'+(o.descontoObs?' ('+o.descontoObs+')':'')+'</td><td class="num">- R$ '+g2(desc)+'</td></tr>'):'')+
+  '<tr class="tl"><td>Na entrega</td><td class="num">R$ '+g2(conclusao)+'</td></tr>'+
+  '<tr class="tl"><td>Total a cobrar</td><td class="num">R$ '+g2(totalCobrar)+'</td></tr>'+
+  '</tbody></table>'+
+  '<div class="nota">* Metal (ouro) cobrado à vista; serviços na conclusão. Cobrança sobre o peso final (pós-produção).</div>'+
   '</body></html>';
 }
 function gerarCobranca(){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a cobrança.');return;}w.document.write(buildCobrancaHTML(o));w.document.close();}
+function baixarArquivo(nome,conteudo,mime){var blob=new Blob([conteudo],{type:mime||'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},100);}
+function ordemRecebimentoOS(o){var lt=tabelaLotesHTML(o,pesoCobrItem,true);var sa=servAdicHTML(o);var desc=parseFloat(o.descontoValor)||0;var totalOrc=lt.totLotes+sa.total+extrasTotalOS(o);var total=totalOrc-desc;var avista=lt.ouro;var conclusao=totalOrc-avista-desc;return {tipo:'ordem-recebimento-magri',versao:1,os:(o.numOS||''),cliente:(o.cliente||''),emissao:hojeISO(),vencimento:(o.prevEntregaISO||hojeISO()),valorTotal:Number(total.toFixed(2)),valorAvista:Number(avista.toFixed(2)),valorConclusao:Number(conclusao.toFixed(2)),obs:'Ouro à vista R$ '+g2(avista)+' · Serviços na conclusão R$ '+g2(conclusao)};}
+function enviarFinanceiro(){var o=dados.find(function(x){return x.id===document.getElementById('cobId').value;});if(!o)return;if(!(o.itens||[]).length){alert('OS sem lotes.');return;}var ord=ordemRecebimentoOS(o);baixarArquivo('OrdemRecebimento_OS_'+((o.numOS||'sem').toString().replace(/[^A-Za-z0-9_-]/g,''))+'.json',JSON.stringify(ord,null,2),'application/json');alert('Ordem de Recebimento gerada (R$ '+g2(ord.valorTotal)+').\nAbra o Sistema Financeiro e clique em "Ordem O.S." para importar o arquivo baixado.');}
 function abrirDev(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;document.getElementById('devId').value=id;document.getElementById('devTitle').textContent='Devolver O.S. '+(o.numOS||'');document.getElementById('devInfo').innerHTML='<div><b>Nº O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div><div><b>Setor atual</b>'+(o.setor||'')+'</div>';document.getElementById('devMotivo').value='';document.getElementById('devModal').classList.add('show');}
 function closeDev(){document.getElementById('devModal').classList.remove('show');}
 function confirmarDev(){
@@ -1824,7 +2007,7 @@ function exportRetrab(){
 }
 
 function render(){
-  document.getElementById('clientes').innerHTML=CLIENTES.map(c=>'<option value="'+c+'">').join('');
+  document.getElementById('clientes').innerHTML=clientesNomes().map(function(c){return '<option value="'+c+'">';}).join('');
 
   const qC=(document.getElementById('buscaCom').value||'').toLowerCase();
   const tbC=document.getElementById('tbodyCom');tbC.innerHTML='';
@@ -1968,11 +2151,30 @@ function render(){
   document.getElementById('cnt-banho').textContent=dados.filter(o=>o.setor==='Banho').length;
   document.getElementById('cnt-qualidade').textContent=dados.filter(o=>o.setor==='Qualidade').length;
   document.getElementById('cnt-expedicao').textContent=dados.filter(o=>o.setor==='Expedição').length;
-  renderGestao();renderResumo();renderTroca();renderVerniz();renderCatalogo();renderCobranca();renderUsuarios();
+  renderGestao();renderResumo();renderDiretoria();renderClientes();renderTroca();renderVerniz();renderVernizRelatorio();renderCatalogo();renderCobranca();renderUsuarios();
   document.getElementById('cnt-reforco').textContent=reforcos.length;
   document.getElementById('cnt-tanque').textContent=TANQUES_SALDO.filter(function(t){return ((tanqueSaldos[t]||0)+reforcoTanque(t)-consumoTanque(t))<=2;}).length;
 }
 
+function renderClientes(){var tb=document.getElementById('tbodyCli');if(!tb)return;
+  var q=(document.getElementById('buscaCli')?document.getElementById('buscaCli').value:'').toLowerCase();
+  var lista=clientesReg.map(function(c,i){return {c:c,i:i};}).filter(function(x){return !q||JSON.stringify(x.c).toLowerCase().includes(q);});
+  lista.sort(function(a,b){return (''+a.c.nome).localeCompare(''+b.c.nome);});
+  tb.innerHTML='';var ev=document.getElementById('emptyCli');if(ev)ev.style.display=lista.length?'none':'block';
+  lista.forEach(function(x){var tr=document.createElement('tr');tr.innerHTML='<td>'+(x.c.nome||'')+'</td><td>'+(x.c.cnpj||'')+'</td><td>'+(x.c.telefone||'')+'</td><td class="row-act"><button class="btn-edit" onclick="editCliente('+x.i+')">Editar</button><button class="btn-del" onclick="delCliente('+x.i+')">x</button></td>';tb.appendChild(tr);});
+  var cc=document.getElementById('cards-cli');if(cc)cc.innerHTML='<div class="card"><div class="n">'+clientesReg.length+'</div><div class="l">Clientes cadastrados</div></div>';
+  var cnt=document.getElementById('cnt-clientes');if(cnt)cnt.textContent=clientesReg.length;}
+function addCliente(){var nome=document.getElementById('cliNome').value.trim();if(!nome){alert('Informe o nome do cliente.');return;}var cnpj=document.getElementById('cliCnpj').value.trim();var tel=document.getElementById('cliTel').value.trim();var idx=parseInt(document.getElementById('cliEditIdx').value);var obj={nome:nome,cnpj:cnpj,telefone:tel};
+  if(idx>=0){clientesReg[idx]=obj;}else{var ex=clientesReg.findIndex(function(c){return (''+c.nome).toLowerCase()===nome.toLowerCase();});if(ex>=0)clientesReg[ex]=obj;else clientesReg.push(obj);}
+  salvarClientes();limparCliForm();render();}
+function editCliente(i){var c=clientesReg[i];if(!c)return;document.getElementById('cliNome').value=c.nome||'';document.getElementById('cliCnpj').value=c.cnpj||'';document.getElementById('cliTel').value=c.telefone||'';document.getElementById('cliEditIdx').value=i;window.scrollTo(0,0);}
+function delCliente(i){if(!confirm('Excluir este cliente?'))return;clientesReg.splice(i,1);salvarClientes();render();}
+function limparCliForm(){document.getElementById('cliNome').value='';document.getElementById('cliCnpj').value='';document.getElementById('cliTel').value='';document.getElementById('cliEditIdx').value='-1';}
+function parseLinhaCliente(line){var parts=line.split(/[;\t,]/).map(function(p){return p.trim();});if(!parts[0])return null;return {nome:parts[0],cnpj:parts[1]||'',telefone:parts[2]||''};}
+function importarClientesTexto(txt){var linhas=(''+txt).split(/\r?\n/).filter(function(l){return l.trim();});var add=0,upd=0;linhas.forEach(function(l,idx){if(idx===0&&/nome/i.test(l)&&/(cnpj|cpf|tel)/i.test(l))return;var c=parseLinhaCliente(l);if(!c)return;var ex=clientesReg.findIndex(function(x){return (''+x.nome).toLowerCase()===c.nome.toLowerCase();});if(ex>=0){clientesReg[ex]=c;upd++;}else{clientesReg.push(c);add++;}});salvarClientes();render();alert('Importação concluída: '+add+' novos, '+upd+' atualizados.');}
+function importarClientesColar(){var t=document.getElementById('cliPaste').value;if(!t.trim()){alert('Cole os dados no campo.');return;}importarClientesTexto(t);document.getElementById('cliPaste').value='';}
+function exportClientes(){if(!clientesReg.length){alert('Sem clientes cadastrados.');return;}var cols=['Nome','CNPJ/CPF','Telefone'];var lin=clientesReg.slice().sort(function(a,b){return (''+a.nome).localeCompare(''+b.nome);}).map(function(c){return [c.nome,c.cnpj,c.telefone];});baixarXls('Clientes_Magri',cols,lin);}
+if(document.getElementById('cliCsvInput'))document.getElementById('cliCsvInput').addEventListener('change',function(e){var fl=e.target.files[0];if(!fl)return;var r=new FileReader();r.onload=function(ev){importarClientesTexto(ev.target.result);};r.readAsText(fl);e.target.value='';});
 function baixarXls(nome,cols,linhas){
   let html='<table border="1"><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr>';
   linhas.forEach(function(l){html+='<tr>'+l.map(v=>'<td>'+(v==null?'':v)+'</td>').join('')+'</tr>';});
