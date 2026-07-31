@@ -797,7 +797,8 @@
   </div>
 </div>
 
-<script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="text/plain" id="__mainapp">
 const KEY='magri_os_v2';
 let dados=JSON.parse(localStorage.getItem(KEY)||'[]');
 let logoData=localStorage.getItem('magri_logo')||'';
@@ -2208,5 +2209,44 @@ function exportAm(){
 
 aplicarLogoHeader();render();if(sessao){aplicarPermissoes();}else{document.getElementById('loginOverlay').style.display='flex';}
 </script>
+
+<script>
+(function(){
+  const SUPA_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
+  const SUPA_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
+  const KEYS_BLOB=['magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo'];
+  const _set=localStorage.setItem.bind(localStorage);
+  const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+  window.__sb=sb;
+  function overlay(html){var d=document.getElementById('__gate');if(!d){d=document.createElement('div');d.id='__gate';d.style.cssText='position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#1c1c1c,#2a2a2a);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;color:#fff';document.body.appendChild(d);}d.innerHTML=html;}
+  function loginUI(msg){overlay('<div style="background:#232323;padding:26px 28px;border-radius:14px;width:320px;max-width:90%"><div style="font-size:20px;font-weight:800;color:#c8a24a;margin-bottom:4px">Magri — Gestão de O.S.</div><div style="font-size:12px;color:#999;margin-bottom:16px">Entre com seu e-mail e senha</div><input id="__em" type="email" placeholder="E-mail" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#fff"><input id="__pw" type="password" placeholder="Senha" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:#fff"><button id="__go" style="width:100%;padding:11px;border:none;border-radius:8px;background:#c8a24a;color:#1c1c1c;font-weight:800;cursor:pointer">Entrar</button><div id="__er" style="color:#f2668b;font-size:12px;margin-top:8px;min-height:16px">'+(msg||'')+'</div></div>');document.getElementById('__go').onclick=doLogin;document.getElementById('__pw').onkeydown=function(e){if(e.key==='Enter')doLogin();};}
+  function loadingUI(){overlay('<div style="text-align:center"><div style="font-size:18px;color:#c8a24a;font-weight:700">Carregando dados da nuvem...</div><div style="font-size:12px;color:#888;margin-top:8px">um instante</div></div>');}
+  async function doLogin(){var email=document.getElementById('__em').value.trim();var password=document.getElementById('__pw').value;document.getElementById('__er').textContent='Entrando...';var r=await sb.auth.signInWithPassword({email:email,password:password});if(r.error){document.getElementById('__er').textContent='Erro: '+r.error.message;return;}boot();}
+  async function boot(){
+    loadingUI();
+    var ses=(await sb.auth.getSession()).data.session;
+    if(!ses){loginUI();return;}
+    var email=ses.user.email.toLowerCase();
+    var cfgRes=await sb.from('config').select('chave,valor');
+    if(cfgRes.error){loginUI('Erro ao ler config: '+cfgRes.error.message);return;}
+    var cfgMap={};(cfgRes.data||[]).forEach(function(r){cfgMap[r.chave]=r.valor;});
+    var roleMap=cfgMap['role_por_email'];
+    if(!roleMap){roleMap={};roleMap[email]='Admin';await sb.from('config').upsert({chave:'role_por_email',valor:roleMap});}
+    var role=roleMap[email];
+    if(!role){await sb.auth.signOut();loginUI('Usuário sem setor definido. Contate o administrador.');return;}
+    KEYS_BLOB.forEach(function(k){if(cfgMap[k]!==undefined)_set(k,JSON.stringify(cfgMap[k]));else localStorage.removeItem(k);});
+    var ordRes=await sb.from('ordens').select('id,dados');var snapOrd={};var arrOrd=(ordRes.data||[]).map(function(r){snapOrd[r.id]=JSON.stringify(r.dados);return r.dados;});_set('magri_os_v2',JSON.stringify(arrOrd));
+    var apRes=await sb.from('apontamentos').select('id,dados');var snapAp={};var arrAp=(apRes.data||[]).map(function(r){snapAp[r.id]=JSON.stringify(r.dados);return r.dados;});_set('magri_apont_v1',JSON.stringify(arrAp));
+    _set('magri_session',JSON.stringify({user:email,role:role}));
+    function syncRows(table,v,snap,mapper){var arr;try{arr=JSON.parse(v||'[]');}catch(e){return;}var seen={};arr.forEach(function(o){if(o.id===undefined||o.id===null)return;var id=String(o.id);seen[id]=1;var js=JSON.stringify(o);if(snap[id]!==js){snap[id]=js;sb.from(table).upsert(mapper(o)).then(function(){},function(err){console.warn(table,err&&err.message);});}});Object.keys(snap).forEach(function(id){if(!seen[id]){delete snap[id];sb.from(table).delete().eq('id',id).then(function(){},function(){});}});}
+    localStorage.setItem=function(k,v){_set(k,v);try{if(k==='magri_session')return;if(k==='magri_os_v2'){syncRows('ordens',v,snapOrd,function(o){return {id:String(o.id),num_os:o.numOS||null,cliente:o.cliente||null,setor:o.setor||null,dados:o};});return;}if(k==='magri_apont_v1'){syncRows('apontamentos',v,snapAp,function(a){return {id:String(a.id),os_id:a.osId||null,data:a.data||null,dados:a};});return;}if(KEYS_BLOB.indexOf(k)>-1){sb.from('config').upsert({chave:k,valor:JSON.parse(v||'null')}).then(function(){},function(){});return;}}catch(e){console.warn('cloud sync',e);}};
+    var d=document.getElementById('__gate');if(d)d.remove();
+    var code=document.getElementById('__mainapp').textContent;var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
+    window.logout=async function(){await sb.auth.signOut();location.reload();};
+  }
+  sb.auth.getSession().then(function(res){if(res.data.session)boot();else loginUI();});
+})();
+</script>
+
 </body>
 </html>
