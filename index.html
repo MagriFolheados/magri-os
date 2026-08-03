@@ -108,6 +108,30 @@
   .etq .os{font-size:22px;text-align:center;font-weight:800;letter-spacing:1px;margin:6px 0;}
   .footer-note{font-size:12px;color:#9ca3af;text-align:center;margin-top:20px;}
   @media print{body *{visibility:hidden;} #printArea,#printArea *{visibility:visible;} #printArea{position:absolute;left:0;top:0;width:100%;}}
+  .mobmenu{display:none;}
+  @media (max-width:860px){
+    .side{position:fixed;left:0;top:0;height:100vh;width:80%;max-width:290px;transform:translateX(-100%);transition:transform .25s ease;z-index:9998;box-shadow:2px 0 18px rgba(0,0,0,.45);}
+    .side.open{transform:translateX(0);}
+    .main{width:100%;min-width:0;}
+    .content{padding:12px 12px 90px;}
+    .topbar{padding:10px 12px;gap:10px;}
+    .topbar h1{font-size:17px;}
+    .topbar .desc{display:none;}
+    .mobmenu{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;border-radius:9px;background:#1c1c1c;color:#fff;font-size:20px;cursor:pointer;flex-shrink:0;}
+    #mobback{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9997;}
+    #mobback.show{display:block;}
+    .grid{grid-template-columns:1fr;}
+    .cards{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
+    .modal-bg{padding:8px 6px;}
+    .modal{max-width:100%;border-radius:12px;}
+    .modal-body{padding:16px;}
+    .panel-body{padding:14px;}
+    table{font-size:12px;}
+    th,td{padding:7px 8px;}
+    input,select,textarea{font-size:16px;}
+    button{min-height:38px;}
+    .row-act{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;}
+  }
 </style>
 </head>
 <body>
@@ -152,7 +176,7 @@
     <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.</div>
   </aside>
   <div class="main">
-    <div class="topbar"><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
+    <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
     <div class="content">
 
       <section class="view" id="view-gestao">
@@ -2248,5 +2272,7 @@ aplicarLogoHeader();render();if(sessao){aplicarPermissoes();}else{document.getEl
 })();
 </script>
 
+<div id="mobback" onclick="document.querySelector('.side').classList.remove('open');this.classList.remove('show')"></div>
+<script>document.addEventListener('click',function(e){var ni=e.target.closest&&e.target.closest('.nav-item');if(ni){var sd=document.querySelector('.side');if(sd)sd.classList.remove('open');var mb=document.getElementById('mobback');if(mb)mb.classList.remove('show');}});</script>
 </body>
 </html>
