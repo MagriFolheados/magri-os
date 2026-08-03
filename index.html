@@ -210,12 +210,13 @@
               <div class="grid">
                 <div><label>Data de entrada <span class="req">*</span></label><input type="date" id="dataEntrada" required></div>
                 <div><label>Nº Ordem de Serviço (O.S.) <span class="req">*</span></label><input type="text" id="numOS" placeholder="Ex.: 12345" required></div>
-                <div><label>Etiqueta</label><select id="etiqueta"><option value="">—</option><option>Urgente</option><option>Prioridade</option><option>Ret Presencial</option><option>Crítico</option><option>Retrabalho</option><option>Vitrine</option></select></div>
+                <div><label>Etiqueta</label><select id="etiqueta" onchange="etiquetaEntregaToggle()"><option value="">—</option><option>Urgente</option><option>Prioridade</option><option>Ret Presencial</option><option>Crítico</option><option>Retrabalho</option><option>Vitrine</option></select></div>
                 <div><label>Cliente <span class="req">*</span></label><input type="text" id="cliente" list="clientes" placeholder="Nome do cliente" required></div>
                 <div><label>Peso total / Kg</label><input type="number" step="0.001" id="peso" placeholder="0,000" oninput="updateSaldoPeso()"></div>
                 <div><label>Status Comercial</label><select id="statusComercial"><option>Recebido</option><option>Entregue</option><option>Não fechado</option></select></div>
                 <div><label>Prev. envio CAT</label><input type="date" id="prevCat" readonly><div class="hint">Auto: entrada + 10 dias úteis (só com cataforético)</div></div>
                 <div><label>Data previsão de entrega</label><input type="text" id="prevEntrega" readonly><div class="hint">15 dias úteis se houver item com cataforético; senão 10</div></div>
+                <div id="prevEntregaBox" style="display:none"><label>Ajustar entrega (etiqueta)</label><input type="date" id="prevEntregaManual" onchange="prevEntregaManualChange()"><div class="hint" style="color:#a9862f">Editável por causa da etiqueta</div></div>
                 <div style="grid-column:1/-1"><label>Observação</label><textarea id="observacao" rows="2" placeholder="Anotações da OS (opcional)" style="width:100%;resize:vertical"></textarea></div>
               </div>
               <div class="sec-title">Itens / Lotes do serviço (a mesma OS pode ter vários lotes, cada um com sua especificação e cataforético próprio)</div>
@@ -1162,7 +1163,9 @@ function prazoSetor(recISO,concl){
   return {cls:'prazo-ok',txt:rest+'d út. restantes'};
 }
 
-function recalc(){const de=document.getElementById('dataEntrada').value;const hasCat=itensTmp.some(function(it){return it.compl&&it.compl.cataforetico;});const pe=addDiasUteis(de,hasCat?15:10);document.getElementById('prevEntrega').value=pe?fmt(pe):'';document.getElementById('prevEntrega').dataset.iso=pe||'';const pc=document.getElementById('prevCat');if(pc)pc.value=hasCat?addDiasUteis(de,10):'';}
+function recalc(){const de=document.getElementById('dataEntrada').value;const hasCat=itensTmp.some(function(it){return it.compl&&it.compl.cataforetico;});var etq=document.getElementById('etiqueta').value;var man=document.getElementById('prevEntregaManual');if(etq&&man&&man.value){document.getElementById('prevEntrega').dataset.iso=man.value;document.getElementById('prevEntrega').value=fmt(man.value);}else{const pe=addDiasUteis(de,hasCat?15:10);document.getElementById('prevEntrega').value=pe?fmt(pe):'';document.getElementById('prevEntrega').dataset.iso=pe||'';}const pc=document.getElementById('prevCat');if(pc)pc.value=hasCat?addDiasUteis(de,10):'';}
+function etiquetaEntregaToggle(){var etq=document.getElementById('etiqueta').value;var box=document.getElementById('prevEntregaBox');var man=document.getElementById('prevEntregaManual');if(etq){if(box)box.style.display='';if(man&&!man.value){var iso=document.getElementById('prevEntrega').dataset.iso||'';if(iso)man.value=iso;}recalc();}else{if(box)box.style.display='none';if(man)man.value='';recalc();}}
+function prevEntregaManualChange(){var man=document.getElementById('prevEntregaManual');var v=man?man.value:'';if(v){document.getElementById('prevEntrega').dataset.iso=v;document.getElementById('prevEntrega').value=fmt(v);}}
 document.getElementById('dataEntrada').addEventListener('change',recalc);
 let itensTmp=[];
 let PRECO_ACETINADO=0;
@@ -1347,13 +1350,14 @@ function editarCom(id){
   servicosTmp=(o.servicos||[]).map(function(x){return Object.assign({},x);});renderServicos();servRefresh();
   recalc();
   if(o.prevEntregaISO){document.getElementById('prevEntrega').value=fmt(o.prevEntregaISO);document.getElementById('prevEntrega').dataset.iso=o.prevEntregaISO;}
+  etiquetaEntregaToggle();
   document.getElementById('form-title').textContent='Editar O.S. '+(o.numOS||'');
   document.getElementById('submitBtn').textContent='Salvar alterações';
   document.getElementById('cancelBtn').style.display='inline-block';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function excluirCom(id){if(confirm('Excluir esta O.S.?')){dados=dados.filter(o=>o.id!==id);salvar();render();}}
-function resetForm(){document.getElementById('osForm').reset();document.getElementById('editId').value='';document.getElementById('prevEntrega').value='';document.getElementById('prevEntrega').dataset.iso='';itensTmp=[];renderItens();servicosTmp=[];renderServicos();servRefresh();document.getElementById('form-title').textContent='Cadastrar nova Ordem de Serviço';document.getElementById('submitBtn').textContent='Cadastrar O.S.';document.getElementById('cancelBtn').style.display='none';}
+function resetForm(){document.getElementById('osForm').reset();document.getElementById('editId').value='';document.getElementById('prevEntrega').value='';document.getElementById('prevEntrega').dataset.iso='';var _pb=document.getElementById('prevEntregaBox');if(_pb)_pb.style.display='none';var _pm=document.getElementById('prevEntregaManual');if(_pm)_pm.value='';itensTmp=[];renderItens();servicosTmp=[];renderServicos();servRefresh();document.getElementById('form-title').textContent='Cadastrar nova Ordem de Serviço';document.getElementById('submitBtn').textContent='Cadastrar O.S.';document.getElementById('cancelBtn').style.display='none';}
 document.getElementById('cancelBtn').addEventListener('click',resetForm);
 document.getElementById('buscaCom').addEventListener('input',render);
 document.getElementById('buscaFb').addEventListener('input',render);
