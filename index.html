@@ -172,6 +172,7 @@
       <div class="nav-item" data-view="cobranca"><span class="ico">$</span> Cobrança <span class="cnt" id="cnt-cobranca">0</span></div>
       <div class="nav-sep">Administração</div>
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
+      <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
     <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.</div>
   </aside>
@@ -549,6 +550,41 @@
           </div>
         </div>
       </section>
+      <section class="view" id="view-precos">
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Tipos de banho (personalizados)</h2></div><div class="panel-body">
+          <div class="hint" style="margin-bottom:8px">Os banhos padrão do sistema continuam fixos. Aqui você adiciona novos. Após adicionar/remover, o sistema recarrega para aplicar.</div>
+          <div class="grid">
+            <div><label>Nome</label><input type="text" id="pbNome" placeholder="Ex.: Ouro Rosé"></div>
+            <div><label>Modelo de preço</label><select id="pbModelo" onchange="pbModeloRefresh()"><option value="grama">Por grama (R$/g)</option><option value="kg">Fixo por kg (R$/kg)</option><option value="ouro">Ouro (fatores × cotação)</option></select></div>
+            <div id="pbGramaBox"><label>Preço por grama (R$/g)</label><input type="number" step="0.01" id="pbPrecoG"></div>
+            <div id="pbAvistaBox"><label>Cobrança</label><select id="pbAvista"><option value="0">Serviço (na entrega)</option><option value="1">Metal / à vista</option></select></div>
+            <div id="pbKgBox" style="display:none"><label>Preço por kg (R$/kg)</label><input type="number" step="0.01" id="pbPrecoKg"></div>
+            <div id="pbOuroBox1" style="display:none"><label>Fator ouro (camada, à vista)</label><input type="number" step="0.1" id="pbCamF"></div>
+            <div id="pbOuroBox2" style="display:none"><label>Fator serviço (mão de obra)</label><input type="number" step="0.1" id="pbMoF"></div>
+          </div>
+          <div class="actions"><button class="btn-primary" onclick="addBanhoCat()">+ Adicionar banho</button></div>
+          <div class="table-scroll"><table><thead><tr><th>Nome</th><th>Modelo</th><th>Detalhe</th><th></th></tr></thead><tbody id="pbLista"></tbody></table></div>
+        </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Complementares / tratamentos (personalizados)</h2></div><div class="panel-body">
+          <div class="grid">
+            <div><label>Nome</label><input type="text" id="pcNome" placeholder="Ex.: Verniz UV"></div>
+            <div><label>Preço por grama (R$/g)</label><input type="number" step="0.01" id="pcPrecoG"></div>
+          </div>
+          <div class="actions"><button class="btn-primary" onclick="addComplCat()">+ Adicionar complementar</button></div>
+          <div class="table-scroll"><table><thead><tr><th>Nome</th><th>R$/g</th><th></th></tr></thead><tbody id="pcLista"></tbody></table></div>
+        </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Serviços adicionais (personalizados)</h2></div><div class="panel-body">
+          <div class="grid">
+            <div><label>Nome</label><input type="text" id="psNome" placeholder="Ex.: Polimento"></div>
+            <div><label>Modelo</label><select id="psModelo" onchange="psModeloRefresh()"><option value="unidade">Por unidade (R$/un)</option><option value="cor">Por cor (R$/un por cor)</option></select></div>
+            <div id="psUnBox"><label>Preço por unidade (R$)</label><input type="number" step="0.01" id="psPreco"></div>
+            <div id="psCorBox" style="display:none;grid-column:1/-1"><label>Cores e preços — uma por linha: Cor=preço</label><textarea id="psCores" rows="3" placeholder="Amarelo=0,50&#10;Branco=0,38" style="width:100%"></textarea></div>
+          </div>
+          <div class="actions"><button class="btn-primary" onclick="addServCat()">+ Adicionar serviço</button></div>
+          <div class="table-scroll"><table><thead><tr><th>Nome</th><th>Modelo</th><th>Detalhe</th><th></th></tr></thead><tbody id="psLista"></tbody></table></div>
+        </div></div>
+      </section>
+
 
     </div>
   </div>
@@ -578,7 +614,7 @@
       </div>
       <label style="display:inline-flex;align-items:center;gap:6px;margin:2px 0 4px;font-size:13px"><input type="checkbox" id="itEspecial" onchange="especialToggle()"> Tabela especial (preço fixo R$/kg) — ex.: Flash R$ 1.450/kg, 1 Milésimo R$ 2.000/kg</label>
       <div class="sec-title">Complementares (preço por grama)</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;font-size:13px">
+      <div id="complBox" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;font-size:13px">
         <label><input type="checkbox" id="c_grafite" onchange="calcItem()"> Grafite (0,60)</label>
         <label><input type="checkbox" id="c_acetinado" onchange="calcItem()"> Acetinado</label>
         <label><input type="checkbox" id="c_niquel" onchange="calcItem()"> Níquel (0,50)</label>
@@ -841,7 +877,7 @@ let rolePerms=JSON.parse(localStorage.getItem('magri_roleperms')||'null')||{};
 ROLES_CONFIG.forEach(function(r){if(!rolePerms[r])rolePerms[r]=(ROLE_VIEWS_DEFAULT[r]||['gestao']).slice();});
 localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));
 function salvarRolePerms(){localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));}
-function viewsDoRole(role){if(role==='Admin')return ALL_VIEWS.concat(['usuarios']);return rolePerms[role]||[];}
+function viewsDoRole(role){if(role==='Admin')return ALL_VIEWS.concat(['usuarios','precos']);return rolePerms[role]||[];}
 function togglePerm(role,view){if(!rolePerms[role])rolePerms[role]=[];var i=rolePerms[role].indexOf(view);if(i>-1)rolePerms[role].splice(i,1);else rolePerms[role].push(view);salvarRolePerms();aplicarPermissoes();}
 function renderPermissoes(){var box=document.getElementById('permBox');if(!box)return;var lab={gestao:'Gestão',comercial:'Comercial',fotobruto:'Foto/Bruto',amarracao:'Amarração',banho:'Banho',qualidade:'Qualidade',expedicao:'Expedição',verniz:'Verniz',reforco:'Reforço',tanque:'Tanque',troca:'Troca Tq',resumo:'Resumo',catalogo:'Catálogo',cobranca:'Cobrança'};var html='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:4px 6px">Papel</th>';ALL_VIEWS.forEach(function(v){html+='<th style="padding:4px 3px;white-space:nowrap">'+lab[v]+'</th>';});html+='</tr></thead><tbody>';ROLES_CONFIG.forEach(function(r){html+='<tr><td style="font-weight:700;padding:4px 6px">'+r+'</td>';ALL_VIEWS.forEach(function(v){var chk=(rolePerms[r]||[]).indexOf(v)>-1?'checked':'';html+='<td style="text-align:center"><input type="checkbox" '+chk+' onchange="togglePerm(\''+r+'\',\''+v+'\')"></td>';});html+='</tr>';});html+='<tr><td style="font-weight:700;color:#888;padding:4px 6px">Admin</td><td colspan="'+ALL_VIEWS.length+'" style="color:#888">acessa todas as abas (fixo)</td></tr></tbody></table>';box.innerHTML=html;}
 function fazerLogin(){var u=document.getElementById('loginUser').value.trim();var p=document.getElementById('loginPass').value;var f=usuarios.find(function(x){return x.user.toLowerCase()===u.toLowerCase()&&x.pass===p;});if(!f){document.getElementById('loginErro').style.display='block';return;}sessao={user:f.user,role:f.role};localStorage.setItem('magri_session',JSON.stringify(sessao));document.getElementById('loginErro').style.display='none';document.getElementById('loginPass').value='';document.getElementById('loginOverlay').style.display='none';aplicarPermissoes();}
@@ -849,6 +885,17 @@ function logout(){sessao=null;localStorage.removeItem('magri_session');var lo=do
 function aplicarPermissoes(){if(!sessao){var lo=document.getElementById('loginOverlay');if(lo)lo.style.display='flex';return;}var al=viewsDoRole(sessao.role);document.querySelectorAll('.nav-item').forEach(function(it){var v=it.dataset.view;if(v)it.style.display=(al.indexOf(v)>-1)?'':'none';});var at=document.querySelector('.nav-item.active');if(!at||at.style.display==='none'||al.indexOf(at.dataset.view)===-1){irParaView(al[0]||'gestao');}var ui=document.getElementById('userInfo');if(ui)ui.textContent=sessao.user+' \u00b7 '+sessao.role;}
 function addUsuario(){var u=document.getElementById('usUser').value.trim();var p=document.getElementById('usPass').value;var r=document.getElementById('usRole').value;if(!u||!p){alert('Informe usuário e senha.');return;}var ex=usuarios.find(function(x){return x.user.toLowerCase()===u.toLowerCase();});if(ex){ex.pass=p;ex.role=r;}else{usuarios.push({user:u,pass:p,role:r});}salvarUsuarios();document.getElementById('usUser').value='';document.getElementById('usPass').value='';render();alert('Usuário salvo.');}
 function delUsuario(u){if(u.toLowerCase()==='admin'){alert('O usuário admin não pode ser removido.');return;}if(confirm('Remover usuário '+u+'?')){usuarios=usuarios.filter(function(x){return x.user!==u;});salvarUsuarios();render();}}
+function pbModeloRefresh(){var m=document.getElementById('pbModelo').value;document.getElementById('pbGramaBox').style.display=(m==='grama')?'':'none';document.getElementById('pbAvistaBox').style.display=(m==='grama')?'':'none';document.getElementById('pbKgBox').style.display=(m==='kg')?'':'none';document.getElementById('pbOuroBox1').style.display=(m==='ouro')?'':'none';document.getElementById('pbOuroBox2').style.display=(m==='ouro')?'':'none';}
+function psModeloRefresh(){var m=document.getElementById('psModelo').value;document.getElementById('psUnBox').style.display=(m==='unidade')?'':'none';document.getElementById('psCorBox').style.display=(m==='cor')?'':'none';}
+function addBanhoCat(){var nome=document.getElementById('pbNome').value.trim();if(!nome){alert('Informe o nome do banho.');return;}if(BANHO_CUSTOM[nome]||['Nenhum','Ouro Camada','Ouro Flash','Ouro 1 Milésimo','Prata 10ML','Prata 20ML','Prata 30ML','Prata 50ML','Prata 70ML','Ródio Branco'].indexOf(nome)>-1){alert('Já existe um banho com esse nome.');return;}var m=document.getElementById('pbModelo').value;var def={nome:nome,modelo:m};if(m==='grama'){def.precoG=parseFloat(document.getElementById('pbPrecoG').value)||0;def.avista=document.getElementById('pbAvista').value==='1';}else if(m==='kg'){def.precoKg=parseFloat(document.getElementById('pbPrecoKg').value)||0;}else if(m==='ouro'){def.camadaFator=parseFloat(document.getElementById('pbCamF').value)||0;def.moFator=parseFloat(document.getElementById('pbMoF').value)||0;}CATALOGO.banhos.push(def);salvarCatalogo();alert('Banho adicionado. O sistema vai recarregar para aplicar.');location.reload();}
+function addComplCat(){var nome=document.getElementById('pcNome').value.trim();if(!nome){alert('Informe o nome.');return;}var precoG=parseFloat(document.getElementById('pcPrecoG').value)||0;var chave='cx_'+nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');if(!chave||chave==='cx_'){alert('Nome inválido.');return;}CATALOGO.compl.push({chave:chave,nome:nome,precoG:precoG});salvarCatalogo();alert('Complementar adicionado. Recarregando para aplicar.');location.reload();}
+function addServCat(){var nome=document.getElementById('psNome').value.trim();if(!nome){alert('Informe o nome.');return;}var m=document.getElementById('psModelo').value;var def={nome:nome,modelo:m};if(m==='unidade'){def.preco=parseFloat(document.getElementById('psPreco').value)||0;}else{var cores={};(document.getElementById('psCores').value||'').split(/\r?\n/).forEach(function(l){var p=l.split('=');if(p.length===2&&p[0].trim())cores[p[0].trim()]=parseFloat((p[1]||'').replace(',','.'))||0;});if(!Object.keys(cores).length){alert('Informe ao menos uma cor=preço.');return;}def.cores=cores;}CATALOGO.servicos.push(def);salvarCatalogo();alert('Serviço adicionado. Recarregando para aplicar.');location.reload();}
+function delBanhoCat(i){if(!confirm('Remover este banho?'))return;CATALOGO.banhos.splice(i,1);salvarCatalogo();location.reload();}
+function delComplCat(i){if(!confirm('Remover este complementar?'))return;CATALOGO.compl.splice(i,1);salvarCatalogo();location.reload();}
+function delServCat(i){if(!confirm('Remover este serviço?'))return;CATALOGO.servicos.splice(i,1);salvarCatalogo();location.reload();}
+function renderPrecos(){var tb=document.getElementById('pbLista');if(tb){tb.innerHTML=CATALOGO.banhos.map(function(b,i){var det=b.modelo==='grama'?('R$ '+g2(b.precoG||0)+'/g · '+(b.avista?'à vista':'serviço')):(b.modelo==='kg'?('R$ '+g2(b.precoKg||0)+'/kg'):('camada '+(b.camadaFator||0)+' + MO '+(b.moFator||0)+' × cotação'));return '<tr><td>'+b.nome+'</td><td>'+b.modelo+'</td><td>'+det+'</td><td class="row-act"><button class="btn-del" onclick="delBanhoCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="4" class="hint">Nenhum banho personalizado.</td></tr>';}
+  var tc=document.getElementById('pcLista');if(tc){tc.innerHTML=CATALOGO.compl.map(function(c,i){return '<tr><td>'+c.nome+'</td><td>R$ '+g2(c.precoG||0)+'</td><td class="row-act"><button class="btn-del" onclick="delComplCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="3" class="hint">Nenhum complementar personalizado.</td></tr>';}
+  var ts=document.getElementById('psLista');if(ts){ts.innerHTML=CATALOGO.servicos.map(function(sv,i){var det=sv.modelo==='unidade'?('R$ '+g2(sv.preco||0)+'/un'):Object.keys(sv.cores||{}).map(function(k){return k+' R$ '+g2(sv.cores[k]);}).join(', ');return '<tr><td>'+sv.nome+'</td><td>'+sv.modelo+'</td><td>'+det+'</td><td class="row-act"><button class="btn-del" onclick="delServCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="4" class="hint">Nenhum serviço personalizado.</td></tr>';}}
 function renderUsuarios(){var tb=document.getElementById('usLista');if(!tb)return;tb.innerHTML='';usuarios.forEach(function(x){var abas=viewsDoRole(x.role).map(function(v){return titulos[v]?titulos[v][0]:v;}).join(', ');var tr=document.createElement('tr');tr.innerHTML='<td><b>'+x.user+'</b></td><td>'+x.role+'</td><td style="font-size:11px">'+abas+'</td><td class="row-act"><button class="btn-del" onclick="delUsuario(\''+x.user+'\')">Excluir</button></td>';tb.appendChild(tr);});var c=document.getElementById('cnt-usuarios');if(c)c.textContent=usuarios.length;renderPermissoes();}
 dados.forEach(function(o){
   if(!o.itens)o.itens=(o.tipoBanho?[{tipoBanho:o.tipoBanho,cor:o.cor,camada:o.camada,peso:o.peso,verniz:o.verniz,antialergico:o.antialergico,paladio:o.paladio,protetor:o.protetor,niquel:o.niquel}]:[]);
@@ -906,7 +953,7 @@ function fmt(dstr){if(!dstr)return '';const p=(''+dstr).slice(0,10).split('-');r
 function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const PRAZO_SETOR=2;
 
-const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],clientes:['Clientes','Cadastro de clientes — nome, CNPJ e telefone'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],diretoria:['Diretoria','Painel gerencial — ranking de clientes, farol/SLA e produção'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor']};
+const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],clientes:['Clientes','Cadastro de clientes — nome, CNPJ e telefone'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],diretoria:['Diretoria','Painel gerencial — ranking de clientes, farol/SLA e produção'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor'],precos:['Serviços e Preços','Cadastro de tipos de banho, complementares e serviços (admin)']};
 document.querySelectorAll('.nav-item').forEach(function(it){
   it.addEventListener('click',function(){var v=it.dataset.view;if(!v)return;if(sessao){var al=viewsDoRole(sessao.role);if(al.indexOf(v)===-1)return;}irParaView(v);});
 });
@@ -1123,7 +1170,7 @@ const PRECO_COMPL={grafite:0.60,niquel:0.50,niquelfree:0.65,paladio:0.55,proteto
 const PRECO_PRATA={'Prata 10ML':1.00,'Prata 20ML':1.20,'Prata 30ML':1.60,'Prata 50ML':2.00,'Prata 70ML':2.45};
 const PRECO_RODIO_BRANCO=4.00;
 const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza'};
-function ehOuroBanho(b){return (b||'').indexOf('Ouro')===0;}
+function ehOuroBanho(b){if((b||'').indexOf('Ouro')===0)return true;var d=customBanho(b);return !!(d&&d.modelo==='ouro');}
 function pesoLiqItem(it){var g=parseFloat(it.peso)||0;var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return g;var v=parseFloat(sp);if(isNaN(v))return g;return Math.max(0,Math.min(g,v));}
 function pedraKgItem(it){var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return 0;var t=parseFloat(it.peso)||0,v=parseFloat(sp);if(isNaN(v))return 0;return Math.max(0,t-v);}
 function fracMetalBanho(it){var pedra=pedraKgItem(it);if(pedra<=0)return 1;var pb=parseFloat(it.pesoBanho)||0;if(pb>0)return Math.max(0,(pb-pedra)/pb);var g=parseFloat(it.peso)||0;return g>0?Math.max(0,(g-pedra)/g):1;}
@@ -1136,6 +1183,7 @@ function precoBanhoItem(it){
   else if(b==='Ouro 1 Milésimo')principal=pesoKg*(parseFloat(it.cotacao)||0)*3;
   else if(PRECO_PRATA[b]!==undefined)principal=pesoG*PRECO_PRATA[b];
   else if(b==='Ródio Branco')principal=pesoG*PRECO_RODIO_BRANCO;
+  else {var _d=customBanho(b);if(_d){if(_d.modelo==='grama')principal=pesoG*(parseFloat(_d.precoG)||0);else if(_d.modelo==='kg')principal=pesoKg*(parseFloat(_d.precoKg)||0);else if(_d.modelo==='ouro')principal=pesoKg*(parseFloat(it.cotacao)||0)*((parseFloat(_d.camadaFator)||0)+(parseFloat(_d.moFator)||0));}}
   let compl=0;const c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
@@ -1223,18 +1271,26 @@ const PRECO_RODIO={'Vermelho':0.36,'Branco':0.36,'Negro':0.46};
 const PRECO_CANETA={'Amarelo':0.50,'Branco':0.38,'Preto':0.48,'Vermelho':0.48};
 const PRECO_MILHEIRO={};
 const PRECO_UNIDADE={'Tarraxa':0.03,'Tarraxamento':0.03,'Engardenação':0.03,'Colocação de pedra':1.00};
+var CATALOGO=JSON.parse(localStorage.getItem('magri_catalogo_v1')||'null')||{banhos:[],compl:[],servicos:[]};
+if(!CATALOGO.banhos)CATALOGO.banhos=[];if(!CATALOGO.compl)CATALOGO.compl=[];if(!CATALOGO.servicos)CATALOGO.servicos=[];
+var BANHO_CUSTOM={};CATALOGO.banhos.forEach(function(b){if(b&&b.nome)BANHO_CUSTOM[b.nome]=b;});
+var SERV_CUSTOM={};CATALOGO.servicos.forEach(function(sv){if(sv&&sv.nome){SERV_CUSTOM[sv.nome]=sv;if(sv.modelo==='unidade')PRECO_UNIDADE[sv.nome]=parseFloat(sv.preco)||0;}});
+CATALOGO.compl.forEach(function(c){if(c&&c.chave){PRECO_COMPL[c.chave]=parseFloat(c.precoG)||0;COMPL_LABEL[c.chave]=c.nome;}});
+function customBanho(nome){return BANHO_CUSTOM[nome]||null;}
+function salvarCatalogo(){localStorage.setItem('magri_catalogo_v1',JSON.stringify(CATALOGO));}
+(function(){try{var sbn=document.getElementById('itBanho');if(sbn)CATALOGO.banhos.forEach(function(b){var o=document.createElement('option');o.textContent=b.nome;sbn.appendChild(o);});var ss=document.getElementById('servTipo');if(ss)CATALOGO.servicos.forEach(function(sv){var o=document.createElement('option');o.textContent=sv.nome;ss.appendChild(o);});var cb=document.getElementById('complBox');if(cb)CATALOGO.compl.forEach(function(c){var l=document.createElement('label');l.innerHTML='<input type="checkbox" id="c_'+c.chave+'" onchange="calcItem()"> '+c.nome+' ('+(parseFloat(c.precoG)||0).toFixed(2).replace('.',',')+')';cb.appendChild(l);});}catch(e){}})();
 let servicosTmp=[];
 function brl(v){return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function ehRodio(t){return t==='Aplique de Ródio';}
 function ehCaneta(t){return t==='Caneta de Ródio';}
-function corOptions(t){if(ehRodio(t))return ['Vermelho','Branco','Negro'];if(ehCaneta(t))return ['Amarelo','Branco','Preto','Vermelho'];return [];}
-function valorServico(tipo,cor,qtd){qtd=parseFloat(qtd)||0;if(ehRodio(tipo))return qtd*(PRECO_RODIO[cor]||0);if(ehCaneta(tipo))return qtd*(PRECO_CANETA[cor]||0);if(PRECO_UNIDADE[tipo]!==undefined)return qtd*PRECO_UNIDADE[tipo];return (qtd/1000)*(PRECO_MILHEIRO[tipo]||0);}
+function corOptions(t){if(ehRodio(t))return ['Vermelho','Branco','Negro'];if(ehCaneta(t))return ['Amarelo','Branco','Preto','Vermelho'];var sc=SERV_CUSTOM[t];if(sc&&sc.modelo==='cor')return Object.keys(sc.cores||{});return [];}
+function valorServico(tipo,cor,qtd){qtd=parseFloat(qtd)||0;if(ehRodio(tipo))return qtd*(PRECO_RODIO[cor]||0);if(ehCaneta(tipo))return qtd*(PRECO_CANETA[cor]||0);var _sc=SERV_CUSTOM[tipo];if(_sc){if(_sc.modelo==='cor')return qtd*((_sc.cores&&_sc.cores[cor])||0);return qtd*(parseFloat(_sc.preco)||0);}if(PRECO_UNIDADE[tipo]!==undefined)return qtd*PRECO_UNIDADE[tipo];return (qtd/1000)*(PRECO_MILHEIRO[tipo]||0);}
 function servRefresh(){
-  const t=document.getElementById('servTipo').value;var showCor=ehRodio(t)||ehCaneta(t);
+  const t=document.getElementById('servTipo').value;var _scv=SERV_CUSTOM[t];var showCor=ehRodio(t)||ehCaneta(t)||(_scv&&_scv.modelo==='cor');
   document.getElementById('servCorBox').style.display=showCor?'block':'none';
   if(showCor){var opts=corOptions(t);document.getElementById('servCor').innerHTML=opts.map(function(c){return '<option>'+c+'</option>';}).join('');var lb=document.getElementById('servCorBox').querySelector('label');if(lb)lb.textContent=ehCaneta(t)?'Cor da caneta':'Cor do ródio';}
   document.getElementById('servQtdLabel').textContent=showCor?'Qtd (pontos)':'Qtd (peças)';
-  var hint='';if(ehRodio(t))hint='Ródio Vermelho/Branco: R$ 0,36 por ponto · Negro: R$ 0,46 por ponto';else if(ehCaneta(t))hint='Caneta por ponto: Amarelo R$ 0,50 · Branco R$ 0,38 · Preto R$ 0,48 · Vermelho R$ 0,48. Deixe a quantidade em branco se os pontos só forem definidos na cobrança (nota do terceiro).';else if(t)hint='R$ '+(PRECO_UNIDADE[t]||0).toFixed(2).replace('.',',')+' por unidade';
+  var hint='';if(ehRodio(t))hint='Ródio Vermelho/Branco: R$ 0,36 por ponto · Negro: R$ 0,46 por ponto';else if(ehCaneta(t))hint='Caneta por ponto: Amarelo R$ 0,50 · Branco R$ 0,38 · Preto R$ 0,48 · Vermelho R$ 0,48. Deixe a quantidade em branco se os pontos só forem definidos na cobrança (nota do terceiro).';else if(_scv&&_scv.modelo==='cor')hint='Personalizado — preço por ponto conforme a cor.';else if(t)hint='R$ '+(PRECO_UNIDADE[t]||0).toFixed(2).replace('.',',')+' por unidade';
   document.getElementById('servHint').textContent=hint;
   servPreview();
 }
@@ -1726,6 +1782,7 @@ function decompOrc(it){
   else if(b==='Ouro 1 Milésimo'){metal=pesoKg*cot*3;}
   else if(PRECO_PRATA[b]!==undefined){metal=pesoG*PRECO_PRATA[b];}
   else if(b==='Ródio Branco'){metal=pesoG*PRECO_RODIO_BRANCO;}
+  else {var _d=customBanho(b);if(_d){if(_d.modelo==='grama'){if(_d.avista)metal=pesoG*(parseFloat(_d.precoG)||0);else mo=pesoG*(parseFloat(_d.precoG)||0);}else if(_d.modelo==='kg'){mo=pesoKg*(parseFloat(_d.precoKg)||0);}else if(_d.modelo==='ouro'){metal=pesoKg*cot*(parseFloat(_d.camadaFator)||0);mo=pesoKg*cot*(parseFloat(_d.moFator)||0);}}}
   var compl=0;var c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
@@ -1790,12 +1847,13 @@ function buildOSFormHTML(o){
     '</body></html>';
 }
 function gerarFormularioOS(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;if(!(o.itens||[]).length){alert('Cadastre ao menos um item na OS.');return;}var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a O.S.');return;}w.document.write(buildOSFormHTML(o));w.document.close();}
-function fatoresGold(it){var b=it.banho||'';if(ehEspecial(it))return null;if(b==='Ouro Camada')return {camadaF:parseFloat(it.camada)||0,moF:parseFloat(it.mo)||0};if(b==='Ouro 1 Milésimo')return {camadaF:1,moF:2};if(b==='Ouro Flash')return {camadaF:0,moF:2};return null;}
+function fatoresGold(it){var b=it.banho||'';if(ehEspecial(it))return null;if(b==='Ouro Camada')return {camadaF:parseFloat(it.camada)||0,moF:parseFloat(it.mo)||0};if(b==='Ouro 1 Milésimo')return {camadaF:1,moF:2};if(b==='Ouro Flash')return {camadaF:0,moF:2};var d=customBanho(b);if(d&&d.modelo==='ouro')return {camadaF:parseFloat(d.camadaFator)||0,moF:parseFloat(d.moFator)||0};return null;}
 function rowsDoLote(it,pb){var rows=[];var b=it.banho||'';var cot=parseFloat(it.cotacao)||0;var pesoG=pb*1000;var fg=fatoresGold(it);
   if(ehEspecial(it)){var v=pb*(parseFloat(it.especialKg)||0);rows.push({tipo:'Banho '+b+' (especial)',fator:'',cor:it.cor||'',camada:'',vlkg:(parseFloat(it.especialKg)||0),peso:pb,serv:v,ouro:0,total:v});}
   else if(fg){var ouro=pb*cot*fg.camadaF,serv=pb*cot*fg.moF;rows.push({tipo:'Banho Ouro',fator:fg.moF,cor:it.cor||'',camada:(fg.camadaF||''),vlkg:cot*(fg.camadaF+fg.moF),peso:pb,serv:serv,ouro:ouro,total:ouro+serv});}
   else if(PRECO_PRATA[b]!==undefined){var v=pesoG*PRECO_PRATA[b];rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:PRECO_PRATA[b]*1000,peso:pb,serv:v,ouro:0,total:v});}
   else if(b==='Ródio Branco'){var v=pesoG*PRECO_RODIO_BRANCO;rows.push({tipo:'Banho Ródio Branco',fator:'',cor:it.cor||'',camada:'',vlkg:PRECO_RODIO_BRANCO*1000,peso:pb,serv:v,ouro:0,total:v});}
+  else {var _d=customBanho(b);if(_d&&_d.modelo==='grama'){var vg=pesoG*(parseFloat(_d.precoG)||0);var av=!!_d.avista;rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:(parseFloat(_d.precoG)||0)*1000,peso:pb,serv:av?0:vg,ouro:av?vg:0,total:vg});}else if(_d&&_d.modelo==='kg'){var vk=pb*(parseFloat(_d.precoKg)||0);rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:(parseFloat(_d.precoKg)||0),peso:pb,serv:vk,ouro:0,total:vk});}}
   var c=it.compl||{};Object.keys(PRECO_COMPL).forEach(function(k){if(c[k]){var v=pesoG*PRECO_COMPL[k];rows.push({tipo:COMPL_LABEL[k],fator:'',cor:'',camada:'',vlkg:PRECO_COMPL[k]*1000,peso:pb,serv:v,ouro:0,total:v});}});
   if(c.acetinado){var v=pesoG*PRECO_ACETINADO;rows.push({tipo:'Acetinado',fator:'',cor:'',camada:'',vlkg:PRECO_ACETINADO*1000,peso:pb,serv:v,ouro:0,total:v});}
   if(c.rodioNegro){var rn=parseFloat(c.rodioNegroPreco)||0;var v=pesoG*rn;rows.push({tipo:'Ródio Negro',fator:'',cor:'',camada:'',vlkg:rn*1000,peso:pb,serv:v,ouro:0,total:v});}
@@ -1856,6 +1914,7 @@ function decompBanho(it){
   else if(b==='Ouro 1 Milésimo'){metal=pesoKg*cot*3;}
   else if(PRECO_PRATA[b]!==undefined){metal=pesoG*PRECO_PRATA[b];}
   else if(b==='Ródio Branco'){metal=pesoG*PRECO_RODIO_BRANCO;}
+  else {var _d=customBanho(b);if(_d){if(_d.modelo==='grama'){if(_d.avista)metal=pesoG*(parseFloat(_d.precoG)||0);else mo=pesoG*(parseFloat(_d.precoG)||0);}else if(_d.modelo==='kg'){mo=pesoKg*(parseFloat(_d.precoKg)||0);}else if(_d.modelo==='ouro'){metal=pesoKg*cot*(parseFloat(_d.camadaFator)||0);mo=pesoKg*cot*(parseFloat(_d.moFator)||0);}}}
   var compl=0;var c=it.compl||{};
   Object.keys(PRECO_COMPL).forEach(function(k){if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
@@ -2176,7 +2235,7 @@ function render(){
   document.getElementById('cnt-banho').textContent=dados.filter(o=>o.setor==='Banho').length;
   document.getElementById('cnt-qualidade').textContent=dados.filter(o=>o.setor==='Qualidade').length;
   document.getElementById('cnt-expedicao').textContent=dados.filter(o=>o.setor==='Expedição').length;
-  renderGestao();renderResumo();renderDiretoria();renderClientes();renderTroca();renderVerniz();renderVernizRelatorio();renderCatalogo();renderCobranca();renderUsuarios();
+  renderGestao();renderResumo();renderDiretoria();renderClientes();renderTroca();renderVerniz();renderVernizRelatorio();renderCatalogo();renderCobranca();renderUsuarios();renderPrecos();
   document.getElementById('cnt-reforco').textContent=reforcos.length;
   document.getElementById('cnt-tanque').textContent=TANQUES_SALDO.filter(function(t){return ((tanqueSaldos[t]||0)+reforcoTanque(t)-consumoTanque(t))<=2;}).length;
 }
@@ -2238,7 +2297,7 @@ aplicarLogoHeader();render();if(sessao){aplicarPermissoes();}else{document.getEl
 (function(){
   const SUPA_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
   const SUPA_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
-  const KEYS_BLOB=['magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo'];
+  const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo'];
   const _set=localStorage.setItem.bind(localStorage);
   const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
   window.__sb=sb;
