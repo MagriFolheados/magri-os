@@ -1433,14 +1433,37 @@ function renderEtqCard(o,opt){
     '</div>';
   document.getElementById('etqModal').classList.add('show');
 }
+function buildEtiquetaBrutoHTML(o,opt){
+  var dt=new Date();var dtstr=fmt(hojeISO())+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
+  var num=(opt.nota||o.numOS||'')+(opt.letra||'');
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Etiqueta Bruto '+num+'</title><style>'
+  +'@page{size:45mm 30mm;margin:0}html,body{margin:0;padding:0;background:#fff}'
+  +'.etq{width:45mm;height:30mm;box-sizing:border-box;padding:1mm 1.5mm;font-family:Arial,sans-serif;color:#000;overflow:hidden;display:flex;flex-direction:column;border:0.3mm solid #000}'
+  +'.hd{display:flex;justify-content:space-between;align-items:baseline;font-weight:bold;font-size:9pt;border-bottom:0.4mm solid #000;padding-bottom:0.5mm}'
+  +'.hd .cli{max-width:29mm;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-style:italic}.hd .num{font-style:italic}'
+  +'.dt{font-size:6pt;margin:0.4mm 0}'
+  +'.rows{display:grid;grid-template-columns:1fr 1fr;gap:0.3mm 2mm;font-size:8pt;line-height:1.3}.rows b{font-weight:bold}'
+  +'.sub{margin-top:auto;font-size:6pt;border-top:0.3mm solid #000;padding-top:0.5mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+  +'.no-print{margin:10px;font-family:Arial;font-size:12px}.no-print button{background:#c8a24a;border:none;padding:9px 18px;border-radius:6px;font-weight:bold;cursor:pointer}'
+  +'@media print{.no-print{display:none}}'
+  +'</style></head><body>'
+  +'<div class="etq"><div class="hd"><span class="cli">'+(o.cliente||'')+'</span><span class="num">'+num+'</span></div>'
+  +'<div class="dt">'+dtstr+'</div>'
+  +'<div class="rows"><div><b>Cor:</b> '+(opt.cor||'')+'</div><div><b>Camada:</b> '+(opt.cam||'')+'</div><div><b>Ant:</b> '+(opt.anti||'')+'</div><div><b>Verniz:</b> '+(opt.vern||'')+'</div></div>'
+  +(opt.sub?('<div class="sub">'+opt.sub+'</div>'):'')
+  +'</div>'
+  +'<div class="no-print"><button onclick="window.print()">Imprimir</button><div style="margin-top:10px;color:#555;line-height:1.6"><b>Impressora Elgin L42 Pro Full — etiqueta 45 × 30 mm:</b><br>1. No driver da Elgin, defina o tamanho da etiqueta <b>45 mm (largura) × 30 mm (altura)</b> e o gap da sua etiqueta.<br>2. Na impressão do Chrome: <b>Margens = Nenhuma</b>, <b>Escala = 100</b>, desmarque <b>Cabeçalhos e rodapés</b> e selecione a <b>Elgin L42</b>.</div></div>'
+  +'</body></html>';
+}
+function abrirEtiquetaBruto(o,opt){var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a etiqueta.');return;}w.document.write(buildEtiquetaBrutoHTML(o,opt));w.document.close();}
 function gerarEtiqueta(){
   const o=dados.find(x=>x.id===document.getElementById('fbId').value)||{};
-  renderEtqCard(o,{cor:document.getElementById('fbCor').value,cam:document.getElementById('fbCamada').value,anti:document.getElementById('fbAnti').value,vern:document.getElementById('fbVerniz').value,nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value});
+  abrirEtiquetaBruto(o,{cor:document.getElementById('fbCor').value,cam:document.getElementById('fbCamada').value,anti:document.getElementById('fbAnti').value,vern:document.getElementById('fbVerniz').value,nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value});
 }
 function gerarEtiquetaLote(idx){
   var o=osAtualFb();if(!o)return;var it=(o.itens||[])[idx];if(!it)return;
   var anti=(it.compl&&it.compl.antialergico)?'SIM':'0';
-  renderEtqCard(o,{cor:it.cor||'',cam:etqCamadaItem(it),anti:anti,vern:etqVernizItem(it),nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value,sub:'Lote '+(idx+1)+(it.produto?(' — '+it.produto):'')+' · '+(it.banho||'')});
+  abrirEtiquetaBruto(o,{cor:it.cor||'',cam:etqCamadaItem(it),anti:anti,vern:etqVernizItem(it),nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value,sub:'Lote '+(idx+1)+(it.produto?(' — '+it.produto):'')+' · '+(it.banho||'')});
 }
 function verFoto(src){document.getElementById('imgBig').src=src;document.getElementById('imgModal').classList.add('show');}
 let sbFotoData='';
