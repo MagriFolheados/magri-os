@@ -369,7 +369,7 @@
         <div class="cards" id="cards-tq"></div>
         <div class="panel">
           <div class="panel-head"><span class="dot"></span><h2>Saldo dos tanques — farol de reforço (REFORÇAR quando saldo &le; 2g)</h2>
-            <div class="toolbar"><button class="btn-excel" onclick="exportTanque()">Exportar Tanque</button></div>
+            <div class="toolbar"><select id="tqMes" onchange="render()" style="padding:6px 8px;border-radius:8px"></select><span id="tqFiltroInfo" class="hint"></span><button class="btn-excel" onclick="exportTanque()">Exportar Tanque</button></div>
           </div>
           <div class="table-scroll"><table>
             <thead><tr><th>Tanque/Cor</th><th>Saldo Inicial</th><th>Reforço (+)</th><th>Consumo (&minus;)</th><th>Base</th><th>Saldo</th><th>Condição</th></tr></thead>
@@ -1374,6 +1374,14 @@ document.getElementById('buscaReforco').addEventListener('input',render);
 document.getElementById('rfForm').addEventListener('submit',function(e){e.preventDefault();const g=id=>document.getElementById(id).value;const data=g('rfData')||hojeISO();reforcos.unshift({id:'rf_'+Date.now(),data:data,mes:new Date(data+'T12:00:00').getMonth()+1,tanque:g('rfTanque'),dose:parseFloat(g('rfDose'))||0,tipo:g('rfTipo'),garrafa:g('rfGarrafa'),obs:g('rfObs')});salvarReforco();document.getElementById('rfForm').reset();render();});
 
 let fbFotoData='';
+function fbCamadaFromItem(it){var b=it.banho||'';if(b==='Ouro Camada')return (it.camada?it.camada+' ML':'');if(b==='Ouro Flash')return 'FLASH';if(b==='Ouro 1 Milésimo')return '1 ML';var m=(''+b).match(/(\d+)ML/);if(m)return m[1]+' ML';return '';}
+function fbDefaultsFromOS(o){var itens=o.itens||[];function comum(fn){var vals=itens.map(fn).filter(function(v){return v!=='';});if(!vals.length)return '';return vals.every(function(v){return v===vals[0];})?vals[0]:'';}
+  var cor=comum(function(it){return it.cor||'';});var camada=comum(function(it){return fbCamadaFromItem(it);});
+  var allOuro=itens.length&&itens.every(function(it){return ehOuroBanho(it.banho);});var anyOuro=itens.some(function(it){return ehOuroBanho(it.banho);});
+  var categoria=itens.length?(allOuro?'FOLHEAÇÂO':(anyOuro?'':'BANHO')):'';
+  var anti=itens.some(function(it){return it.compl&&it.compl.antialergico;})?'Sim':'Não';
+  var verniz=itens.some(function(it){return it.compl&&it.compl.cataforetico;})?'CAT':(itens.some(function(it){return it.compl&&it.compl.protetor;})?'PROT 300':'');
+  return {cor:cor,camada:camada,categoria:categoria,anti:anti,verniz:verniz};}
 function abrirFb(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   document.getElementById('fbId').value=id;
@@ -1384,8 +1392,9 @@ function abrirFb(id){
   const set=(id,v)=>document.getElementById(id).value=v||'';
   set('fbFornecedor',f.fornecedor);set('fbQtd',f.qtd);
   set('fbPesoPacote',f.pesoPacote);set('fbResp',f.resp);set('fbNota',f.nota||o.numOS);set('fbLetra',f.letra);
-  set('fbCategoria',f.categoria);set('fbCamada',f.camada);set('fbCor',f.cor);set('fbAnti',f.anti||'Não');
-  set('fbVerniz',f.verniz||((o.itens&&o.itens.some(function(it){return it.compl&&it.compl.cataforetico;}))?'CAT':''));set('fbScanner',f.scanner||'Não');set('fbOutros',f.outros);
+  var _D=fbDefaultsFromOS(o);
+  set('fbCategoria',f.categoria||_D.categoria);set('fbCamada',f.camada||_D.camada);set('fbCor',f.cor||_D.cor);set('fbAnti',f.anti||_D.anti||'Não');
+  set('fbVerniz',f.verniz||_D.verniz);set('fbScanner',f.scanner||'Não');set('fbOutros',f.outros);
   sbPopulate();
   document.getElementById('fbModal').classList.add('show');
 }
@@ -2202,10 +2211,13 @@ function render(){
 
   // TANQUE
   const tbTq=document.getElementById('tbodyTq');
+  var _tqSel=document.getElementById('tqMes');
+  if(_tqSel){var _ms={};apont.forEach(function(a){var y=(''+a.data).slice(0,7);if(y.length===7)_ms[y]=1;});reforcos.forEach(function(x){var y=(''+x.data).slice(0,7);if(y.length===7)_ms[y]=1;});var _meses=Object.keys(_ms).sort().reverse();var _cur=_tqSel.value;_tqSel.innerHTML='<option value="">Consolidado (todos)</option>'+_meses.map(function(y){var p=y.split('-');return '<option value="'+y+'"'+(y===_cur?' selected':'')+'>'+(MESES[parseInt(p[1])]||'')+'/'+p[0]+'</option>';}).join('');}
+  var _tqF=_tqSel?_tqSel.value:'';var _fi=document.getElementById('tqFiltroInfo');if(_fi)_fi.textContent=_tqF?'Reforço/Consumo do mês · Saldo sempre acumulado':'Consolidado (todos os meses)';
   if(tbTq){
     tbTq.innerHTML='';let nRef=0;
     TANQUES_SALDO.forEach(function(t){
-      const ini=tanqueSaldos[t]||0,ref=reforcoTanque(t),cons=consumoTanque(t),saldo=ini+ref-cons;
+      const ini=tanqueSaldos[t]||0;var ref,cons;if(_tqF){ref=volumeReforcadoPeriodo(t,_tqF+'-01',_tqF+'-31');cons=volumeBanhadoPeriodo(t,_tqF+'-01',_tqF+'-31');}else{ref=reforcoTanque(t);cons=consumoTanque(t);}var saldo=ini+reforcoTanque(t)-consumoTanque(t);
       const base=(t==='Folheação')?'Metal':'Peso';const reforcar=saldo<=2;if(reforcar)nRef++;
       const cond=reforcar?'<span class="st" style="background:var(--vermelho-bg);color:var(--vermelho)">REFORÇAR</span>':'<span class="st st-entregue">NORMAL</span>';
       const tr=document.createElement('tr');
