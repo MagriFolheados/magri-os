@@ -835,8 +835,8 @@ localStorage.setItem('magri_users',JSON.stringify(usuarios));
 function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usuarios));}
 let sessao=JSON.parse(localStorage.getItem('magri_session')||'null');
 const ALL_VIEWS=['gestao','comercial','clientes','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','diretoria','catalogo','cobranca'];
-const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Expedição','Financeiro'];
-const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','clientes','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
+const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Produção','Expedição','Financeiro'];
+const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','clientes','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Produção':['gestao','amarracao','banho','reforco','tanque','troca','resumo','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
 let rolePerms=JSON.parse(localStorage.getItem('magri_roleperms')||'null')||{};
 ROLES_CONFIG.forEach(function(r){if(!rolePerms[r])rolePerms[r]=(ROLE_VIEWS_DEFAULT[r]||['gestao']).slice();});
 localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));
