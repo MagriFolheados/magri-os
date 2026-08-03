@@ -1216,7 +1216,9 @@ function calcItem(){
   document.getElementById('itVTotal').textContent=brl(p.total);
   var _g=parseFloat(it.peso)||0,_liq=pesoLiqItem(it),_pd=Math.max(0,_g-_liq),_pct=_g>0?(_pd/_g*100):0;
   var _el=document.getElementById('itVLiq');
-  if(_el)_el.textContent=(_g>0?(_liq.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' Kg'):'—')+(_pd>0?(' (pedra '+g2(_pct)+'%)'):'');
+  if(_el){var _spRaw=(it.pesoSemPedra===undefined||it.pesoSemPedra===null)?'':(''+it.pesoSemPedra).trim();var _spNum=parseFloat((''+_spRaw).replace(',','.'));
+    if(_spRaw!==''&&!isNaN(_spNum)&&_spNum>_g+1e-9){_el.innerHTML='<span style="color:#c0392b;font-weight:700">\u26a0 Peso sem pedra maior que o peso do lote \u2014 verifique (o campo \u00e9 em KG). Ex.: 71,83 g = 0,07183 kg.</span>';}
+    else{_el.textContent=(_g>0?(_liq.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3})+' Kg'):'—')+(_pd>0?(' (pedra '+g2(_pct)+'%)'):'');}}
 }
 function openItemModal(idx){
   document.getElementById('itemIdx').value=idx;
