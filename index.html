@@ -723,7 +723,7 @@
       <div class="info-os" id="devInfo"></div>
       <input type="hidden" id="devId">
       <div class="grid">
-        <div><label>Devolver para o setor</label><select id="devDestino"><option>Foto/Bruto</option><option>Amarração</option><option>Banho</option><option>Expedição</option></select></div>
+        <div><label>Devolver para o setor</label><select id="devDestino"><option>Comercial</option><option>Foto/Bruto</option><option>Amarração</option><option>Banho</option><option>Expedição</option></select></div>
         <div style="grid-column:1/-1"><label>Motivo da devolução</label><input type="text" id="devMotivo" placeholder="Descreva o problema encontrado"></div>
       </div>
       <div class="actions"><button class="btn-primary" onclick="confirmarDev()">Confirmar devolução</button><button class="btn-ghost" onclick="closeDev()">Cancelar</button></div>
@@ -1342,8 +1342,10 @@ document.getElementById('osForm').addEventListener('submit',function(e){
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Foto/Bruto',fbRecebidoEm:hojeISO(),fb:null}));}
   salvar();render();resetForm();
 });
+function comEnviarFoto(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.setor='Foto/Bruto';o.fbRecebidoEm=hojeISO();o.devolvido=false;salvar();render();alert('O.S. '+(o.numOS||'')+' enviada para o Foto/Bruto.');}
 function editarCom(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
+  if(o.setor&&o.setor!=='Comercial'){alert('Esta O.S. está no setor "'+o.setor+'". Para editar, ela precisa estar no Comercial — peça ao setor atual para devolver ao Comercial (botão Devolver → Comercial).');return;}
   document.getElementById('editId').value=o.id;
   ['dataEntrada','numOS','etiqueta','cliente','peso','statusComercial','prevCat','observacao'].forEach(function(k){const el=document.getElementById(k);if(el)el.value=o[k]||'';});
   itensTmp=(o.itens||[]).map(function(x){return Object.assign({},x);});renderItens();
@@ -1439,7 +1441,7 @@ function buildEtiquetaBrutoHTML(o,opt){
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Etiqueta Bruto '+num+'</title><style>'
   +'@page{size:45mm 30mm;margin:0}html,body{margin:0;padding:0;background:#fff}'
   +'.etq{width:45mm;height:30mm;box-sizing:border-box;padding:1mm 1.5mm;font-family:Arial,sans-serif;color:#000;overflow:hidden;display:flex;flex-direction:column;border:0.3mm solid #000}'
-  +'.hd{display:flex;justify-content:space-between;align-items:baseline;font-weight:bold;font-size:9pt;border-bottom:0.4mm solid #000;padding-bottom:0.5mm}'
+  +'.hd{display:flex;justify-content:flex-start;gap:2.5mm;align-items:baseline;font-weight:bold;font-size:9pt;border-bottom:0.4mm solid #000;padding-bottom:0.5mm}'
   +'.hd .cli{max-width:29mm;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-style:italic}.hd .num{font-style:italic}'
   +'.dt{font-size:6pt;margin:0.4mm 0}'
   +'.rows{display:grid;grid-template-columns:1fr 1fr;gap:0.3mm 2mm;font-size:8pt;line-height:1.3}.rows b{font-weight:bold}'
@@ -2145,7 +2147,7 @@ function render(){
   const listaC=dados.filter(o=>!qC||JSON.stringify(o).toLowerCase().includes(qC));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
   listaC.forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td>'+resumoItens(o)+servicosResumo(o)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
+    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td>'+resumoItens(o)+servicosResumo(o)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button>'+(o.setor==='Comercial'?'<button class="btn-excel" onclick="comEnviarFoto(\''+o.id+'\')">Enviar p/ Foto/Bruto</button>':'')+'<button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
   let atras=0,hoje=0;dados.forEach(function(o){const s=statusEntrega(o);if(s.txt.indexOf('Atrasada')===0)atras++;if(s.txt==='Vence hoje')hoje++;});
