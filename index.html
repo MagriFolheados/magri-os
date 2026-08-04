@@ -1807,7 +1807,7 @@ function buildCatalogoHTML(o){
       '<div class="l"><b>Peso UN:</b> '+g2(pesoU*1000)+' g &nbsp;|&nbsp; <b>Peso Total:</b> '+g2(pesoT*1000)+' g</div>'+
       '<div class="l"><b>Preço do Bruto UN:</b> R$ '+g2(brutoUN)+' &nbsp;|&nbsp; <b>Preço do banho UN:</b> R$ '+g2(banhoUN)+'</div>'+
       '<div class="l"><b>Qtd. de Peças:</b> '+qtd+'</div>'+
-      '<div class="l"><b>Serviço:</b> '+(it.banho||'-')+', <b>M.O.:</b> '+(it.mo||'-')+', <b>Mil.:</b> '+(it.camada||'-')+'</div>'+
+      '<div class="l"><b>Serviço:</b> '+(it.banho||'-')+', <b>M.O.:</b> '+(it.mo||'-')+(fatoresGold(it)?(', <b>Mil.:</b> '+((it.camada!==''&&it.camada!=null?it.camada:fatoresGold(it).camadaF)||'-')):'')+'</div>'+
       '<div class="l"><b>Base:</b> '+(catBaseNome(it)||'-')+', <b>Cor:</b> '+(catCorNome(it.cor)||'-')+', <b>Verniz:</b> '+(catVernizNome(it)||'-')+'</div>'+
       '<div class="tot">Valor Aprox. Bruto + Banho: R$ '+g2(finalUN)+'</div>'+
     '</div></div>';
