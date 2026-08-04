@@ -669,11 +669,12 @@
       <div class="hint" style="margin-bottom:8px">Escolha o lote da OS e ramifique em tipos de peça. O banho é herdado do lote e não muda; controla o saldo de peso.</div>
       <div class="grid">
         <div><label>Item / Lote da OS</label><select id="sbItem" onchange="sbRefresh()"></select></div>
-        <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola"></div>
+        <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola" oninput="sbTipoChange()"></div>
         <div><label>Peso (Kg)</label><input type="number" step="0.001" id="sbPeso"></div>
         <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div>
         <div><label>Código da peça</label><input type="text" id="sbCodigo"></div>
         <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
+        <div style="grid-column:1/-1;display:none" id="sbBrincoBox"><label>Serviços por unidade (só para brinco)</label><label style="font-weight:normal;margin-right:16px"><input type="checkbox" id="sbTarraxa"> Tarraxa</label><label style="font-weight:normal"><input type="checkbox" id="sbTarraxamento"> Tarraxamento</label> <span class="hint">cobrado por peça inspecionada na expedição</span></div>
         <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><button type="button" class="btn-ghost" onclick="document.getElementById('sbFotoInput').click()" style="padding:8px 14px">Anexar foto</button> <button type="button" class="btn-ghost" onclick="document.getElementById('sbCamInput').click()" style="padding:8px 14px">Tirar foto (câmera)</button><input type="file" id="sbFotoInput" accept="image/*" style="display:none"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="display:none"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
       </div>
       <div class="hint" id="sbInfo" style="padding:2px"></div>
@@ -1493,6 +1494,7 @@ function sbRefresh(){
   const total=parseFloat(it.peso)||0;const saldo=total-usado;
   info.innerHTML='Banho herdado: <b>'+(it.banho||'')+(it.cor?' '+it.cor:'')+(it.camada?' '+it.camada:'')+'</b> &nbsp;·&nbsp; Peso do lote: '+total.toFixed(3)+' kg &nbsp;·&nbsp; Ramificado: '+usado.toFixed(3)+' kg &nbsp;·&nbsp; Disponível: <b style="color:'+(saldo<-0.000001?'var(--vermelho)':'var(--verde)')+'">'+saldo.toFixed(3)+' kg</b>';
 }
+function sbTipoChange(){var t=(document.getElementById('sbTipo').value||'');var b=/brinco/i.test(t);var box=document.getElementById('sbBrincoBox');if(box)box.style.display=b?'':'none';if(!b){var a=document.getElementById('sbTarraxa'),c=document.getElementById('sbTarraxamento');if(a)a.checked=false;if(c)c.checked=false;}}
 function addSubitem(){
   const o=osAtualFb();if(!o)return;
   const idx=parseInt(document.getElementById('sbItem').value);const it=(o.itens||[])[idx];if(!it){alert('Selecione o lote da OS.');return;}
@@ -1503,9 +1505,10 @@ function addSubitem(){
   const total=parseFloat(it.peso)||0;
   if(total>0 && (usado+peso)>total+0.000001){alert('O peso dos sub-itens ('+(usado+peso).toFixed(3)+' kg) ultrapassaria o peso do lote ('+total.toFixed(3)+' kg).\nDisponível: '+(total-usado).toFixed(3)+' kg.');return;}
   if(!it.subitens)it.subitens=[];
-  it.subitens.push({tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:document.getElementById('sbPeso').value,qtd:qtd,foto:sbFotoData});
+  var _ehBrinco=/brinco/i.test(tipo);var _tar=_ehBrinco&&document.getElementById('sbTarraxa')&&document.getElementById('sbTarraxa').checked;var _trx=_ehBrinco&&document.getElementById('sbTarraxamento')&&document.getElementById('sbTarraxamento').checked;
+  it.subitens.push({tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:document.getElementById('sbPeso').value,qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx});
   salvar();
-  document.getElementById('sbTipo').value='';document.getElementById('sbPeso').value='';document.getElementById('sbQtd').value='';document.getElementById('sbCodigo').value='';document.getElementById('sbPrecoUnit').value='';
+  document.getElementById('sbTipo').value='';document.getElementById('sbPeso').value='';document.getElementById('sbQtd').value='';document.getElementById('sbCodigo').value='';document.getElementById('sbPrecoUnit').value='';var _t1=document.getElementById('sbTarraxa');if(_t1)_t1.checked=false;var _t2=document.getElementById('sbTarraxamento');if(_t2)_t2.checked=false;var _bb=document.getElementById('sbBrincoBox');if(_bb)_bb.style.display='none';
   sbFotoData='';var pv=document.getElementById('sbFotoPrev');if(pv){pv.style.display='none';pv.src='';}document.getElementById('sbFotoInput').value='';
   sbRefresh();renderSubitens();
 }
@@ -1513,7 +1516,7 @@ function delSubitem(idx,si){const o=osAtualFb();if(!o)return;const it=(o.itens||
 function renderSubitens(){
   const o=osAtualFb();if(!o)return;const tb=document.getElementById('sbLista');if(!tb)return;tb.innerHTML='';
   (o.itens||[]).forEach(function(it,i){(it.subitens||[]).forEach(function(sb,si){var tr=document.createElement('tr');
-    var fdi=sb.foto?'<img src="'+sb.foto+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+(sb.peso||'')+'</td><td>'+(sb.qtd||'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
+    var fdi=sb.foto?'<img src="'+sb.foto+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+((sb.tarraxa||sb.tarraxamento)?' <span style=\'color:#a9862f;font-size:11px\'>('+[sb.tarraxa?'Tarraxa':'',sb.tarraxamento?'Tarraxamento':''].filter(Boolean).join(', ')+')</span>':'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+(sb.peso||'')+'</td><td>'+(sb.qtd||'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
     tb.appendChild(tr);});});
   updatePacoteTotais();
 }
@@ -2083,12 +2086,19 @@ function buildEtiquetasClienteHTML(o){
     var brutoUN=parseFloat(sb.precoUnit)||0;
     var banhoTot=banhoSub(it,sb);var banhoUN=qtd>0?banhoTot/qtd:0;
     var banhadaUN=brutoUN+banhoUN;
+    var ehBrincoSb=/brinco/i.test(sb.tipoPeca||'');
+    var tarUN=(ehBrincoSb&&sb.tarraxa)?(PRECO_UNIDADE['Tarraxa']||0):0;
+    var traxUN=(ehBrincoSb&&sb.tarraxamento)?(PRECO_UNIDADE['Tarraxamento']||0):0;
+    var totalUN=banhadaUN+tarUN+traxUN;
     labels.push('<div class="etq"><div class="etq-l">'+
       '<div class="l"><b>'+(o.cliente||'')+'</b></div>'+
       '<div class="l">'+(sb.tipoPeca||'')+' &middot; Qtd '+qtd+'</div>'+
       '<div class="l">PU '+g2(pesoUN*1000)+'g &middot; PT '+g2(pesoKg*1000)+'g</div>'+
       '<div class="l">Bruta R$'+g2(brutoUN)+' &middot; Banho R$'+g2(banhoUN)+'</div>'+
-      '<div class="l dest">Banhada ~ R$ '+g2(banhadaUN)+'</div>'+
+      '<div class="l'+((tarUN||traxUN)?'':' dest')+'">Banhada ~ R$ '+g2(banhadaUN)+'</div>'+
+      (tarUN?'<div class="l">+ Tarraxa R$ '+g2(tarUN)+'</div>':'')+
+      (traxUN?'<div class="l">+ Tarraxamento R$ '+g2(traxUN)+'</div>':'')+
+      ((tarUN||traxUN)?'<div class="l dest">Total un ~ R$ '+g2(totalUN)+'</div>':'')+
       '<div class="l">Forn: '+((o.fb&&o.fb.fornecedor)||'-')+'</div>'+
     '</div><div class="etq-r">'+(logoData?'<img src="'+logoData+'">':'<b>MAGRI</b>')+'</div></div>');
   });});
