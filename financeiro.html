@@ -581,7 +581,7 @@ let afterRender = null;
 function viewDashboard(){
   const saldo = saldoAtual();
   const rec = totalReceber(), pag = totalPagar();
-  const ini = hoje().slice(0,7)+'-01', fim = hoje();
+  const perD = periodoRange(dashPeriodo); const ini = perD.ini, fim = perD.fim;
   const fatMes = faturamentoPeriodo(ini,fim);
   const dre = dreDados(ini,fim);
   const fx = fluxoMensal(6);
@@ -608,16 +608,17 @@ function viewDashboard(){
   };
 
   return `
+  <div class="toolbar" style="margin-bottom:12px">${periodoToolbar(dashPeriodo,'setDashPer')}<div class="spacer"></div><span class="hint">Período: <b>${perD.label}</b></span></div>
   <div class="grid kpis" style="margin-bottom:16px">
     ${kpi('💵 Disponível em caixa', fmt(saldo), 'Banco + caixa', saldo>=0?'pos':'neg')}
     ${kpi('📥 A receber', fmt(rec), vRec>0?`<span class="neg">${fmt(vRec)} vencido</span>`:'Em dia', '')}
     ${kpi('📤 A pagar', fmt(pag), vPag>0?`<span class="neg">${fmt(vPag)} vencido</span>`:'Em dia', '')}
-    ${kpi('🛒 Faturamento do mês', fmt(fatMes), `Lucro: ${fmt(dre.lucroLiq)} (${dre.margem.toFixed(1)}%)`, dre.lucroLiq>=0?'pos':'neg')}
+    ${kpi('🛒 Faturamento · '+perD.label, fmt(fatMes), `Lucro: ${fmt(dre.lucroLiq)} (${dre.margem.toFixed(1)}%)`, dre.lucroLiq>=0?'pos':'neg')}
   </div>
   ${painelFechamento()}
   <div class="two-col" style="margin-bottom:16px">
     <div class="card"><h3>Fluxo de caixa <span class="muted">últimos 6 meses</span></h3><div class="chart-wrap"><canvas id="chFluxo"></canvas></div></div>
-    <div class="card"><h3>Despesas do mês <span class="muted">por categoria</span></h3><div class="chart-wrap"><canvas id="chDesp"></canvas></div></div>
+    <div class="card"><h3>Despesas <span class="muted">${perD.label} · por categoria</span></h3><div class="chart-wrap"><canvas id="chDesp"></canvas></div></div>
   </div>
   <div class="two-col">
     <div class="card">
@@ -747,8 +748,29 @@ function linhaConta(l){
    ============================================================ */
 const TIPO_CONTA = {banco:'🏦 Banco', caixa:'💵 Caixa', cheque:'🧾 Cheques', credito:'💳 Cartão/Crédito'};
 let caixaTab = 'resumo';
-let movFiltro = {conta:'todas'};
+let movFiltro = {conta:'todas', modo:'mes', mes:hoje().slice(0,7), ano:hoje().slice(0,4), de:'', ate:''};
 let recebFiltro = {status:'previsto'};
+let dashPeriodo = {modo:'mes', mes:hoje().slice(0,7), ano:hoje().slice(0,4), de:'', ate:''};
+function ultDiaMes(ymv){ const p=ymv.split('-'); return new Date(+p[0], +p[1], 0).toISOString().slice(0,10); }
+function periodoRange(p){
+  if(p.modo==='ano'){ const a=p.ano||hoje().slice(0,4); return {ini:a+'-01-01', fim:a+'-12-31', label:'Ano '+a}; }
+  if(p.modo==='intervalo'){ return {ini:p.de||'0000-01-01', fim:p.ate||'9999-12-31', label:(p.de?dataBR(p.de):'início')+' a '+(p.ate?dataBR(p.ate):'hoje')}; }
+  if(p.modo==='tudo'){ return {ini:'0000-01-01', fim:'9999-12-31', label:'Todo o período'}; }
+  const mv=p.mes||hoje().slice(0,7); return {ini:mv+'-01', fim:ultDiaMes(mv), label:mesLabel(mv)};
+}
+function periodoToolbar(state, cb){
+  const modo=state.modo;
+  return `<div class="field"><label>Período</label><select onchange="${cb}('modo',this.value)">`
+    +`<option value="mes"${modo==='mes'?' selected':''}>Mês</option>`
+    +`<option value="ano"${modo==='ano'?' selected':''}>Ano</option>`
+    +`<option value="intervalo"${modo==='intervalo'?' selected':''}>Intervalo de datas</option>`
+    +`<option value="tudo"${modo==='tudo'?' selected':''}>Tudo</option></select></div>`
+    +(modo==='mes'?`<div class="field"><label>Mês</label><input type="month" value="${state.mes}" onchange="${cb}('mes',this.value)"></div>`:'')
+    +(modo==='ano'?`<div class="field"><label>Ano</label><input type="number" min="2000" max="2100" step="1" value="${state.ano}" onchange="${cb}('ano',this.value)"></div>`:'')
+    +(modo==='intervalo'?`<div class="field"><label>De</label><input type="date" value="${state.de}" onchange="${cb}('de',this.value)"></div><div class="field"><label>Até</label><input type="date" value="${state.ate}" onchange="${cb}('ate',this.value)"></div>`:'');
+}
+function setDashPer(k,v){ dashPeriodo[k]=v; render(); }
+function setMovPer(k,v){ movFiltro[k]=v; render(); }
 function setCaixaTab(t){ caixaTab=t; render(); }
 function optContas(tipos, selId){ return contasPorTipo(...tipos).map(c=>`<option value="${c.id}" ${c.id===selId?'selected':''}>${esc(c.nome)}</option>`).join(''); }
 function nomeConta(id){ const c=DB.contas.find(x=>x.id===id); return c?c.nome:'—'; }
@@ -918,8 +940,10 @@ function salvarConciliacao(contaId, saldoSis){
 
 /* ---------- ABA: MOVIMENTAÇÕES ---------- */
 function caixaMovimentos(){
+  const perM = periodoRange(movFiltro);
   let movs=[...DB.movimentos];
   if(movFiltro.conta!=='todas') movs=movs.filter(m=>m.contaId===parseInt(movFiltro.conta));
+  movs=movs.filter(m=> (m.data||'')>=perM.ini && (m.data||'')<=perM.fim );
   movs.sort((a,b)=>(b.data+String(b.id).padStart(6,'0')).localeCompare(a.data+String(a.id).padStart(6,'0')));
   const rows=movs.slice(0,300).map(m=>`<tr>
     <td>${dataBR(m.data)}</td>
@@ -929,17 +953,18 @@ function caixaMovimentos(){
     <td class="num ${m.tipo==='entrada'?'pos':'neg'}">${m.tipo==='entrada'?'+':'-'}${fmt(m.valor)}</td>
     <td class="num">${['manual','transferencia','ajuste'].includes(m.origem)?`<button class="icon-btn" onclick="delMovimento(${m.id})">🗑</button>`:`<span class="hint" title="Gerado por ${esc(m.origem||'')}">🔗</span>`}</td>
   </tr>`).join('');
-  const entMes=DB.movimentos.filter(m=>m.tipo==='entrada'&&ym(m.data)===hoje().slice(0,7)).reduce((s,m)=>s+Number(m.valor),0);
-  const saiMes=DB.movimentos.filter(m=>m.tipo==='saida'&&ym(m.data)===hoje().slice(0,7)).reduce((s,m)=>s+Number(m.valor),0);
+  const entMes=movs.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+Number(m.valor),0);
+  const saiMes=movs.filter(m=>m.tipo==='saida').reduce((s,m)=>s+Number(m.valor),0);
   return `
   <div class="grid kpis" style="margin-bottom:16px">
-    ${kpi('Entradas do mês', fmt(entMes),'Recebimentos no caixa','pos')}
-    ${kpi('Saídas do mês', fmt(saiMes),'Pagamentos no caixa','neg')}
-    ${kpi('Resultado do mês', fmt(entMes-saiMes),'Entradas − Saídas', entMes-saiMes>=0?'pos':'neg')}
+    ${kpi('Entradas · '+perM.label, fmt(entMes),'Recebimentos no caixa','pos')}
+    ${kpi('Saídas · '+perM.label, fmt(saiMes),'Pagamentos no caixa','neg')}
+    ${kpi('Resultado · '+perM.label, fmt(entMes-saiMes),'Entradas − Saídas', entMes-saiMes>=0?'pos':'neg')}
   </div>
   <div class="toolbar">
     <div class="field"><label>Conta</label><select onchange="movFiltro.conta=this.value;render()">
       <option value="todas">Todas as contas</option>${DB.contas.map(c=>`<option value="${c.id}" ${movFiltro.conta==c.id?'selected':''}>${esc(c.nome)}</option>`).join('')}</select></div>
+    ${periodoToolbar(movFiltro,'setMovPer')}
     <div class="spacer"></div>
     <button class="btn" onclick="modalImportar()">⭳ Importar planilha</button>
     <button class="btn" onclick="modalMovimento('entrada')">+ Entrada</button>
