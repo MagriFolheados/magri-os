@@ -552,6 +552,12 @@
         </div>
       </section>
       <section class="view" id="view-precos">
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-05c</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
+          <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
+          <div class="hint" id="migStatus" style="margin-top:8px"></div>
+        </div></div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Tipos de banho (personalizados)</h2></div><div class="panel-body">
           <div class="hint" style="margin-bottom:8px">Os banhos padrão do sistema continuam fixos. Aqui você adiciona novos. Após adicionar/remover, o sistema recarrega para aplicar.</div>
           <div class="grid">
@@ -1471,6 +1477,30 @@ function gerarEtiquetaLote(idx){
 }
 function verFoto(src){document.getElementById('imgBig').src=src;document.getElementById('imgModal').classList.add('show');}
 let sbFotoData='';
+async function migrarFotosNuvem(){
+  if(!window.__sb){alert('Disponível só na versão online (nuvem).');return;}
+  var st=document.getElementById('migStatus');
+  var tasks=[];
+  (dados||[]).forEach(function(o){(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.foto&&/^data:/.test(sb.foto))tasks.push({set:function(u){sb.foto=u;},data:sb.foto});});});if(o.fb&&o.fb.foto&&/^data:/.test(o.fb.foto))tasks.push({set:function(u){o.fb.foto=u;},data:o.fb.foto});});
+  if(!tasks.length){if(st)st.textContent='Nenhuma foto antiga para migrar. Tudo certo!';alert('Nenhuma foto antiga encontrada — nada a migrar.');return;}
+  if(!confirm(tasks.length+' foto(s) serão enviadas para a nuvem. Pode demorar um pouco. Continuar?'))return;
+  var ok=0,fail=0;
+  for(var i=0;i<tasks.length;i++){
+    if(st)st.textContent='Enviando '+(i+1)+' de '+tasks.length+'...';
+    try{
+      var blob=await (await fetch(tasks[i].data)).blob();
+      var name='mig_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,6)+'.jpg';
+      var up=await window.__sb.storage.from('fotos').upload(name,blob,{contentType:'image/jpeg',upsert:false});
+      if(up.error){fail++;console.warn('mig',up.error.message);continue;}
+      var pub=window.__sb.storage.from('fotos').getPublicUrl(name);
+      var url=(pub&&pub.data&&pub.data.publicUrl)||null;
+      if(url){tasks[i].set(url);ok++;}else{fail++;}
+    }catch(e){fail++;console.warn('mig ex',e);}
+  }
+  salvar();render();
+  if(st)st.textContent='Concluído: '+ok+' enviada(s), '+fail+' falha(s).';
+  alert('Migração concluída.\nEnviadas: '+ok+'\nFalhas: '+fail+(fail?'\n\nSe houve falhas, o upload pro Storage não está passando (verifique o SQL das permissões) — me avise.':'\n\nPronto! Agora o celular deve salvar as fotos normalmente.'));
+}
 function fotosSubitens(o){var arr=[];(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.foto)arr.push({tipoPeca:sb.tipoPeca,cor:it.cor,banho:it.banho,foto:sb.foto});});});return arr;}
 function primeiraFotoOS(o){var a=fotosSubitens(o);return a.length?a[0].foto:((o.fb&&o.fb.foto)||'');}
 function osAtualFb(){return dados.find(function(x){return x.id===document.getElementById('fbId').value;});}
