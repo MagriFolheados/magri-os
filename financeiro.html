@@ -1282,16 +1282,16 @@ function caixaRecebiveis(){
   let list=[...DB.recebiveis];
   if(recebFiltro.status!=='todos') list=list.filter(r=>r.status===recebFiltro.status);
   list.sort((a,b)=>(a.dataPrevista||'').localeCompare(b.dataPrevista||''));
-  const previsto=DB.recebiveis.filter(r=>r.status==='previsto').reduce((s,r)=>s+Number(r.valorLiquido),0);
-  const bruto=DB.recebiveis.filter(r=>r.status==='previsto').reduce((s,r)=>s+Number(r.valorBruto),0);
+  const previsto=DB.recebiveis.filter(r=>r.status==='previsto').reduce((s,r)=>s+(Number(r.valorLiquido)-Number(r.recebidoLiq||0)),0);
+  const bruto=DB.recebiveis.filter(r=>r.status==='previsto').reduce((s,r)=>{const liq=Number(r.valorLiquido)||0;const rem=liq-Number(r.recebidoLiq||0);const frac=liq>0?rem/liq:1;return s+Number(r.valorBruto)*frac;},0);
   const rows=list.map(r=>`<tr>
     <td>${esc(nomeConta(r.contaId))}${r.operadora?`<div class="hint">${esc(r.operadora)}</div>`:''}</td>
     <td>${dataBR(r.dataPrevista)}</td>
     <td>${r.parcela}/${r.totalParcelas}</td>
     <td class="num">${fmt(r.valorBruto)}</td>
     <td class="num hint">${fmtN(r.taxa)}%</td>
-    <td class="num"><b>${fmt(r.valorLiquido)}</b></td>
-    <td>${r.status==='recebido'?`<span class="pill pago">recebido ${dataBR(r.dataRecebido)}</span>`:'<span class="pill pendente">previsto</span>'}</td>
+    <td class="num"><b>${fmt(r.valorLiquido)}</b>${Number(r.recebidoLiq||0)>0.005?`<div class="hint">recebido ${fmt(r.recebidoLiq)} · saldo ${fmt(Number(r.valorLiquido)-Number(r.recebidoLiq))}</div>`:''}</td>
+    <td>${r.status==='recebido'?`<span class="pill pago">recebido ${dataBR(r.dataRecebido)}</span>`:(Number(r.recebidoLiq||0)>0.005?'<span class="pill pendente">parcial</span>':'<span class="pill pendente">previsto</span>')}</td>
     <td class="num">${r.status==='previsto'?`<button class="btn sm primary" onclick="receberRecebivel(${r.id})">Receber</button>`:''} <button class="icon-btn" onclick="delRecebivel(${r.id})">🗑</button></td>
   </tr>`).join('');
   return `
@@ -1359,14 +1359,18 @@ function receberRecebivel(id){
   const r=DB.recebiveis.find(x=>x.id===id); if(!r) return;
   const contasBC=contasPorTipo('banco','caixa');
   if(!contasBC.length){ toast('Cadastre uma conta de banco/caixa.', true); return; }
+  const jaRec=Number(r.recebidoLiq||0); const saldo=Math.round((Number(r.valorLiquido)-jaRec)*100)/100;
   abrirModal(`
     <div class="modal-head"><h3>Receber parcela</h3><button class="close-x" onclick="fecharModal()">×</button></div>
     <div class="modal-body">
-      <p class="hint" style="margin-bottom:14px">Parcela ${r.parcela}/${r.totalParcelas} — líquido <b>${fmt(r.valorLiquido)}</b></p>
+      <p class="hint" style="margin-bottom:6px">Parcela ${r.parcela}/${r.totalParcelas} — líquido total <b>${fmt(r.valorLiquido)}</b>${jaRec>0.005?` · já recebido <b>${fmt(jaRec)}</b>`:''}</p>
+      <p class="hint" style="margin-bottom:14px">Saldo em aberto: <b style="color:var(--green)">${fmt(saldo)}</b></p>
       <div class="form-grid">
+        <div class="field"><label>Valor recebido agora (R$) *</label><input id="rcValor" type="number" step="0.01" value="${saldo.toFixed(2)}"></div>
         <div class="field"><label>Cai na conta *</label><select id="rcConta">${contasBC.map(c=>`<option value="${c.id}">${esc(c.nome)}</option>`).join('')}</select></div>
         <div class="field"><label>Data</label><input id="rcData" type="date" value="${hoje()}"></div>
       </div>
+      <div class="hint" style="margin-top:8px">Deixe o valor cheio para baixar tudo, ou informe só o que caiu no mês — o restante fica em aberto.</div>
     </div>
     <div class="modal-foot"><button class="btn ghost" onclick="fecharModal()">Cancelar</button><button class="btn primary" onclick="confirmarRecebivel(${id})">Confirmar recebimento</button></div>
   `);
@@ -1375,8 +1379,14 @@ function confirmarRecebivel(id){
   const r=DB.recebiveis.find(x=>x.id===id); if(!r) return;
   const conta=parseInt(document.getElementById('rcConta').value);
   const data=document.getElementById('rcData').value||hoje();
-  movEntrada(conta,r.valorLiquido,'Recebível cartão '+(r.operadora||'')+' '+r.parcela+'/'+r.totalParcelas,data,{origem:'recebivel',origemId:id,categoria:'Cartão'});
-  r.status='recebido'; r.dataRecebido=data; r.contaDestino=conta; salvar(); fecharModal(); render(); toast('Recebível creditado.');
+  const jaRec=Number(r.recebidoLiq||0); const saldo=Math.round((Number(r.valorLiquido)-jaRec)*100)/100;
+  let val=parseFloat(document.getElementById('rcValor').value); if(isNaN(val)||val<=0){ toast('Informe o valor recebido.', true); return; }
+  if(val>saldo+0.005) val=saldo;
+  const parcial=(val<saldo-0.005)||jaRec>0.005;
+  movEntrada(conta,val,'Recebível cartão '+(r.operadora||'')+' '+r.parcela+'/'+r.totalParcelas+(parcial?' (parcial)':''),data,{origem:'recebivel',origemId:id,categoria:'Cartão'});
+  r.recebidoLiq=Math.round((jaRec+val)*100)/100; r.contaDestino=conta;
+  if(r.recebidoLiq>=Number(r.valorLiquido)-0.005){ r.status='recebido'; r.dataRecebido=data; }
+  salvar(); fecharModal(); render(); toast(r.status==='recebido'?'Recebível liquidado.':'Baixa parcial registrada · saldo '+fmt(Number(r.valorLiquido)-r.recebidoLiq));
 }
 function delRecebivel(id){
   if(!confirm('Excluir este recebível?'))return;
