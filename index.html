@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Gestão de Ordens de Serviço — Magri</title>
 <style>
   :root{
@@ -174,7 +177,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.</div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-06</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -215,6 +218,7 @@
                 <div><label>Peso total / Kg</label><input type="number" step="0.001" id="peso" placeholder="0,000" oninput="updateSaldoPeso()"></div>
                 <div><label>Status Comercial</label><select id="statusComercial"><option>Recebido</option><option>Entregue</option><option>Não fechado</option></select></div>
                 <div><label>Prev. envio CAT</label><input type="date" id="prevCat" readonly><div class="hint">Auto: entrada + 10 dias úteis (só com cataforético)</div></div>
+                <div id="prevCatBox" style="display:none"><label>Ajustar envio CAT (etiqueta)</label><input type="date" id="prevCatManual" onchange="prevCatManualChange()"><div class="hint" style="color:#a9862f">Editável por causa da etiqueta</div></div>
                 <div><label>Data previsão de entrega</label><input type="text" id="prevEntrega" readonly><div class="hint">15 dias úteis se houver item com cataforético; senão 10</div></div>
                 <div id="prevEntregaBox" style="display:none"><label>Ajustar entrega (etiqueta)</label><input type="date" id="prevEntregaManual" onchange="prevEntregaManualChange()"><div class="hint" style="color:#a9862f">Editável por causa da etiqueta</div></div>
                 <div style="grid-column:1/-1"><label>Observação</label><textarea id="observacao" rows="2" placeholder="Anotações da OS (opcional)" style="width:100%;resize:vertical"></textarea></div>
@@ -553,7 +557,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-05c</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-06</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1171,9 +1175,10 @@ function prazoSetor(recISO,concl){
   return {cls:'prazo-ok',txt:rest+'d út. restantes'};
 }
 
-function recalc(){const de=document.getElementById('dataEntrada').value;const hasCat=itensTmp.some(function(it){return it.compl&&it.compl.cataforetico;});var etq=document.getElementById('etiqueta').value;var man=document.getElementById('prevEntregaManual');if(etq&&man&&man.value){document.getElementById('prevEntrega').dataset.iso=man.value;document.getElementById('prevEntrega').value=fmt(man.value);}else{const pe=addDiasUteis(de,hasCat?15:10);document.getElementById('prevEntrega').value=pe?fmt(pe):'';document.getElementById('prevEntrega').dataset.iso=pe||'';}const pc=document.getElementById('prevCat');if(pc)pc.value=hasCat?addDiasUteis(de,10):'';}
-function etiquetaEntregaToggle(){var etq=document.getElementById('etiqueta').value;var box=document.getElementById('prevEntregaBox');var man=document.getElementById('prevEntregaManual');if(etq){if(box)box.style.display='';if(man&&!man.value){var iso=document.getElementById('prevEntrega').dataset.iso||'';if(iso)man.value=iso;}recalc();}else{if(box)box.style.display='none';if(man)man.value='';recalc();}}
+function recalc(){const de=document.getElementById('dataEntrada').value;const hasCat=itensTmp.some(function(it){return it.compl&&it.compl.cataforetico;});var etq=document.getElementById('etiqueta').value;var man=document.getElementById('prevEntregaManual');if(etq&&man&&man.value){document.getElementById('prevEntrega').dataset.iso=man.value;document.getElementById('prevEntrega').value=fmt(man.value);}else{const pe=addDiasUteis(de,hasCat?15:10);document.getElementById('prevEntrega').value=pe?fmt(pe):'';document.getElementById('prevEntrega').dataset.iso=pe||'';}const pc=document.getElementById('prevCat');var pcm=document.getElementById('prevCatManual');if(pc){if(etq&&pcm&&pcm.value){pc.value=pcm.value;}else{pc.value=hasCat?addDiasUteis(de,10):'';}}}
+function etiquetaEntregaToggle(){var etq=document.getElementById('etiqueta').value;var box=document.getElementById('prevEntregaBox');var man=document.getElementById('prevEntregaManual');var cbox=document.getElementById('prevCatBox');var cman=document.getElementById('prevCatManual');if(etq){if(box)box.style.display='';if(man&&!man.value){var iso=document.getElementById('prevEntrega').dataset.iso||'';if(iso)man.value=iso;}if(cbox)cbox.style.display='';if(cman&&!cman.value){var pcv=(document.getElementById('prevCat')||{}).value||'';if(pcv)cman.value=pcv;}recalc();}else{if(box)box.style.display='none';if(man)man.value='';if(cbox)cbox.style.display='none';if(cman)cman.value='';recalc();}}
 function prevEntregaManualChange(){var man=document.getElementById('prevEntregaManual');var v=man?man.value:'';if(v){document.getElementById('prevEntrega').dataset.iso=v;document.getElementById('prevEntrega').value=fmt(v);}}
+function prevCatManualChange(){var m=document.getElementById('prevCatManual');var pc=document.getElementById('prevCat');if(m&&pc&&m.value)pc.value=m.value;}
 document.getElementById('dataEntrada').addEventListener('change',recalc);
 let itensTmp=[];
 let PRECO_ACETINADO=0;
@@ -1348,7 +1353,7 @@ document.getElementById('osForm').addEventListener('submit',function(e){
   const header={dataEntrada:g('dataEntrada'),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g('peso'),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
   if(editId){const o=dados.find(x=>x.id===editId);Object.assign(o,header);}
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Foto/Bruto',fbRecebidoEm:hojeISO(),fb:null}));}
-  salvar();render();resetForm();
+  try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();
 });
 function comEnviarFoto(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.setor='Foto/Bruto';o.fbRecebidoEm=hojeISO();o.devolvido=false;salvar();render();alert('O.S. '+(o.numOS||'')+' enviada para o Foto/Bruto.');}
 function editarCom(id){
@@ -1367,7 +1372,7 @@ function editarCom(id){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function excluirCom(id){if(confirm('Excluir esta O.S.?')){dados=dados.filter(o=>o.id!==id);salvar();render();}}
-function resetForm(){document.getElementById('osForm').reset();document.getElementById('editId').value='';document.getElementById('prevEntrega').value='';document.getElementById('prevEntrega').dataset.iso='';var _pb=document.getElementById('prevEntregaBox');if(_pb)_pb.style.display='none';var _pm=document.getElementById('prevEntregaManual');if(_pm)_pm.value='';itensTmp=[];renderItens();servicosTmp=[];renderServicos();servRefresh();document.getElementById('form-title').textContent='Cadastrar nova Ordem de Serviço';document.getElementById('submitBtn').textContent='Cadastrar O.S.';document.getElementById('cancelBtn').style.display='none';}
+function resetForm(){document.getElementById('osForm').reset();document.getElementById('editId').value='';document.getElementById('prevEntrega').value='';document.getElementById('prevEntrega').dataset.iso='';var _pb=document.getElementById('prevEntregaBox');if(_pb)_pb.style.display='none';var _pm=document.getElementById('prevEntregaManual');if(_pm)_pm.value='';var _cb=document.getElementById('prevCatBox');if(_cb)_cb.style.display='none';var _cm=document.getElementById('prevCatManual');if(_cm)_cm.value='';itensTmp=[];renderItens();servicosTmp=[];renderServicos();servRefresh();document.getElementById('form-title').textContent='Cadastrar nova Ordem de Serviço';document.getElementById('submitBtn').textContent='Cadastrar O.S.';document.getElementById('cancelBtn').style.display='none';}
 document.getElementById('cancelBtn').addEventListener('click',resetForm);
 document.getElementById('buscaCom').addEventListener('input',render);
 document.getElementById('buscaFb').addEventListener('input',render);
@@ -1386,12 +1391,14 @@ document.getElementById('rfForm').addEventListener('submit',function(e){e.preven
 let fbFotoData='';
 function fbCamadaFromItem(it){var b=it.banho||'';if(b==='Ouro Camada')return (it.camada?it.camada+' ML':'');if(b==='Ouro Flash')return 'FLASH';if(b==='Ouro 1 Milésimo')return '1 ML';var m=(''+b).match(/(\d+)ML/);if(m)return m[1]+' ML';return '';}
 function fbDefaultsFromOS(o){var itens=o.itens||[];function comum(fn){var vals=itens.map(fn).filter(function(v){return v!=='';});if(!vals.length)return '';return vals.every(function(v){return v===vals[0];})?vals[0]:'';}
-  var cor=comum(function(it){return it.cor||'';});var camada=comum(function(it){return fbCamadaFromItem(it);});
+  function primeiro(fn){for(var i=0;i<itens.length;i++){var v=fn(itens[i]);if(v!=='')return v;}return '';}
+  var cor=comum(function(it){return it.cor||'';})||primeiro(function(it){return it.cor||'';});var camada=comum(function(it){return fbCamadaFromItem(it);})||primeiro(function(it){return fbCamadaFromItem(it);});
   var allOuro=itens.length&&itens.every(function(it){return ehOuroBanho(it.banho);});var anyOuro=itens.some(function(it){return ehOuroBanho(it.banho);});
-  var categoria=itens.length?(allOuro?'FOLHEAÇÂO':(anyOuro?'':'BANHO')):'';
+  var categoria=itens.length?(allOuro?'FOLHEAÇÂO':(anyOuro?(ehOuroBanho(itens[0].banho)?'FOLHEAÇÂO':'BANHO'):'BANHO')):'';
   var anti=itens.some(function(it){return it.compl&&it.compl.antialergico;})?'Sim':'Não';
   var verniz=itens.some(function(it){return it.compl&&it.compl.cataforetico;})?'CAT':(itens.some(function(it){return it.compl&&it.compl.protetor;})?'PROT 300':'');
   return {cor:cor,camada:camada,categoria:categoria,anti:anti,verniz:verniz};}
+function fbSetSel(id,v){v=(v||'');var el=document.getElementById(id);if(!el)return;if(v){var match=null;Array.prototype.forEach.call(el.options,function(o){if((''+o.value).toLowerCase()===(''+v).toLowerCase())match=o.value;});if(match){el.value=match;return;}var op=document.createElement('option');op.value=v;op.textContent=v;el.appendChild(op);el.value=v;return;}el.value='';}
 function abrirFb(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   document.getElementById('fbId').value=id;
@@ -1403,7 +1410,7 @@ function abrirFb(id){
   set('fbFornecedor',f.fornecedor);set('fbQtd',f.qtd);
   set('fbPesoPacote',f.pesoPacote);set('fbResp',f.resp);set('fbNota',f.nota||o.numOS);set('fbLetra',f.letra);
   var _D=fbDefaultsFromOS(o);
-  set('fbCategoria',f.categoria||_D.categoria);set('fbCamada',f.camada||_D.camada);set('fbCor',f.cor||_D.cor);set('fbAnti',f.anti||_D.anti||'Não');
+  fbSetSel('fbCategoria',f.categoria||_D.categoria);fbSetSel('fbCamada',f.camada||_D.camada);fbSetSel('fbCor',f.cor||_D.cor);set('fbAnti',f.anti||_D.anti||'Não');
   set('fbVerniz',f.verniz||_D.verniz);set('fbScanner',f.scanner||'Não');set('fbOutros',f.outros);
   sbPopulate();
   document.getElementById('fbModal').classList.add('show');
@@ -1477,6 +1484,7 @@ function gerarEtiquetaLote(idx){
 }
 function verFoto(src){document.getElementById('imgBig').src=src;document.getElementById('imgModal').classList.add('show');}
 let sbFotoData='';
+let sbFotoPend=false;
 async function migrarFotosNuvem(){
   if(!window.__sb){alert('Disponível só na versão online (nuvem).');return;}
   var st=document.getElementById('migStatus');
@@ -1506,7 +1514,7 @@ function primeiraFotoOS(o){var a=fotosSubitens(o);return a.length?a[0].foto:((o.
 function osAtualFb(){return dados.find(function(x){return x.id===document.getElementById('fbId').value;});}
 function sbItemLabel(it,i){return 'Lote '+(i+1)+' — '+(it.banho||'')+(it.cor?' '+it.cor:'')+' ('+(it.peso||0)+'kg)';}
 function uploadFotoNuvem(dataUrl,cb){if(!window.__sb){cb(dataUrl);return;}try{fetch(dataUrl).then(function(res){return res.blob();}).then(function(blob){var name='fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';window.__sb.storage.from('fotos').upload(name,blob,{contentType:'image/jpeg',upsert:false}).then(function(up){if(up.error){console.warn('upload foto',up.error.message);cb(dataUrl);return;}var pub=window.__sb.storage.from('fotos').getPublicUrl(name);cb((pub&&pub.data&&pub.data.publicUrl)||dataUrl);},function(e){console.warn('upload foto',e);cb(dataUrl);});},function(e){console.warn('foto blob',e);cb(dataUrl);});}catch(e){console.warn('upload foto ex',e);cb(dataUrl);}}
-function processSbFoto(file){if(!file)return;var r=new FileReader();r.onload=function(ev){var img=new Image();img.onload=function(){var max=900,w=img.width,h=img.height;if(w>max||h>max){var sc=max/Math.max(w,h);w=w*sc;h=h*sc;}var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var durl=c.toDataURL('image/jpeg',0.7);var pv=document.getElementById('sbFotoPrev');pv.src=durl;pv.style.display='inline';sbFotoData=durl;if(pv)pv.title='enviando foto...';uploadFotoNuvem(durl,function(url){sbFotoData=url;if(pv)pv.title=(url&&url.indexOf('http')===0)?'foto na nuvem':'foto (local)';});};img.src=ev.target.result;};r.readAsDataURL(file);}
+function processSbFoto(file){if(!file)return;var r=new FileReader();r.onload=function(ev){var img=new Image();img.onload=function(){var max=900,w=img.width,h=img.height;if(w>max||h>max){var sc=max/Math.max(w,h);w=w*sc;h=h*sc;}var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var durl=c.toDataURL('image/jpeg',0.7);var pv=document.getElementById('sbFotoPrev');pv.src=durl;pv.style.display='inline';sbFotoData='';sbFotoPend=true;if(pv)pv.title='enviando foto...';uploadFotoNuvem(durl,function(url){sbFotoPend=false;if(url&&(''+url).indexOf('http')===0){sbFotoData=url;if(pv)pv.title='foto na nuvem';}else{sbFotoData=durl;if(pv)pv.title='foto (local)';alert('Não consegui enviar a foto para a nuvem agora. Ela ficou salva localmente — tente de novo com internet, se possível.');}});};img.src=ev.target.result;};r.readAsDataURL(file);}
 document.getElementById('sbFotoInput').addEventListener('change',function(e){processSbFoto(e.target.files[0]);});
 document.getElementById('sbCamInput').addEventListener('change',function(e){processSbFoto(e.target.files[0]);});
 function sbPopulate(){
@@ -1532,6 +1540,7 @@ function addSubitem(){
   const tipo=document.getElementById('sbTipo').value.trim();const peso=parseFloat(document.getElementById('sbPeso').value)||0;const qtd=document.getElementById('sbQtd').value;
   if(!tipo){alert('Informe o tipo de peça.');return;}
   if(peso<=0){alert('Informe o peso do sub-item.');return;}
+  if(sbFotoPend){alert('A foto ainda está sendo enviada para a nuvem. Aguarde alguns segundos e clique novamente.');return;}
   const usado=(it.subitens||[]).reduce(function(sm,x){return sm+(parseFloat(x.peso)||0);},0);
   const total=parseFloat(it.peso)||0;
   if(total>0 && (usado+peso)>total+0.000001){alert('O peso dos sub-itens ('+(usado+peso).toFixed(3)+' kg) ultrapassaria o peso do lote ('+total.toFixed(3)+' kg).\nDisponível: '+(total-usado).toFixed(3)+' kg.');return;}
@@ -1540,7 +1549,7 @@ function addSubitem(){
   it.subitens.push({tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:document.getElementById('sbPeso').value,qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx});
   salvar();
   document.getElementById('sbTipo').value='';document.getElementById('sbPeso').value='';document.getElementById('sbQtd').value='';document.getElementById('sbCodigo').value='';document.getElementById('sbPrecoUnit').value='';var _t1=document.getElementById('sbTarraxa');if(_t1)_t1.checked=false;var _t2=document.getElementById('sbTarraxamento');if(_t2)_t2.checked=false;var _bb=document.getElementById('sbBrincoBox');if(_bb)_bb.style.display='none';
-  sbFotoData='';var pv=document.getElementById('sbFotoPrev');if(pv){pv.style.display='none';pv.src='';}document.getElementById('sbFotoInput').value='';
+  sbFotoData='';sbFotoPend=false;var pv=document.getElementById('sbFotoPrev');if(pv){pv.style.display='none';pv.src='';}document.getElementById('sbFotoInput').value='';
   sbRefresh();renderSubitens();
 }
 function delSubitem(idx,si){const o=osAtualFb();if(!o)return;const it=(o.itens||[])[idx];if(!it||!it.subitens)return;it.subitens.splice(si,1);salvar();sbRefresh();renderSubitens();}
