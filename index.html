@@ -158,6 +158,7 @@
       <div class="nav-sep">Fluxo da O.S.</div>
       <div class="nav-item active" data-view="comercial"><span class="ico">CO</span> Comercial <span class="cnt" id="cnt-comercial">0</span></div>
       <div class="nav-item" data-view="clientes"><span class="ico">CL</span> Clientes <span class="cnt" id="cnt-clientes">0</span></div>
+      <div class="nav-item" data-view="financeiro"><span class="ico">FI</span> Financeiro <span class="cnt" id="cnt-financeiro">0</span></div>
       <div class="nav-item" data-view="fotobruto"><span class="ico">FB</span> Foto / Bruto <span class="cnt" id="cnt-fotobruto">0</span></div>
       <div class="nav-item" data-view="amarracao"><span class="ico">AM</span> Amarração <span class="cnt" id="cnt-amarracao">0</span></div>
       <div class="nav-item" data-view="banho"><span class="ico">BA</span> Banho (Galvano) <span class="cnt" id="cnt-banho">0</span></div>
@@ -177,7 +178,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-06</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-06b</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -264,6 +265,21 @@
             <tbody id="tbodyCom"></tbody>
           </table></div>
           <div id="emptyCom" class="empty">Nenhuma O.S. cadastrada ainda.</div>
+        </div>
+      </section>
+
+      <section class="view" id="view-financeiro">
+        <div class="cards" id="cards-fin"></div>
+        <div class="panel">
+          <div class="panel-head"><span class="dot"></span><h2>Financeiro — O.S. aguardando liberação</h2>
+            <div class="toolbar"><input type="text" id="buscaFin" placeholder="Buscar..." oninput="render()"></div>
+          </div>
+          <div class="hint" style="padding:2px 4px 10px">O Comercial cria a O.S. e gera o orçamento. Aqui você registra o recebimento prévio (opcional) e libera a O.S. para a produção (Foto/Bruto) com um clique.</div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Nº O.S.</th><th>Etiqueta</th><th>Cliente</th><th>Recebido em</th><th>Orçamento</th><th>Receb. prévio (R$)</th><th>Obs</th><th>Ações</th></tr></thead>
+            <tbody id="tbodyFin"></tbody>
+          </table></div>
+          <div id="emptyFin" class="empty">Nenhuma O.S. aguardando liberação do Financeiro.</div>
         </div>
       </section>
 
@@ -557,7 +573,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-06</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-06b</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -883,16 +899,16 @@ DEFAULT_USERS.forEach(function(du){if(!usuarios.find(function(u){return (u.user|
 localStorage.setItem('magri_users',JSON.stringify(usuarios));
 function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usuarios));}
 let sessao=JSON.parse(localStorage.getItem('magri_session')||'null');
-const ALL_VIEWS=['gestao','comercial','clientes','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','diretoria','catalogo','cobranca'];
+const ALL_VIEWS=['gestao','comercial','clientes','financeiro','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','diretoria','catalogo','cobranca'];
 const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Produção','Expedição','Financeiro'];
-const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','clientes','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Produção':['gestao','amarracao','banho','reforco','tanque','troca','resumo','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','cobranca','catalogo','resumo']};
+const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','clientes','catalogo','cobranca'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Produção':['gestao','amarracao','banho','reforco','tanque','troca','resumo','qualidade'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','financeiro','cobranca','catalogo','resumo']};
 let rolePerms=JSON.parse(localStorage.getItem('magri_roleperms')||'null')||{};
 ROLES_CONFIG.forEach(function(r){if(!rolePerms[r])rolePerms[r]=(ROLE_VIEWS_DEFAULT[r]||['gestao']).slice();});
 localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));
 function salvarRolePerms(){localStorage.setItem('magri_roleperms',JSON.stringify(rolePerms));}
 function viewsDoRole(role){if(role==='Admin')return ALL_VIEWS.concat(['usuarios','precos']);return rolePerms[role]||[];}
 function togglePerm(role,view){if(!rolePerms[role])rolePerms[role]=[];var i=rolePerms[role].indexOf(view);if(i>-1)rolePerms[role].splice(i,1);else rolePerms[role].push(view);salvarRolePerms();aplicarPermissoes();}
-function renderPermissoes(){var box=document.getElementById('permBox');if(!box)return;var lab={gestao:'Gestão',comercial:'Comercial',fotobruto:'Foto/Bruto',amarracao:'Amarração',banho:'Banho',qualidade:'Qualidade',expedicao:'Expedição',verniz:'Verniz',reforco:'Reforço',tanque:'Tanque',troca:'Troca Tq',resumo:'Resumo',catalogo:'Catálogo',cobranca:'Cobrança'};var html='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:4px 6px">Papel</th>';ALL_VIEWS.forEach(function(v){html+='<th style="padding:4px 3px;white-space:nowrap">'+lab[v]+'</th>';});html+='</tr></thead><tbody>';ROLES_CONFIG.forEach(function(r){html+='<tr><td style="font-weight:700;padding:4px 6px">'+r+'</td>';ALL_VIEWS.forEach(function(v){var chk=(rolePerms[r]||[]).indexOf(v)>-1?'checked':'';html+='<td style="text-align:center"><input type="checkbox" '+chk+' onchange="togglePerm(\''+r+'\',\''+v+'\')"></td>';});html+='</tr>';});html+='<tr><td style="font-weight:700;color:#888;padding:4px 6px">Admin</td><td colspan="'+ALL_VIEWS.length+'" style="color:#888">acessa todas as abas (fixo)</td></tr></tbody></table>';box.innerHTML=html;}
+function renderPermissoes(){var box=document.getElementById('permBox');if(!box)return;var lab={gestao:'Gestão',comercial:'Comercial',financeiro:'Financeiro',fotobruto:'Foto/Bruto',amarracao:'Amarração',banho:'Banho',qualidade:'Qualidade',expedicao:'Expedição',verniz:'Verniz',reforco:'Reforço',tanque:'Tanque',troca:'Troca Tq',resumo:'Resumo',catalogo:'Catálogo',cobranca:'Cobrança'};var html='<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr><th style="text-align:left;padding:4px 6px">Papel</th>';ALL_VIEWS.forEach(function(v){html+='<th style="padding:4px 3px;white-space:nowrap">'+lab[v]+'</th>';});html+='</tr></thead><tbody>';ROLES_CONFIG.forEach(function(r){html+='<tr><td style="font-weight:700;padding:4px 6px">'+r+'</td>';ALL_VIEWS.forEach(function(v){var chk=(rolePerms[r]||[]).indexOf(v)>-1?'checked':'';html+='<td style="text-align:center"><input type="checkbox" '+chk+' onchange="togglePerm(\''+r+'\',\''+v+'\')"></td>';});html+='</tr>';});html+='<tr><td style="font-weight:700;color:#888;padding:4px 6px">Admin</td><td colspan="'+ALL_VIEWS.length+'" style="color:#888">acessa todas as abas (fixo)</td></tr></tbody></table>';box.innerHTML=html;}
 function fazerLogin(){var u=document.getElementById('loginUser').value.trim();var p=document.getElementById('loginPass').value;var f=usuarios.find(function(x){return x.user.toLowerCase()===u.toLowerCase()&&x.pass===p;});if(!f){document.getElementById('loginErro').style.display='block';return;}sessao={user:f.user,role:f.role};localStorage.setItem('magri_session',JSON.stringify(sessao));document.getElementById('loginErro').style.display='none';document.getElementById('loginPass').value='';document.getElementById('loginOverlay').style.display='none';aplicarPermissoes();}
 function logout(){sessao=null;localStorage.removeItem('magri_session');var lo=document.getElementById('loginOverlay');if(lo)lo.style.display='flex';}
 function aplicarPermissoes(){if(!sessao){var lo=document.getElementById('loginOverlay');if(lo)lo.style.display='flex';return;}var al=viewsDoRole(sessao.role);document.querySelectorAll('.nav-item').forEach(function(it){var v=it.dataset.view;if(v)it.style.display=(al.indexOf(v)>-1)?'':'none';});var at=document.querySelector('.nav-item.active');if(!at||at.style.display==='none'||al.indexOf(at.dataset.view)===-1){irParaView(al[0]||'gestao');}var ui=document.getElementById('userInfo');if(ui)ui.textContent=sessao.user+' \u00b7 '+sessao.role;}
@@ -966,7 +982,7 @@ function fmt(dstr){if(!dstr)return '';const p=(''+dstr).slice(0,10).split('-');r
 function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 const PRAZO_SETOR=2;
 
-const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],clientes:['Clientes','Cadastro de clientes — nome, CNPJ e telefone'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],diretoria:['Diretoria','Painel gerencial — ranking de clientes, farol/SLA e produção'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor'],precos:['Serviços e Preços','Cadastro de tipos de banho, complementares e serviços (admin)']};
+const titulos={comercial:['Comercial','Cadastro e acompanhamento de Ordens de Serviço'],clientes:['Clientes','Cadastro de clientes — nome, CNPJ e telefone'],financeiro:['Financeiro','Liberação de O.S. para produção e recebimento prévio'],fotobruto:['Foto / Bruto','Separação, contagem, foto, controle e etiqueta'],amarracao:['Amarração / Gancheira','Preparo das peças para entrar na galvanoplastia'],banho:['Banho / Galvanoplastia','Recebe da amarração, pesa e libera para a Qualidade'],qualidade:['Qualidade','Apontamento de produção após o banho'],reforco:['Reforço','Lançamento de reforços e controle de garrafinhas'],tanque:['Tanque','Saldo dos tanques e farol de reforço'],expedicao:['Expedição','Conferência, pesagem, etiqueta do cliente e retrabalho'],gestao:['Gestão à Vista','Farol de prazos por setor — máximo 2 dias úteis por setor'],resumo:['Resumo de Produção','Volume banhado por dia e mês, modo e produtividade'],diretoria:['Diretoria','Painel gerencial — ranking de clientes, farol/SLA e produção'],troca:['Controle de Troca de Tanque','Período de uso, volume banhado e reforçado por versão do tanque'],verniz:['Verniz (Terceiro)','Envio, retorno e reinspeção do verniz cataforético — 5 dias úteis'],catalogo:['Catálogo do Cliente','Gera o catálogo de sub-itens (PDF) com fotos, pesos e preços'],cobranca:['Cobrança / Fechamento','Formulário de cobrança com banho no peso final + serviços'],usuarios:['Usuários','Controle de acesso por setor'],precos:['Serviços e Preços','Cadastro de tipos de banho, complementares e serviços (admin)']};
 document.querySelectorAll('.nav-item').forEach(function(it){
   it.addEventListener('click',function(){var v=it.dataset.view;if(!v)return;if(sessao){var al=viewsDoRole(sessao.role);if(al.indexOf(v)===-1)return;}irParaView(v);});
 });
@@ -1352,10 +1368,23 @@ document.getElementById('osForm').addEventListener('submit',function(e){
   const editId=document.getElementById('editId').value;
   const header={dataEntrada:g('dataEntrada'),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g('peso'),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
   if(editId){const o=dados.find(x=>x.id===editId);Object.assign(o,header);}
-  else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Foto/Bruto',fbRecebidoEm:hojeISO(),fb:null}));}
+  else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Financeiro',finRecebidoEm:hojeISO(),fb:null}));}
   try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();
 });
-function comEnviarFoto(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.setor='Foto/Bruto';o.fbRecebidoEm=hojeISO();o.devolvido=false;salvar();render();alert('O.S. '+(o.numOS||'')+' enviada para o Foto/Bruto.');}
+function comEnviarFoto(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.setor='Financeiro';o.finRecebidoEm=hojeISO();o.devolvido=false;salvar();render();alert('O.S. '+(o.numOS||'')+' enviada para o Financeiro.');}
+function renderFinanceiro(){
+  var q=((document.getElementById('buscaFin')||{}).value||'').toLowerCase();
+  var fila=dados.filter(function(o){return o.setor==='Financeiro';});
+  var lista=fila.filter(function(o){return !q||JSON.stringify(o).toLowerCase().includes(q);});
+  var tb=document.getElementById('tbodyFin');
+  if(tb){tb.innerHTML='';lista.forEach(function(o){var tr=document.createElement('tr');
+    tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.finRecebidoEm)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td><input type="number" step="0.01" id="finPrev_'+o.id+'" value="'+(o.finRecebPrevio||'')+'" placeholder="0,00" style="width:110px;padding:6px"></td><td><input type="text" id="finObs_'+o.id+'" value="'+((''+(o.finObs||'')).replace(/"/g,"&quot;"))+'" placeholder="opcional" style="width:150px;padding:6px"></td><td class="row-act"><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-excel" onclick="liberarFinanceiro(\''+o.id+'\')">Liberar p/ produção</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tb.appendChild(tr);});}
+  var emp=document.getElementById('emptyFin');if(emp)emp.style.display=lista.length?'none':'block';
+  var cnt=document.getElementById('cnt-financeiro');if(cnt)cnt.textContent=fila.length;
+  var cards=document.getElementById('cards-fin');if(cards){var totOrc=fila.reduce(function(s,o){return s+totalOS(o);},0);cards.innerHTML='<div class="card"><div class="n">'+fila.length+'</div><div class="l">Aguardando liberação</div></div><div class="card azul"><div class="n" style="font-size:18px">'+brl(totOrc)+'</div><div class="l">Orçamento na fila</div></div>';}
+}
+function liberarFinanceiro(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var pv=document.getElementById('finPrev_'+id);var ob=document.getElementById('finObs_'+id);o.finRecebPrevio=pv?pv.value:'';o.finObs=ob?ob.value:'';o.finLiberadoEm=hojeISO();o.setor='Foto/Bruto';o.fbRecebidoEm=hojeISO();salvar();render();alert('O.S. '+(o.numOS||'')+' liberada para a produção (Foto/Bruto).');}
 function editarCom(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   if(o.setor&&o.setor!=='Comercial'){alert('Esta O.S. está no setor "'+o.setor+'". Para editar, ela precisa estar no Comercial — peça ao setor atual para devolver ao Comercial (botão Devolver → Comercial).');return;}
@@ -1496,7 +1525,7 @@ async function migrarFotosNuvem(){
   for(var i=0;i<tasks.length;i++){
     if(st)st.textContent='Enviando '+(i+1)+' de '+tasks.length+'...';
     try{
-      var blob=await (await fetch(tasks[i].data)).blob();
+      var blob=dataURLtoBlob(tasks[i].data);
       var name='mig_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,6)+'.jpg';
       var up=await window.__sb.storage.from('fotos').upload(name,blob,{contentType:'image/jpeg',upsert:false});
       if(up.error){fail++;console.warn('mig',up.error.message);continue;}
@@ -1513,7 +1542,8 @@ function fotosSubitens(o){var arr=[];(o.itens||[]).forEach(function(it){(it.subi
 function primeiraFotoOS(o){var a=fotosSubitens(o);return a.length?a[0].foto:((o.fb&&o.fb.foto)||'');}
 function osAtualFb(){return dados.find(function(x){return x.id===document.getElementById('fbId').value;});}
 function sbItemLabel(it,i){return 'Lote '+(i+1)+' — '+(it.banho||'')+(it.cor?' '+it.cor:'')+' ('+(it.peso||0)+'kg)';}
-function uploadFotoNuvem(dataUrl,cb){if(!window.__sb){cb(dataUrl);return;}try{fetch(dataUrl).then(function(res){return res.blob();}).then(function(blob){var name='fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';window.__sb.storage.from('fotos').upload(name,blob,{contentType:'image/jpeg',upsert:false}).then(function(up){if(up.error){console.warn('upload foto',up.error.message);cb(dataUrl);return;}var pub=window.__sb.storage.from('fotos').getPublicUrl(name);cb((pub&&pub.data&&pub.data.publicUrl)||dataUrl);},function(e){console.warn('upload foto',e);cb(dataUrl);});},function(e){console.warn('foto blob',e);cb(dataUrl);});}catch(e){console.warn('upload foto ex',e);cb(dataUrl);}}
+function dataURLtoBlob(dataUrl){var parts=(''+dataUrl).split(',');var mime=(parts[0].match(/:(.*?);/)||[])[1]||'image/jpeg';var bin=atob(parts[1]||'');var n=bin.length;var u8=new Uint8Array(n);while(n--){u8[n]=bin.charCodeAt(n);}return new Blob([u8],{type:mime});}
+function uploadFotoNuvem(dataUrl,cb){if(!window.__sb){cb(dataUrl);return;}try{var blob=dataURLtoBlob(dataUrl);var name='fb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.jpg';window.__sb.storage.from('fotos').upload(name,blob,{contentType:'image/jpeg',upsert:false}).then(function(up){if(up.error){console.warn('upload foto',up.error.message);cb(dataUrl);return;}var pub=window.__sb.storage.from('fotos').getPublicUrl(name);cb((pub&&pub.data&&pub.data.publicUrl)||dataUrl);},function(e){console.warn('upload foto',e);cb(dataUrl);});}catch(e){console.warn('upload foto ex',e);cb(dataUrl);}}
 function processSbFoto(file){if(!file)return;var r=new FileReader();r.onload=function(ev){var img=new Image();img.onload=function(){var max=900,w=img.width,h=img.height;if(w>max||h>max){var sc=max/Math.max(w,h);w=w*sc;h=h*sc;}var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);var durl=c.toDataURL('image/jpeg',0.7);var pv=document.getElementById('sbFotoPrev');pv.src=durl;pv.style.display='inline';sbFotoData='';sbFotoPend=true;if(pv)pv.title='enviando foto...';uploadFotoNuvem(durl,function(url){sbFotoPend=false;if(url&&(''+url).indexOf('http')===0){sbFotoData=url;if(pv)pv.title='foto na nuvem';}else{sbFotoData=durl;if(pv)pv.title='foto (local)';alert('Não consegui enviar a foto para a nuvem agora. Ela ficou salva localmente — tente de novo com internet, se possível.');}});};img.src=ev.target.result;};r.readAsDataURL(file);}
 document.getElementById('sbFotoInput').addEventListener('change',function(e){processSbFoto(e.target.files[0]);});
 document.getElementById('sbCamInput').addEventListener('change',function(e){processSbFoto(e.target.files[0]);});
@@ -2198,6 +2228,7 @@ function exportRetrab(){
 }
 
 function render(){
+  renderFinanceiro();
   document.getElementById('clientes').innerHTML=clientesNomes().map(function(c){return '<option value="'+c+'">';}).join('');
 
   const qC=(document.getElementById('buscaCom').value||'').toLowerCase();
@@ -2205,7 +2236,7 @@ function render(){
   const listaC=dados.filter(o=>!qC||JSON.stringify(o).toLowerCase().includes(qC));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
   listaC.forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td>'+resumoItens(o)+servicosResumo(o)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button>'+(o.setor==='Comercial'?'<button class="btn-excel" onclick="comEnviarFoto(\''+o.id+'\')">Enviar p/ Foto/Bruto</button>':'')+'<button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
+    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td><b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td>'+resumoItens(o)+servicosResumo(o)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button>'+(o.setor==='Comercial'?'<button class="btn-excel" onclick="comEnviarFoto(\''+o.id+'\')">Enviar p/ Financeiro</button>':'')+'<button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
   let atras=0,hoje=0;dados.forEach(function(o){const s=statusEntrega(o);if(s.txt.indexOf('Atrasada')===0)atras++;if(s.txt==='Vence hoje')hoje++;});
