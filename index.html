@@ -178,7 +178,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-06b</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-06c</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -272,7 +272,7 @@
         <div class="cards" id="cards-fin"></div>
         <div class="panel">
           <div class="panel-head"><span class="dot"></span><h2>Financeiro — O.S. aguardando liberação</h2>
-            <div class="toolbar"><input type="text" id="buscaFin" placeholder="Buscar..." oninput="render()"></div>
+            <div class="toolbar"><input type="text" id="buscaFin" placeholder="Buscar..." oninput="render()"><button class="btn-azul" onclick="ativarAvisosFin()" style="padding:6px 12px" title="Autoriza os avisos na área de trabalho (fazer uma vez por computador)">🔔 Ativar avisos</button></div>
           </div>
           <div class="hint" style="padding:2px 4px 10px">O Comercial cria a O.S. e gera o orçamento. Aqui você registra o recebimento prévio (opcional) e libera a O.S. para a produção (Foto/Bruto) com um clique.</div>
           <div class="table-scroll"><table>
@@ -573,7 +573,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-06b</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-06c</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1385,6 +1385,45 @@ function renderFinanceiro(){
   var cards=document.getElementById('cards-fin');if(cards){var totOrc=fila.reduce(function(s,o){return s+totalOS(o);},0);cards.innerHTML='<div class="card"><div class="n">'+fila.length+'</div><div class="l">Aguardando liberação</div></div><div class="card azul"><div class="n" style="font-size:18px">'+brl(totOrc)+'</div><div class="l">Orçamento na fila</div></div>';}
 }
 function liberarFinanceiro(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var pv=document.getElementById('finPrev_'+id);var ob=document.getElementById('finObs_'+id);o.finRecebPrevio=pv?pv.value:'';o.finObs=ob?ob.value:'';o.finLiberadoEm=hojeISO();o.setor='Foto/Bruto';o.fbRecebidoEm=hojeISO();salvar();render();alert('O.S. '+(o.numOS||'')+' liberada para a produção (Foto/Bruto).');}
+var finKnownIds=new Set();var finFirstPoll=true;var finPollTimer=null;
+function tocarSino(){try{var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;var ctx=new AC();var o=ctx.createOscillator();var g=ctx.createGain();o.type='sine';o.connect(g);g.connect(ctx.destination);o.frequency.value=880;g.gain.value=0.08;o.start();setTimeout(function(){o.frequency.value=1175;},160);setTimeout(function(){g.gain.value=0.0001;},430);setTimeout(function(){try{o.stop();ctx.close();}catch(e){}},500);}catch(e){}}
+function notificarFinanceiro(n){
+  tocarSino();
+  var msg=(n===1)?'1 nova O.S. aguardando liberação no Financeiro.':(n+' novas O.S. aguardando liberação no Financeiro.');
+  try{var nav=document.querySelector('.nav-item[data-view="financeiro"]');if(nav){var old=nav.style.background;nav.style.background='#b3343e';setTimeout(function(){nav.style.background=old||'';},2600);}}catch(e){}
+  if(('Notification' in window)&&Notification.permission==='granted'){try{var nt=new Notification('Magri — Financeiro',{body:msg,tag:'magri-fin'});nt.onclick=function(){window.focus();try{irParaView('financeiro');}catch(e){}nt.close();};}catch(e){}}
+}
+function ativarAvisosFin(){
+  if(!('Notification' in window)){alert('Este navegador não suporta avisos na área de trabalho.');return;}
+  Notification.requestPermission().then(function(p){if(p==='granted'){tocarSino();alert('Avisos ativados neste computador! Você receberá uma notificação quando uma O.S. chegar para liberação.');}else{alert('Avisos não autorizados. Você ainda verá o número na aba Financeiro, mas sem pop-up.');}});
+}
+async function pollFinanceiro(){
+  if(!window.__sb)return;
+  try{
+    var all=await window.__sb.from('ordens').select('id,setor');
+    if(all.error)return;
+    var setorById={};(all.data||[]).forEach(function(r){setorById[String(r.id)]=r.setor;});
+    dados.forEach(function(o){var s=setorById[String(o.id)];if(s&&s!==o.setor)o.setor=s;});
+    var finIds=Object.keys(setorById).filter(function(id){return setorById[id]==='Financeiro';});
+    var missing=finIds.filter(function(id){return !dados.some(function(o){return String(o.id)===id;});});
+    if(missing.length){var rows=await window.__sb.from('ordens').select('id,dados').in('id',missing);if(rows&&rows.data){rows.data.forEach(function(r){if(!dados.some(function(o){return String(o.id)===String(r.id);}))dados.unshift(r.dados);});}}
+    var prev=Array.from(finKnownIds);
+    var novos=finIds.filter(function(id){return finKnownIds.size&&!finKnownIds.has(id);});
+    var saiu=prev.filter(function(id){return finIds.indexOf(id)===-1;});
+    finKnownIds=new Set(finIds);
+    if(finFirstPoll){finFirstPoll=false;}
+    else if(novos.length){notificarFinanceiro(novos.length);}
+    var mudou=novos.length>0||saiu.length>0;
+    var editando=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#tbodyFin');
+    if(mudou&&!editando&&typeof renderFinanceiro==='function')renderFinanceiro();
+  }catch(e){console.warn('poll fin',e);}
+}
+function iniciarAvisosFin(){
+  if(!window.__sb||finPollTimer)return;
+  if(!(typeof sessao!=='undefined'&&sessao&&viewsDoRole(sessao.role).indexOf('financeiro')>-1))return;
+  setTimeout(pollFinanceiro,3000);
+  finPollTimer=setInterval(pollFinanceiro,45000);
+}
 function editarCom(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   if(o.setor&&o.setor!=='Comercial'){alert('Esta O.S. está no setor "'+o.setor+'". Para editar, ela precisa estar no Comercial — peça ao setor atual para devolver ao Comercial (botão Devolver → Comercial).');return;}
@@ -2431,7 +2470,7 @@ function exportAm(){
   baixarXls('Amarracao_Magri',cols,lin);
 }
 
-aplicarLogoHeader();render();if(sessao){aplicarPermissoes();}else{document.getElementById('loginOverlay').style.display='flex';}
+aplicarLogoHeader();render();if(sessao){aplicarPermissoes();}else{document.getElementById('loginOverlay').style.display='flex';}try{iniciarAvisosFin();}catch(e){}
 </script>
 
 <script>
