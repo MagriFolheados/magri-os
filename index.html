@@ -179,7 +179,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07e</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07f</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -606,7 +606,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07e</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07f</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2054,6 +2054,25 @@ function linhasBanho(it,pesoKg){
   if(c.rodioNegro)lines.push({nome:'Ródio Negro',valor:pesoG*(parseFloat(c.rodioNegroPreco)||0),cat:'servico'});
   return lines;
 }
+function buildConferenciaHTML(o){
+  var rows=(o.itens||[]).map(function(it,i){
+    var adic=complResumo(it).filter(function(x){return x!=='Cataforético';}).join(', ')||'—';
+    var cat=(it.compl&&it.compl.cataforetico)?'Sim':'—';
+    var cam=etqCamadaItem(it)||'—';
+    return '<tr><td>Lote '+(i+1)+'</td><td>'+(it.produto||'—')+'</td><td class="num">'+(it.peso?(g2((parseFloat(it.peso)||0)*1000)+' g'):'—')+'</td><td>'+(it.banho||'—')+(it.cor?(' '+it.cor):'')+'</td><td class="ctr">'+cam+'</td><td>'+adic+'</td><td class="ctr">'+cat+'</td></tr>';
+  }).join('');
+  var serv=(o.servicos||[]).map(function(x){return '<tr><td colspan="2">'+(x.servico||'')+(x.cor?(' ('+x.cor+')'):'')+'</td><td class="num">'+(x.qtd||'')+'</td></tr>';}).join('');
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Conferência O.S. '+(o.numOS||'')+'</title>'+docCobCSS()+'</head><body>'+
+    '<div class="head">'+logoTag(56)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Conferência (Qualidade)</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data de entrada:</b> '+fmt(o.dataEntrada)+' &nbsp;|&nbsp; <b>Etiqueta:</b> '+(o.etiqueta||'—')+'</div></div>'+
+    '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
+    '<h2>Resumo por lote (sem valores)</h2>'+
+    '<table><thead><tr><th>Lote</th><th>Produto</th><th class="num">Peso</th><th>Serviço (banho)</th><th class="ctr">Camada</th><th>Adicionais</th><th class="ctr">CAT</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Sem lotes.</td></tr>')+'</tbody></table>'+
+    (serv?('<h2>Serviços adicionais</h2><table><thead><tr><th colspan="2">Descrição</th><th class="num">Qtd</th></tr></thead><tbody>'+serv+'</tbody></table>'):'')+
+    '<div class="nota">Documento de conferência interna — sem valores de preço.</div>'+
+    '<div class="nota" style="margin-top:20px">Conferido por: ____________________________  &nbsp;&nbsp; Data: ____ / ____ / ______</div>'+
+    '</body></html>';
+}
+function gerarConferencia(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a conferência.');return;}w.document.write(buildConferenciaHTML(o));w.document.close();}
 function docCobCSS(){return '<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;padding:20px;color:#1a1a1a}h1{font-size:20px;margin:0;color:#a9862f}.head{border-bottom:2px solid #c8a24a;padding-bottom:10px;margin-bottom:16px}.head .sub{font-size:13px;color:#555;margin-top:4px}h2{font-size:14px;color:#a9862f;margin:18px 0 6px;border-bottom:1px solid #eee;padding-bottom:4px}table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:8px;border:1.5px solid #555}th{background:#f4f5f7;text-align:left;padding:6px 8px;border:1px solid #888}td{padding:6px 8px;border:1px solid #999}.grp td{background:#faf3e0;font-weight:bold}.tot{margin-top:14px;text-align:right;font-size:14px;line-height:1.7}.tot .grand{font-size:20px;font-weight:bold;color:#a9862f}.nota{font-size:11px;color:#888;margin-top:14px}.imprimir{margin:14px 0;text-align:center}button{background:#c8a24a;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px}.itemh{font-weight:bold;font-size:12.5px;margin:12px 0 3px}.num{text-align:right}.ctr{text-align:center}tr.tl td,tr.bloco td{background:#fff2a8;font-weight:bold}table.fin{max-width:420px;margin-left:auto}table.fin td{font-size:13px}@media print{.imprimir{display:none}@page{size:A4;margin:12mm}}</style>';}
 function detalheItens(o,pesoFn,cortesiaOn){
   var rows='';
@@ -2443,7 +2462,7 @@ function render(){
       const st=o.qualStatus||'Recebido';
       const sel='<select onchange="qualStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
       const tr=document.createElement('tr');
-      tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.qualRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+g2(pbT*1000)+' g</td><td>'+nap+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirApont(\''+o.id+'\')">Apontar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+      tr.innerHTML='<td><b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.qualRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+g2(pbT*1000)+' g</td><td>'+nap+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-azul" onclick="gerarConferencia(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">Conferência</button><button class="btn-abrir" onclick="abrirApont(\''+o.id+'\')">Apontar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
       tbQu.appendChild(tr);});}
   document.getElementById('tanques').innerHTML=TANQUES.map(t=>'<option value="'+t+'">').join('');
   const hj=hojeISO(),mesAtual=new Date().getMonth()+1;
