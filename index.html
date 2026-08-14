@@ -180,7 +180,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07u</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07v</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -196,7 +196,7 @@
         </div>
         <div class="panel">
           <div class="panel-head"><span class="dot"></span><h2>O.S. em produção</h2>
-            <div class="toolbar"><input type="text" id="buscaGv" placeholder="Buscar..." oninput="render()"><select id="gvSetor" onchange="render()"><option value="todos">Todos os setores</option><option>Foto/Bruto</option><option>Amarração</option><option>Banho</option><option>Qualidade</option><option>Expedição</option></select><select id="gvFarol" onchange="render()"><option value="todos">Todas as situações</option><option value="verde">No prazo</option><option value="amarelo">Em atenção</option><option value="vermelho">Atrasadas</option></select><button class="btn-excel" onclick="exportGv()">Exportar</button></div>
+            <div class="toolbar" style="gap:6px;flex-wrap:wrap;align-items:center"><input type="text" id="buscaGv" placeholder="Buscar..." oninput="render()" style="width:130px;padding:5px 8px;font-size:12px"><select id="gvSetor" onchange="render()" style="width:130px;padding:5px;font-size:12px"><option value="todos">Todos os setores</option><option>Foto/Bruto</option><option>Amarração</option><option>Banho</option><option>Qualidade</option><option>Expedição</option></select><select id="gvFarol" onchange="render()" style="width:135px;padding:5px;font-size:12px"><option value="todos">Todas as situações</option><option value="verde">No prazo</option><option value="amarelo">Em atenção</option><option value="vermelho">Atrasadas</option></select><button class="btn-excel" onclick="exportGv()" style="padding:5px 10px;font-size:12px">Exportar</button></div>
           </div>
           <div class="table-scroll"><table>
             <thead><tr><th>Farol</th><th>Nº O.S.</th><th>Cliente</th><th>Setor atual</th><th>Recebido no setor</th><th>Dias úteis no setor</th><th>Situação</th></tr></thead>
@@ -493,6 +493,7 @@
           <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Produtividade por responsável (mês)</h2></div><div class="panel-body"><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="rsResp"></tbody></table></div></div>
         </div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Consumo por tanque (mês)</h2><div class="toolbar"><button class="btn-excel" onclick="exportResumo()">Exportar</button></div></div><div class="panel-body"><div class="hint" style="margin-bottom:6px">Folheação por metal (Camada−1)×Peso; demais tanques por peso.</div><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="rsMetal"></tbody></table></div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>O.S. concluídas no mês — dentro × fora do prazo</h2></div><div class="panel-body"><div class="hint" style="margin-bottom:6px">Concluídas (Expedido) no mês atual — compara a data de saída com a previsão de entrega. Volume = peso final (ou declarado, se ainda sem pesagem).</div><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:5px 8px">Situação</th><th style="text-align:right;padding:5px 8px">Qtd O.S.</th><th style="text-align:right;padding:5px 8px">Volume (kg)</th></tr></thead><tbody id="rsPrazo"></tbody></table></div></div>
       </section>
       <section class="view" id="view-diretoria">
         <div class="panel" style="margin-bottom:12px"><div class="panel-body" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -609,7 +610,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07u</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07v</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1110,11 +1111,14 @@ var MESES=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov',
 function barRows(pairs,unit){var max=0.0001;pairs.forEach(function(p){if(p[1]>max)max=p[1];});return pairs.map(function(p){var pct=(p[1]/max*100);return '<tr><td style="padding:4px 8px;white-space:nowrap">'+p[0]+'</td><td style="padding:4px 8px;width:60%"><div style="background:var(--ouro);height:14px;border-radius:3px;width:'+pct.toFixed(0)+'%;min-width:2px"></div></td><td style="padding:4px 8px;text-align:right;font-weight:700;white-space:nowrap">'+p[1].toFixed(2)+(unit||'')+'</td></tr>';}).join('');}
 function renderResumo(){
   var mesAtual=new Date().getMonth()+1;
+  var _concM=dados.filter(function(o){return o.setor==='Expedido'&&o.dataSaida&&parseInt((''+o.dataSaida).slice(5,7))===mesAtual;});
+  var _inN=0,_inV=0,_outN=0,_outV=0;
+  _concM.forEach(function(o){var vol=pesoFinalTotalOS(o);if(!vol)vol=pesoDeclaradoOS(o);var onTime=(!o.prevEntregaISO)||((''+o.dataSaida)<=(''+o.prevEntregaISO));if(onTime){_inN++;_inV+=vol;}else{_outN++;_outV+=vol;}});
   var pm={},pmMetal={};apont.forEach(function(a){var m=a.mes||0;pm[m]=(pm[m]||0)+(a.peso||0);var _tk=a.tanques||(a.tanque?[a.tanque]:[]);pmMetal[m]=(pmMetal[m]||0)+((_tk.indexOf('Folheação')>-1)?(a.metal||0):0);});
   var pmesPeso=pm[mesAtual]||0,pmesMetal=pmMetal[mesAtual]||0;
   var nMes=apont.filter(function(a){return a.mes===mesAtual;}).length;
   var retrabMes=apont.filter(function(a){return a.mes===mesAtual&&a.modo==='Retrabalho';}).reduce(function(s,a){return s+(a.peso||0);},0);
-  var cc=document.getElementById('cards-rs');if(cc)cc.innerHTML='<div class="card"><div class="n">'+pmesPeso.toFixed(2)+'</div><div class="l">Kg banhado (mês)</div></div><div class="card azul"><div class="n">'+pmesMetal.toFixed(2)+'</div><div class="l">Metal (mês)</div></div><div class="card"><div class="n">'+nMes+'</div><div class="l">Apontamentos (mês)</div></div><div class="card vermelho"><div class="n">'+retrabMes.toFixed(2)+'</div><div class="l">Retrabalho kg (mês)</div></div>';
+  var cc=document.getElementById('cards-rs');if(cc)cc.innerHTML='<div class="card"><div class="n">'+pmesPeso.toFixed(2)+'</div><div class="l">Kg banhado (mês)</div></div><div class="card azul"><div class="n">'+pmesMetal.toFixed(2)+'</div><div class="l">Metal (mês)</div></div><div class="card"><div class="n">'+nMes+'</div><div class="l">Apontamentos (mês)</div></div><div class="card vermelho"><div class="n">'+retrabMes.toFixed(2)+'</div><div class="l">Retrabalho kg (mês)</div></div><div class="card verde"><div class="n">'+_inN+'</div><div class="l">Concluídas no prazo</div></div><div class="card vermelho"><div class="n">'+_outN+'</div><div class="l">Concluídas atrasadas</div></div>';
   // por mês
   var mesPairs=[];for(var m=1;m<=12;m++){if(pm[m])mesPairs.push([MESES[m],pm[m]]);}
   var e1=document.getElementById('rsMes');if(e1)e1.innerHTML=mesPairs.length?barRows(mesPairs):'<tr><td class="hint" style="padding:8px">Sem apontamentos.</td></tr>';
@@ -1134,6 +1138,7 @@ function renderResumo(){
   var mt={};apont.filter(function(a){return a.mes===mesAtual;}).forEach(function(a){var tks=a.tanques||(a.tanque?[a.tanque]:[]);tks.forEach(function(t){mt[t]=(mt[t]||0)+((t==='Folheação')?(a.metal||0):(a.peso||0));});});
   var mtPairs=Object.keys(mt).map(function(k){return [k,mt[k]];}).sort(function(x,y){return y[1]-x[1];});
   var e5=document.getElementById('rsMetal');if(e5)e5.innerHTML=mtPairs.length?barRows(mtPairs):'<tr><td class="hint" style="padding:8px">Sem consumo no mês.</td></tr>';
+  var e6=document.getElementById('rsPrazo');if(e6)e6.innerHTML=(_concM.length?('<tr><td style="padding:5px 8px;color:var(--verde);font-weight:700">Dentro do prazo</td><td style="padding:5px 8px;text-align:right;font-weight:700">'+_inN+'</td><td style="padding:5px 8px;text-align:right">'+g3(_inV)+'</td></tr><tr><td style="padding:5px 8px;color:var(--vermelho);font-weight:700">Fora do prazo</td><td style="padding:5px 8px;text-align:right;font-weight:700">'+_outN+'</td><td style="padding:5px 8px;text-align:right">'+g3(_outV)+'</td></tr><tr><td style="padding:5px 8px;font-weight:700;border-top:1px solid #ddd">Total</td><td style="padding:5px 8px;text-align:right;font-weight:700;border-top:1px solid #ddd">'+(_inN+_outN)+'</td><td style="padding:5px 8px;text-align:right;font-weight:700;border-top:1px solid #ddd">'+g3(_inV+_outV)+'</td></tr>'):'<tr><td class="hint" style="padding:8px" colspan="3">Nenhuma O.S. concluída no mês.</td></tr>');
   var cnt=document.getElementById('cnt-resumo');if(cnt)cnt.textContent=apont.length;
 }
 var dirYM=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');})();
