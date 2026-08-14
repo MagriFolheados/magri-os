@@ -180,7 +180,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07x</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07y</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -610,9 +610,9 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07x</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07y</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
-          <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
+          <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
         </div></div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Tipos de banho (personalizados)</h2></div><div class="panel-body">
@@ -1778,6 +1778,19 @@ function verFotosOrfas(){
   var w=window.open('','_blank');if(!w){alert('Permita pop-ups.');return;}
   w.document.write('<html><head><meta charset="utf-8"><title>Fotos sem vinculo</title></head><body style="font-family:Arial;padding:12px"><h3>Fotos sem vinculo (orfas) — '+orf.length+'</h3><p style="color:#555;font-size:13px">Fotos que existem na nuvem mas nao estao ligadas a nenhuma O.S. atual (ex.: itens excluidos). Clique com o botao direito para salvar.</p><div style="display:flex;flex-wrap:wrap;gap:8px">'+orf.map(function(k){return '<div style="border:1px solid #ccc;border-radius:6px;padding:4px;font-size:10px;text-align:center"><img src="'+(window.__fotos[k]||'')+'" style="width:150px;height:150px;object-fit:cover;border-radius:4px"><div>'+k+'</div></div>';}).join('')+'</div></body></html>');w.document.close();
 }
+async function backupAgora(){
+  if(!window.__sb){alert('Sem conexao com a nuvem. Abra o sistema logado no navegador.');return;}
+  if(!confirm('Gerar um backup agora na nuvem? (as fotos ja ficam guardadas a parte)'))return;
+  try{
+    var oR=await window.__sb.from('ordens').select('id,dados');var ords=(oR.data||[]).map(function(r){return r.dados;});
+    var aR=await window.__sb.from('apontamentos').select('id,dados');var aps=(aR.data||[]).map(function(r){return r.dados;});
+    var cR=await window.__sb.from('config').select('chave,valor');var cfg={};(cR.data||[]).forEach(function(r){cfg[r.chave]=r.valor;});
+    var id='manual_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    var ins=await window.__sb.from('backups').insert({id:id,dados:{ordens:ords,apontamentos:aps,config:cfg}});
+    if(ins&&ins.error){alert('Falha ao gravar backup: '+ins.error.message);return;}
+    alert('Backup criado agora: '+id+' ('+ords.length+' O.S., '+aps.length+' apontamentos). Disponivel em "Recuperar itens de backup".');
+  }catch(e){alert('Erro no backup: '+((e&&e.message)||e));}
+}
 async function migrarFotosNuvem(){
   if(!window.__sb){alert('Disponível só na versão online (nuvem).');return;}
   var st=document.getElementById('migStatus');
@@ -2821,7 +2834,7 @@ aplicarLogoHeader();render();if(sessao){aplicarPermissoes();}else{document.getEl
     KEYS_BLOB.forEach(function(k){if(cfgMap[k]!==undefined)_set(k,JSON.stringify(cfgMap[k]));else localStorage.removeItem(k);});
     var ordRes=await sb.from('ordens').select('id,dados');var snapOrd={};var arrOrd=(ordRes.data||[]).map(function(r){snapOrd[r.id]=JSON.stringify(r.dados);return r.dados;});_set('magri_os_v2',JSON.stringify(arrOrd));
     var apRes=await sb.from('apontamentos').select('id,dados');var snapAp={};var arrAp=(apRes.data||[]).map(function(r){snapAp[r.id]=JSON.stringify(r.dados);return r.dados;});_set('magri_apont_v1',JSON.stringify(arrAp));
-    try{var _bh=new Date().getHours();var _bt=new Date().toISOString().slice(0,10);if(_bh>=22){var _bk=await sb.from('backups').select('id').eq('id',_bt).maybeSingle();if(!_bk.error&&!_bk.data){await sb.from('backups').insert({id:_bt,dados:{ordens:arrOrd,apontamentos:arrAp,config:cfgMap}});var _cut=new Date(Date.now()-30*864e5).toISOString().slice(0,10);sb.from('backups').delete().lt('id',_cut).then(function(){},function(){});}}}catch(_be){console.warn('backup',_be);}
+    try{var _bt=new Date().toISOString().slice(0,10);if(true){var _bk=await sb.from('backups').select('id').eq('id',_bt).maybeSingle();if(!_bk.error&&!_bk.data){await sb.from('backups').insert({id:_bt,dados:{ordens:arrOrd,apontamentos:arrAp,config:cfgMap}});var _cut=new Date(Date.now()-30*864e5).toISOString().slice(0,10);sb.from('backups').delete().lt('id',_cut).then(function(){},function(){});}}}catch(_be){console.warn('backup',_be);}
     try{window.__fotos={};var _fids=await sb.from('fotos').select('id');var _fidl=(_fids.data||[]).map(function(r){return r.id;});for(var _bi=0;_bi<_fidl.length;_bi+=20){var _fr=await sb.from('fotos').select('id,b64').in('id',_fidl.slice(_bi,_bi+20));if(_fr&&_fr.data)_fr.data.forEach(function(r){window.__fotos[r.id]=r.b64;});}}catch(_ef){window.__fotos=window.__fotos||{};}
     _set('magri_session',JSON.stringify({user:email,role:role}));
     var _pend=0;
