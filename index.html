@@ -180,7 +180,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07v</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07w</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -610,7 +610,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07v</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07w</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -812,6 +812,23 @@
   </div>
 </div>
 
+<div class="modal-bg" id="desmModal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-head"><h3 id="desmTitle">Desmembrar lotes</h3><button class="x" onclick="closeDesm()">×</button></div>
+    <div class="modal-body">
+      <div class="info-os" id="desmInfo"></div>
+      <input type="hidden" id="desmId">
+      <div class="grid" style="margin-bottom:6px">
+        <div style="grid-column:1/-1"><label>O que fazer com os lotes marcados</label><select id="desmDest" onchange="desmDestRefresh()"><option value="lote">Separar em nova O.S. (segue no mesmo setor) — sufixo letra</option><option value="retrab">Enviar p/ RETRABALHO (Amarração) — sufixo -R</option></select></div>
+        <div style="grid-column:1/-1;display:none" id="desmMotivoBox"><label>Motivo do retrabalho</label><input type="text" id="desmMotivo" placeholder="Descreva o defeito"></div>
+      </div>
+      <div class="hint" style="margin-bottom:8px">Marque os lotes que saem para a nova O.S. O restante continua na O.S. de origem, sem travar.</div>
+      <div class="table-scroll" style="max-height:240px"><table><thead><tr><th>Sair?</th><th>Lote</th><th>Produto</th><th>Banho/Cor</th><th>Peso</th></tr></thead><tbody id="desmLotes"></tbody></table></div>
+      <div class="actions"><button class="btn-primary" onclick="confirmarDesm()">Confirmar</button><button class="btn-ghost" onclick="closeDesm()">Cancelar</button></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="cobModal">
   <div class="modal">
     <div class="modal-head"><h3 id="cobTitle">Cobrança</h3><button class="x" onclick="closeCob()">×</button></div>
@@ -936,7 +953,7 @@
         <div style="grid-column:1/-1"><label>Problema encontrado</label><input type="text" id="expRetrabMotivo" placeholder="Descreva o defeito"></div>
         <div><label>Qtd com defeito</label><input type="number" id="expRetrabQtd" min="0"></div>
       </div>
-      <div class="actions"><button style="background:var(--vermelho-bg);color:var(--vermelho)" onclick="gerarRetrabalho()">Gerar retrabalho e devolver p/ Amarração</button></div>
+      <div class="actions"><button style="background:var(--vermelho-bg);color:var(--vermelho)" onclick="gerarRetrabalho()">Gerar retrabalho (separa em -R, não trava a O.S.)</button></div>
     </div>
   </div>
 </div>
@@ -1459,7 +1476,7 @@ function renderFinanceiro(){
   var lista=fila.filter(function(o){return !q||JSON.stringify(o).toLowerCase().includes(q);});
   var tb=document.getElementById('tbodyFin');
   if(tb){tb.innerHTML='';lista.forEach(function(o){var tr=document.createElement('tr');
-    tr.innerHTML='<td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.finRecebidoEm)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td><input type="number" step="0.01" id="finPrev_'+o.id+'" value="'+(o.finRecebPrevio||'')+'" placeholder="0,00" style="width:110px;padding:6px"></td><td><input type="text" id="finObs_'+o.id+'" value="'+((''+(o.finObs||'')).replace(/"/g,"&quot;"))+'" placeholder="opcional" style="width:150px;padding:6px"></td><td class="row-act"><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-excel" onclick="liberarFinanceiro(\''+o.id+'\')">Liberar p/ produção</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.finRecebidoEm)+'</td><td><b>'+brl(totalOS(o))+'</b></td><td><input type="number" step="0.01" id="finPrev_'+o.id+'" value="'+(o.finRecebPrevio||'')+'" placeholder="0,00" style="width:110px;padding:6px"></td><td><input type="text" id="finObs_'+o.id+'" value="'+((''+(o.finObs||'')).replace(/"/g,"&quot;"))+'" placeholder="opcional" style="width:150px;padding:6px"></td><td class="row-act"><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-excel" onclick="liberarFinanceiro(\''+o.id+'\')">Liberar p/ produção</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tb.appendChild(tr);});}
   var emp=document.getElementById('emptyFin');if(emp)emp.style.display=lista.length?'none':'block';
   var envio=dados.filter(function(o){return o.envioFinPendente;});
@@ -2450,20 +2467,45 @@ function gerarEtiquetaCliente(){
   var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir as etiquetas.');return;}
   w.document.write(buildEtiquetasClienteHTML(o));w.document.close();
 }
+function desmDestRefresh(){var d=document.getElementById('desmDest').value;var mb=document.getElementById('desmMotivoBox');if(mb)mb.style.display=(d==='retrab')?'block':'none';}
+function desmBase(o){if(o.familiaBase)return o.familiaBase;return (''+(o.numOS||'')).replace(/-(?:[B-Z]|R\d+)$/,'');}
+function desmProxLetra(base){var used={};dados.forEach(function(o){if(desmBase(o)===base){var m=(''+(o.numOS||'')).match(/-([B-Z])$/);if(m)used[m[1]]=1;}});for(var c=66;c<=90;c++){var L=String.fromCharCode(c);if(!used[L])return L;}return 'X'+(''+Date.now()).slice(-3);}
+function desmProxR(oid){return 'R'+(dados.filter(function(x){return x.retrabalhoOrigemId===oid;}).length+1);}
+function recalcFbResumo(x){if(!x.fb)return;var _q=0,_pk=0,_pp=0;(x.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){_q+=parseInt(sb.qtd)||0;_pk+=parseFloat(sb.peso)||0;_pp+=(parseFloat(sb.precoUnit)||0)*(parseInt(sb.qtd)||0);});});x.fb=Object.assign({},x.fb,{qtd:_q||'',pesoPacote:_pk||'',precoPacote:_pp});}
+function abrirDesm(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;if((o.itens||[]).length<2){alert('Esta O.S. tem so um lote \u2014 nao ha o que desmembrar. (Para retrabalho de pecas especificas, use a inspecao da Expedicao.)');return;}document.getElementById('desmId').value=id;document.getElementById('desmTitle').textContent='Desmembrar lotes \u2014 O.S. '+(o.numOS||'');document.getElementById('desmInfo').innerHTML='<div><b>N\u00ba O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div><div><b>Setor</b>'+(o.setor||'')+'</div>';document.getElementById('desmDest').value='lote';var mb=document.getElementById('desmMotivoBox');if(mb)mb.style.display='none';var mo=document.getElementById('desmMotivo');if(mo)mo.value='';document.getElementById('desmLotes').innerHTML=(o.itens||[]).map(function(it,i){return '<tr><td style="text-align:center"><input type="checkbox" id="desm_'+i+'"></td><td><b>Lote '+(i+1)+'</b></td><td>'+(it.produto||'')+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+(it.peso||'')+'</td></tr>';}).join('');document.getElementById('desmModal').classList.add('show');}
+function closeDesm(){document.getElementById('desmModal').classList.remove('show');}
+function confirmarDesm(){var o=dados.find(function(x){return x.id===document.getElementById('desmId').value;});if(!o)return;var dest=document.getElementById('desmDest').value;var sel=[];(o.itens||[]).forEach(function(it,i){var el=document.getElementById('desm_'+i);if(el&&el.checked)sel.push(i);});if(!sel.length){alert('Marque ao menos um lote.');return;}if(sel.length>=(o.itens||[]).length){alert('Deixe ao menos um lote na O.S. de origem.');return;}var motivo='';if(dest==='retrab'){motivo=(document.getElementById('desmMotivo').value||'').trim();if(!motivo){alert('Descreva o motivo do retrabalho.');return;}}
+  var base=desmBase(o);o.familiaBase=base;
+  var moved=sel.map(function(i){return JSON.parse(JSON.stringify(o.itens[i]));});
+  o.itens=o.itens.filter(function(it,i){return sel.indexOf(i)<0;});recalcFbResumo(o);
+  var filho=JSON.parse(JSON.stringify(o));filho.id='os_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);filho.itens=moved;filho.servicos=[];filho.familiaBase=base;
+  if(dest==='retrab'){var suf=desmProxR(o.id);filho.numOS=base+'-'+suf;filho.loteDesmembrado=false;filho.retrabalho=true;filho.retrabalhoOrigem=o.numOS;filho.retrabalhoOrigemId=o.id;filho.retrabalhoMotivo=motivo;filho.etiqueta='Retrabalho';filho.observacao='Retrabalho da O.S. '+(o.numOS||'')+' \u2014 '+motivo;filho.dataEntrada=hojeISO();filho.prevEntregaISO=addDiasCorridos(hojeISO(),7);
+    ['fbRecebidoEm','fb','banhoRecebidoEm','banhoStatus','banhoConcluidoEm','qualRecebidoEm','qualStatus','qualConcluidoEm','expRecebidoEm','expStatus','dataSaida','verniz'].forEach(function(k){delete filho[k];});
+    filho.setor='Amarra\u00e7\u00e3o';filho.amRecebidoEm=hojeISO();filho.amStatus='Recebido';filho.amConcluidoEm='';
+    dados.unshift(filho);retrabalhos.unshift({id:'rt_'+Date.now(),osId:filho.id,os:filho.numOS,cliente:o.cliente,data:hojeISO(),motivo:motivo,qtd:'',resp:''});salvarRetrab();salvar();render();closeDesm();alert('Retrabalho separado na O.S. '+filho.numOS+' (Amarra\u00e7\u00e3o). A O.S. '+(o.numOS||'')+' seguiu normalmente com os demais lotes.');
+  } else {
+    var L=desmProxLetra(base);filho.numOS=base+'-'+L;filho.loteDesmembrado=true;filho.observacao='Desmembrado da O.S. '+(o.numOS||'')+(o.observacao?(' \u2014 '+o.observacao):'');recalcFbResumo(filho);
+    dados.unshift(filho);salvar();render();closeDesm();alert('Lotes desmembrados na O.S. '+filho.numOS+' (setor '+(filho.setor||'')+'). A O.S. '+(o.numOS||'')+' seguiu com os demais lotes.');
+  }
+}
 function gerarRetrabalho(){
   const id=document.getElementById('expId').value;const o=dados.find(x=>x.id===id);if(!o)return;
   const motivo=document.getElementById('expRetrabMotivo').value.trim();
   const qtd=document.getElementById('expRetrabQtd').value;
   if(!motivo){alert('Descreva o problema encontrado.');return;}
-  retrabalhos.unshift({id:'rt_'+Date.now(),osId:id,os:o.numOS,cliente:o.cliente,data:hojeISO(),motivo:motivo,qtd:qtd,resp:document.getElementById('expResp').value});
-  salvarRetrab();
-  o.setor='Amarração';o.amStatus='Recebido';o.amRecebidoEm=hojeISO();o.amConcluidoEm='';o.retrabalho=true;o.retrabalhoMotivo=motivo;
-  salvar();
-  document.getElementById('etqContent').innerHTML='<h4>RETRABALHO</h4><div class="os">O.S. '+(o.numOS||'')+'</div><div class="lin"><b>Cliente:</b><span>'+(o.cliente||'')+'</span></div><div class="lin"><b>Qtd:</b><span>'+(qtd||'')+'</span></div><div class="lin"><b>Problema:</b><span>'+motivo+'</span></div><div class="lin"><b>Data:</b><span>'+fmt(hojeISO())+'</span></div>';
+  var base=desmBase(o);o.familiaBase=base;var childNum=base+'-'+desmProxR(o.id);
+  var filho=JSON.parse(JSON.stringify(o));filho.id='os_'+Date.now()+'_r';filho.numOS=childNum;filho.familiaBase=base;filho.servicos=[];filho.retrabalho=true;filho.retrabalhoOrigem=o.numOS;filho.retrabalhoOrigemId=o.id;filho.retrabalhoMotivo=motivo;filho.etiqueta='Retrabalho';filho.observacao='Retrabalho da O.S. '+(o.numOS||'')+' — '+motivo;filho.dataEntrada=hojeISO();filho.prevEntregaISO=addDiasCorridos(hojeISO(),7);
+  ['fbRecebidoEm','fb','banhoRecebidoEm','banhoStatus','banhoConcluidoEm','qualRecebidoEm','qualStatus','qualConcluidoEm','expRecebidoEm','expStatus','dataSaida','verniz'].forEach(function(k){delete filho[k];});
+  filho.setor='Amarração';filho.amRecebidoEm=hojeISO();filho.amStatus='Recebido';filho.amConcluidoEm='';
+  dados.unshift(filho);
+  retrabalhos.unshift({id:'rt_'+Date.now(),osId:filho.id,os:childNum,cliente:o.cliente,data:hojeISO(),motivo:motivo,qtd:qtd,resp:document.getElementById('expResp').value});
+  salvarRetrab();salvar();
+  document.getElementById('etqContent').innerHTML='<h4>RETRABALHO</h4><div class="os">O.S. '+childNum+'</div><div class="lin"><b>Origem:</b><span>'+(o.numOS||'')+'</span></div><div class="lin"><b>Cliente:</b><span>'+(o.cliente||'')+'</span></div><div class="lin"><b>Qtd:</b><span>'+(qtd||'')+'</span></div><div class="lin"><b>Problema:</b><span>'+motivo+'</span></div><div class="lin"><b>Data:</b><span>'+fmt(hojeISO())+'</span></div>';
+  document.getElementById('expRetrabMotivo').value='';document.getElementById('expRetrabQtd').value='';
   document.getElementById('expModal').classList.remove('show');
   document.getElementById('etqModal').classList.add('show');
   render();
-  alert('Retrabalho registrado. O.S. '+(o.numOS||'')+' devolvida para a Amarração.');
+  alert('Retrabalho separado na O.S. '+childNum+' (Amarração). A O.S. '+(o.numOS||'')+' NÃO foi travada — segue na Expedição com o restante.');
 }
 function exportRetrab(){
   if(!retrabalhos.length){alert('Nenhum retrabalho registrado.');return;}
@@ -2505,7 +2547,7 @@ function render(){
     const pu=f.precoUnit?Number(f.precoUnit).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
     const stt=f.qtd?'<span class="st st-recebido">Em andamento</span>':'<span class="st st-nfechado">Pendente</span>';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.fbRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+(f.fornecedor||'')+'</td><td>'+(f.qtd||'')+'</td><td>'+pu+'</td><td>'+pp+'</td><td>'+stt+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirFb(\''+o.id+'\')">Processar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.fbRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+(f.fornecedor||'')+'</td><td>'+(f.qtd||'')+'</td><td>'+pu+'</td><td>'+pp+'</td><td>'+stt+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirFb(\''+o.id+'\')">Processar</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tbF.appendChild(tr);});
   const fbTot=naFila.length,fbPend=naFila.filter(o=>!o.fb||!o.fb.qtd).length,fbAtr=naFila.filter(o=>prazoSetor(o.fbRecebidoEm,o.fb&&o.fb.concluidoEm).cls==='prazo-atraso').length;
   const totPecas=dados.reduce((s,o)=>s+(o.fb&&o.fb.qtd?parseInt(o.fb.qtd):0),0);
@@ -2522,7 +2564,7 @@ function render(){
     const sel='<select onchange="amStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
     const btn=concl?'<button class="btn-excel" onclick="amEncaminhar(\''+o.id+'\')">Encaminhar p/ Banho</button>':'<button class="btn-ghost" onclick="amEncaminhar(\''+o.id+'\')" style="background:var(--amarelo-bg);color:var(--amarelo)">Encaminhar p/ Banho</button>';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.amRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+sel+'</td><td class="row-act">'+btn+'<button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.amRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+sel+'</td><td class="row-act">'+btn+'<button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tbA.appendChild(tr);});
   const amRec=naAm.filter(o=>(o.amStatus||'Recebido')==='Recebido').length,amProc=naAm.filter(o=>o.amStatus==='Em processo').length,amConcl=naAm.filter(o=>o.amStatus==='Concluído').length,amAtr=naAm.filter(o=>prazoSetor(o.amRecebidoEm,o.amStatus==='Concluído').cls==='prazo-atraso').length;
   document.getElementById('cards-am').innerHTML='<div class="card"><div class="n">'+naAm.length+'</div><div class="l">No setor</div></div><div class="card azul"><div class="n">'+amRec+'</div><div class="l">Recebidas</div></div><div class="card amarelo"><div class="n">'+amProc+'</div><div class="l">Em processo</div></div><div class="card verde"><div class="n">'+amConcl+'</div><div class="l">Concluídas</div></div><div class="card vermelho"><div class="n">'+amAtr+'</div><div class="l">Atrasadas (>2 du)</div></div>';
@@ -2538,7 +2580,7 @@ function render(){
     const st=o.banhoStatus||'Recebido';
     const sel='<select onchange="banhoStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.banhoRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+nlin+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirPesagem(\''+o.id+'\')">Pesagem</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.banhoRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+nlin+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirPesagem(\''+o.id+'\')">Pesagem</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tbB.appendChild(tr);});
   const qAp=(document.getElementById('buscaApont').value||'').toLowerCase();
   const listaAp=apont.filter(a=>!qAp||JSON.stringify(a).toLowerCase().includes(qAp));
@@ -2559,7 +2601,7 @@ function render(){
       const st=o.qualStatus||'Recebido';
       const sel='<select onchange="qualStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
       const tr=document.createElement('tr');
-      tr.innerHTML='<td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.qualRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+g2(pbT*1000)+' g</td><td>'+nap+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-azul" onclick="gerarConferencia(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">Conferência</button><button class="btn-abrir" onclick="abrirApont(\''+o.id+'\')">Apontar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+      tr.innerHTML='<td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.qualRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+g2(pbT*1000)+' g</td><td>'+nap+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-azul" onclick="gerarConferencia(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">Conferência</button><button class="btn-abrir" onclick="abrirApont(\''+o.id+'\')">Apontar</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
       tbQu.appendChild(tr);});}
   document.getElementById('tanques').innerHTML=TANQUES.map(t=>'<option value="'+t+'">').join('');
   const hj=hojeISO(),mesAtual=new Date().getMonth()+1;
@@ -2614,7 +2656,7 @@ function render(){
     const sel='<select onchange="expStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
     var _cr=confResumoExp(o);const conf=_cr==='Sim'?'<span class="st st-entregue">Sim</span>':(_cr==='Não'?'<span class="st" style="background:var(--vermelho-bg);color:var(--vermelho)">Não</span>':'<span class="st st-recebido">'+_cr+'</span>');
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.expRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+(e.qtd||'')+'</td><td>'+(pesoFinalTotalOS(o)?pesoFinalTotalOS(o).toFixed(3):'')+'</td><td>'+conf+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirExp(\''+o.id+'\')">Processar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.expRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+(e.qtd||'')+'</td><td>'+(pesoFinalTotalOS(o)?pesoFinalTotalOS(o).toFixed(3):'')+'</td><td>'+conf+'</td><td>'+sel+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirExp(\''+o.id+'\')">Processar</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tbEx.appendChild(tr);});
   const tbRt=document.getElementById('tbodyRt');tbRt.innerHTML='';
   document.getElementById('emptyRt').style.display=retrabalhos.length?'none':'block';
