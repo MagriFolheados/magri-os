@@ -179,7 +179,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07s</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07t</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -606,7 +606,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07s</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07t</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1583,7 +1583,18 @@ function abrirFb(id){
   document.getElementById('fbModal').classList.add('show');
 }
 function closeFb(){document.getElementById('fbModal').classList.remove('show');}
-function salvarFb(concluir){
+async function salvarOSVerificado(o){
+  try{
+    var up=await window.__sb.from('ordens').upsert({id:String(o.id),num_os:o.numOS||null,cliente:o.cliente||null,setor:o.setor||null,dados:o});
+    if(up&&up.error)return {ok:false,err:'gravar: '+up.error.message};
+    var chk=await window.__sb.from('ordens').select('setor').eq('id',String(o.id)).maybeSingle();
+    if(chk&&chk.error)return {ok:false,err:'conferir: '+chk.error.message};
+    if(!chk||!chk.data)return {ok:false,err:'O.S. sumiu do servidor após gravar'};
+    if(chk.data.setor!==o.setor)return {ok:false,err:'servidor manteve setor "'+chk.data.setor+'" (esperado "'+o.setor+'")'};
+    return {ok:true};
+  }catch(e){return {ok:false,err:'exceção: '+((e&&e.message)||e)};}
+}
+async function salvarFb(concluir){
   const id=document.getElementById('fbId').value;const o=dados.find(x=>x.id===id);if(!o)return;
   const g=id=>document.getElementById(id).value;
   const q=parseFloat(g('fbQtd'))||0;
@@ -1595,8 +1606,13 @@ function salvarFb(concluir){
     scanner:g('fbScanner'),outros:g('fbOutros'),concluidoEm:o.fb&&o.fb.concluidoEm?o.fb.concluidoEm:''};
   if(concluir){o.fb.concluidoEm=hojeISO();o.setor='Amarração';o.amRecebidoEm=hojeISO();o.amStatus=o.amStatus||'Recebido';}
   salvar();render();
-  if(concluir){closeFb();alert('O.S. '+(o.numOS||'')+' concluída no Foto/Bruto e encaminhada para Amarração.');}
-  else alert('Dados salvos.');
+  if(concluir){
+    if(window.__sb){
+      var r=await salvarOSVerificado(o);
+      if(!r.ok){alert('⚠ NÃO consegui confirmar a gravação no servidor.\n\nErro: '+r.err+'\n\nNÃO atualize a tela — verifique a internet e toque em Concluir de novo. (Me mande esse erro.)');return;}
+    }
+    closeFb();alert('O.S. '+(o.numOS||'')+' concluída no Foto/Bruto e encaminhada para Amarração. (gravação confirmada no servidor)');
+  } else { alert('Dados salvos.'); }
 }
 function etqCamadaItem(it){var b=it.banho||'';if(b==='Ouro Camada')return it.camada?(it.camada+' ML'):'';if(b==='Ouro Flash')return 'FLASH';if(b==='Ouro 1 Milésimo')return '1 ML';var m=b.match(/(\d+)ML/);if(m)return m[1]+' ML';return '';}
 function etqVernizItem(it){var c=it.compl||{};if(c.cataforetico)return 'CAT';if(c.protetor)return 'PROT 300';return '0';}
