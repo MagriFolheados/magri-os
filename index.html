@@ -110,6 +110,7 @@
   .etq .lin{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;}
   .etq .os{font-size:22px;text-align:center;font-weight:800;letter-spacing:1px;margin:6px 0;}
   .footer-note{font-size:12px;color:#9ca3af;text-align:center;margin-top:20px;}
+  @media(max-width:640px){.mob-hide{display:none!important}#view-fotobruto table thead th:nth-child(7),#view-fotobruto table thead th:nth-child(8),#view-fotobruto table thead th:nth-child(9),#view-fotobruto table thead th:nth-child(10),#view-fotobruto table tbody td:nth-child(7),#view-fotobruto table tbody td:nth-child(8),#view-fotobruto table tbody td:nth-child(9),#view-fotobruto table tbody td:nth-child(10){display:none!important}}
   @media print{body *{visibility:hidden;} #printArea,#printArea *{visibility:visible;} #printArea{position:absolute;left:0;top:0;width:100%;}}
   .mobmenu{display:none;}
   @media (max-width:860px){
@@ -179,7 +180,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07t</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07u</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -223,6 +224,8 @@
                 <div id="prevCatBox" style="display:none"><label>Ajustar envio CAT (etiqueta)</label><input type="date" id="prevCatManual" onchange="prevCatManualChange()"><div class="hint" style="color:#a9862f">Editável por causa da etiqueta</div></div>
                 <div><label>Data previsão de entrega</label><input type="text" id="prevEntrega" readonly><div class="hint">15 dias úteis se houver item com cataforético; senão 10</div></div>
                 <div id="prevEntregaBox" style="display:none"><label>Ajustar entrega (etiqueta)</label><input type="date" id="prevEntregaManual" onchange="prevEntregaManualChange()"><div class="hint" style="color:#a9862f">Editável por causa da etiqueta</div></div>
+                <div><label>Modalidade</label><select id="modalidade"><option value="">—</option><option>Entrega</option><option>Retirada</option></select></div>
+                <div><label>Tipo de transporte</label><select id="transporte"><option value="">—</option></select></div>
                 <div style="grid-column:1/-1"><label>Observação</label><textarea id="observacao" rows="2" placeholder="Anotações da OS (opcional)" style="width:100%;resize:vertical"></textarea></div>
               </div>
               <div class="sec-title">Itens / Lotes do serviço (a mesma OS pode ter vários lotes, cada um com sua especificação e cataforético próprio)</div>
@@ -606,7 +609,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07t</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07u</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -638,6 +641,12 @@
           <div class="grid"><div><label>Nome da cor</label><input type="text" id="pcorNome" placeholder="Ex.: Rosé"></div></div>
           <div class="actions"><button class="btn-primary" onclick="addCorCat()">+ Adicionar cor</button></div>
           <div class="table-scroll"><table><thead><tr><th>Cor</th><th></th></tr></thead><tbody id="pcorLista"></tbody></table></div>
+        </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Transporte (tipos)</h2></div><div class="panel-body">
+          <div class="hint" style="margin-bottom:8px">Cadastre os tipos de transporte (ex.: Motoboy, Correios, Transportadora). Aparecem no cadastro da O.S. (Comercial). Após adicionar/remover, o sistema recarrega.</div>
+          <div class="grid"><div><label>Nome do transporte</label><input type="text" id="ptransNome" placeholder="Ex.: Motoboy"></div></div>
+          <div class="actions"><button class="btn-primary" onclick="addTransCat()">+ Adicionar transporte</button></div>
+          <div class="table-scroll"><table><thead><tr><th>Transporte</th><th></th></tr></thead><tbody id="ptransLista"></tbody></table></div>
         </div></div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Serviços adicionais (personalizados)</h2></div><div class="panel-body">
           <div class="grid">
@@ -694,6 +703,7 @@
         <label style="background:#eef7ee;border:1px solid #cfe6cf;border-radius:6px;padding:3px 6px"><input type="checkbox" id="c_antialergicoCortesia" onchange="calcItem()"> Hipoalergênico — Cortesia</label>
         <label style="background:#eef7ee;border:1px solid #cfe6cf;border-radius:6px;padding:3px 6px"><input type="checkbox" id="c_niquelfreeCortesia" onchange="calcItem()"> Níquel Free — Cortesia</label>
         <label style="background:#eef7ee;border:1px solid #cfe6cf;border-radius:6px;padding:3px 6px"><input type="checkbox" id="c_niquelCortesia" onchange="calcItem()"> Níquel — Cortesia</label>
+        <label style="background:#eef7ee;border:1px solid #cfe6cf;border-radius:6px;padding:3px 6px"><input type="checkbox" id="c_protetorCortesia" onchange="calcItem()"> Verniz Protetor — Cortesia</label>
       </div>
       <div id="itRodioNegroBox" style="display:none;margin-top:10px;max-width:280px"><label>Ródio Negro — preço combinado (R$/g)</label><input type="number" step="0.01" id="itRodioNegroPreco" oninput="calcItem()"></div>
       <div class="info-os" style="margin-top:16px">
@@ -715,9 +725,9 @@
       <input type="hidden" id="fbId">
       <div class="sec-title">Dados do bruto e contagem</div>
       <div class="grid">
-        <div><label>Quantidade de peças <span class="req">*</span></label><input type="number" id="fbQtd" readonly><div class="hint">Soma automática dos sub-itens</div></div>
+        <div class="mob-hide"><label>Quantidade de peças <span class="req">*</span></label><input type="number" id="fbQtd" readonly><div class="hint">Soma automática dos sub-itens</div></div>
         <div><label>Peso total do pacote (Kg)</label><input type="number" step="0.001" id="fbPesoPacote" readonly><div class="hint">Soma automática dos sub-itens</div></div>
-        <div><label>Preço do pacote (R$)</label><input type="text" id="fbPrecoPacote" readonly><div class="hint">Soma dos sub-itens (preço un. × qtd)</div></div>
+        <div class="mob-hide"><label>Preço do pacote (R$)</label><input type="text" id="fbPrecoPacote" readonly><div class="hint">Soma dos sub-itens (preço un. × qtd)</div></div>
       </div>
       <div class="sec-title">Registro no Controle de Brutos</div>
       <div class="grid">
@@ -739,9 +749,9 @@
         <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola" oninput="sbTipoChange()"></div>
         <div><label>Peso (Kg)</label><input type="number" step="0.001" id="sbPeso"></div>
         <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div>
-        <div><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor"></div>
+        <div class="mob-hide"><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor"></div>
         <div><label>Código da peça</label><input type="text" id="sbCodigo"></div>
-        <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
+        <div class="mob-hide"><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
         <div style="grid-column:1/-1"><label>Observação da peça (detalhes)</label><input type="text" id="sbObs" placeholder="Ex.: detalhes, avaria, referência da peça..."></div>
         <div style="grid-column:1/-1;display:none" id="sbBrincoBox"><label>Serviços por unidade (só para brinco)</label><label style="font-weight:normal;margin-right:16px"><input type="checkbox" id="sbTarraxa"> Tarraxa</label><label style="font-weight:normal"><input type="checkbox" id="sbTarraxamento"> Tarraxamento</label> <span class="hint">cobrado por peça inspecionada na expedição</span></div>
         <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><button type="button" class="btn-ghost" onclick="document.getElementById('sbFotoInput').click()" style="padding:8px 14px">Anexar foto</button> <button type="button" class="btn-ghost" onclick="document.getElementById('sbCamInput').click()" style="padding:8px 14px">Tirar foto (câmera)</button><input type="file" id="sbFotoInput" accept="image/*" style="display:none"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="display:none"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
@@ -966,13 +976,15 @@ function addBanhoCat(){var nome=document.getElementById('pbNome').value.trim();i
 function addComplCat(){var nome=document.getElementById('pcNome').value.trim();if(!nome){alert('Informe o nome.');return;}var precoG=parseFloat(document.getElementById('pcPrecoG').value)||0;var chave='cx_'+nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');if(!chave||chave==='cx_'){alert('Nome inválido.');return;}CATALOGO.compl.push({chave:chave,nome:nome,precoG:precoG});catalogoReload('Complementar adicionado.');}
 function addCorCat(){var nome=document.getElementById('pcorNome').value.trim();if(!nome){alert('Informe o nome da cor.');return;}var fixas=['AU 18','AU 24','CHAMPANHE','VERDE','MONT','ROSE','PRATA','RODIO BRANCO','NIQUEL FREE','NÍQUEL','COBRE'];if((CATALOGO.cores||[]).indexOf(nome)>-1||fixas.map(function(x){return x.toLowerCase();}).indexOf(nome.toLowerCase())>-1){alert('Essa cor já existe.');return;}CATALOGO.cores=CATALOGO.cores||[];CATALOGO.cores.push(nome);catalogoReload('Cor adicionada.');}
 function delCorCat(i){if(!confirm('Remover esta cor?'))return;CATALOGO.cores.splice(i,1);catalogoReload('');}
+function addTransCat(){var nome=(document.getElementById('ptransNome').value||'').trim();if(!nome){alert('Informe o nome do transporte.');return;}CATALOGO.transportes=CATALOGO.transportes||[];if(CATALOGO.transportes.map(function(x){return (''+x).toLowerCase();}).indexOf(nome.toLowerCase())>-1){alert('Esse transporte já existe.');return;}CATALOGO.transportes.push(nome);catalogoReload('Transporte adicionado.');}
+function delTransCat(i){if(!confirm('Remover este transporte?'))return;CATALOGO.transportes.splice(i,1);catalogoReload('');}
 function addServCat(){var nome=document.getElementById('psNome').value.trim();if(!nome){alert('Informe o nome.');return;}var m=document.getElementById('psModelo').value;var def={nome:nome,modelo:m};if(m==='unidade'){def.preco=parseFloat(document.getElementById('psPreco').value)||0;}else{var cores={};(document.getElementById('psCores').value||'').split(/\r?\n/).forEach(function(l){var p=l.split('=');if(p.length===2&&p[0].trim())cores[p[0].trim()]=parseFloat((p[1]||'').replace(',','.'))||0;});if(!Object.keys(cores).length){alert('Informe ao menos uma cor=preço.');return;}def.cores=cores;}CATALOGO.servicos.push(def);catalogoReload('Serviço adicionado.');}
 function delBanhoCat(i){if(!confirm('Remover este banho?'))return;CATALOGO.banhos.splice(i,1);catalogoReload('');}
 function delComplCat(i){if(!confirm('Remover este complementar?'))return;CATALOGO.compl.splice(i,1);catalogoReload('');}
 function delServCat(i){if(!confirm('Remover este serviço?'))return;CATALOGO.servicos.splice(i,1);catalogoReload('');}
 function renderPrecos(){var tb=document.getElementById('pbLista');if(tb){tb.innerHTML=CATALOGO.banhos.map(function(b,i){var det=b.modelo==='grama'?('R$ '+g2(b.precoG||0)+'/g · '+(b.avista?'à vista':'serviço')):(b.modelo==='kg'?('R$ '+g2(b.precoKg||0)+'/kg'):('camada '+(b.camadaFator||0)+' + MO '+(b.moFator||0)+' × cotação'));return '<tr><td>'+b.nome+'</td><td>'+b.modelo+'</td><td>'+det+'</td><td class="row-act"><button class="btn-del" onclick="delBanhoCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="4" class="hint">Nenhum banho personalizado.</td></tr>';}
   var tc=document.getElementById('pcLista');if(tc){tc.innerHTML=CATALOGO.compl.map(function(c,i){return '<tr><td>'+c.nome+'</td><td>R$ '+g2(c.precoG||0)+'</td><td class="row-act"><button class="btn-del" onclick="delComplCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="3" class="hint">Nenhum complementar personalizado.</td></tr>';}
-  var ts=document.getElementById('psLista');if(ts){ts.innerHTML=CATALOGO.servicos.map(function(sv,i){var det=sv.modelo==='unidade'?('R$ '+g2(sv.preco||0)+'/un'):Object.keys(sv.cores||{}).map(function(k){return k+' R$ '+g2(sv.cores[k]);}).join(', ');return '<tr><td>'+sv.nome+'</td><td>'+sv.modelo+'</td><td>'+det+'</td><td class="row-act"><button class="btn-del" onclick="delServCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="4" class="hint">Nenhum serviço personalizado.</td></tr>';}var tcor=document.getElementById('pcorLista');if(tcor){tcor.innerHTML=(CATALOGO.cores||[]).map(function(cn,i){return '<tr><td>'+cn+'</td><td class="row-act"><button class="btn-del" onclick="delCorCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="2" class="hint">Nenhuma cor personalizada.</td></tr>';}}
+  var ts=document.getElementById('psLista');if(ts){ts.innerHTML=CATALOGO.servicos.map(function(sv,i){var det=sv.modelo==='unidade'?('R$ '+g2(sv.preco||0)+'/un'):Object.keys(sv.cores||{}).map(function(k){return k+' R$ '+g2(sv.cores[k]);}).join(', ');return '<tr><td>'+sv.nome+'</td><td>'+sv.modelo+'</td><td>'+det+'</td><td class="row-act"><button class="btn-del" onclick="delServCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="4" class="hint">Nenhum serviço personalizado.</td></tr>';}var tcor=document.getElementById('pcorLista');if(tcor){tcor.innerHTML=(CATALOGO.cores||[]).map(function(cn,i){return '<tr><td>'+cn+'</td><td class="row-act"><button class="btn-del" onclick="delCorCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="2" class="hint">Nenhuma cor personalizada.</td></tr>';}var ttr=document.getElementById('ptransLista');if(ttr){ttr.innerHTML=(CATALOGO.transportes||[]).map(function(tn,i){return '<tr><td>'+tn+'</td><td class="row-act"><button class="btn-del" onclick="delTransCat('+i+')">x</button></td></tr>';}).join('')||'<tr><td colspan="2" class="hint">Nenhum transporte cadastrado.</td></tr>';}}
 function renderUsuarios(){var tb=document.getElementById('usLista');if(!tb)return;tb.innerHTML='';usuarios.forEach(function(x){var abas=viewsDoRole(x.role).map(function(v){return titulos[v]?titulos[v][0]:v;}).join(', ');var tr=document.createElement('tr');tr.innerHTML='<td><b>'+x.user+'</b></td><td>'+x.role+'</td><td style="font-size:11px">'+abas+'</td><td class="row-act"><button class="btn-del" onclick="delUsuario(\''+x.user+'\')">Excluir</button></td>';tb.appendChild(tr);});var c=document.getElementById('cnt-usuarios');if(c)c.textContent=usuarios.length;renderPermissoes();}
 dados.forEach(function(o){
   if(!o||typeof o!=='object')return;
@@ -1255,7 +1267,7 @@ let PRECO_ACETINADO=0;
 const PRECO_COMPL={grafite:0.60,niquel:0.50,niquelfree:0.65,paladio:0.55,protetor:0.21,cataforetico:0.42,antialergico:0.07,limpeza:0.06};
 const PRECO_PRATA={'Prata 10ML':1.00,'Prata 20ML':1.20,'Prata 30ML':1.60,'Prata 50ML':2.00,'Prata 70ML':2.45};
 const PRECO_RODIO_BRANCO=4.00;
-const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza',antialergicoCortesia:'Hipoalergênico (Cortesia)',niquelfreeCortesia:'Níquel Free (Cortesia)',niquelCortesia:'Níquel (Cortesia)'};
+const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza',antialergicoCortesia:'Hipoalergênico (Cortesia)',niquelfreeCortesia:'Níquel Free (Cortesia)',niquelCortesia:'Níquel (Cortesia)',protetorCortesia:'Verniz Protetor (Cortesia)'};
 function ehOuroBanho(b){if((b||'').indexOf('Ouro')===0)return true;var d=customBanho(b);return !!(d&&d.modelo==='ouro');}
 function pesoLiqItem(it){var g=parseFloat(it.peso)||0;var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return g;var v=parseFloat(sp);if(isNaN(v))return g;return Math.max(0,Math.min(g,v));}
 function pedraKgItem(it){var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return 0;var t=parseFloat(it.peso)||0,v=parseFloat(sp);if(isNaN(v))return 0;return Math.max(0,t-v);}
@@ -1295,7 +1307,16 @@ function lerItemModal(){
   compl.rodioNegroPreco=g('itRodioNegroPreco');
   return {produto:g('itProduto'),peso:g('itPeso'),pesoSemPedra:g('itPesoSemPedra'),qtd:g('itQtd'),cor:g('itCor'),banho:g('itBanho'),cotacao:g('itCotacao'),camada:g('itCamada'),mo:g('itMO'),especial:document.getElementById('itEspecial').checked,especialKg:g('itEspecialKg'),compl:compl};
 }
-function calcItem(){
+function moCortesiaRule(){
+  var bEl=document.getElementById('itBanho');var b=bEl?bEl.value:'';var moEl=document.getElementById('itMO');var mo=moEl?parseFloat(moEl.value):NaN;
+  var lock=(b==='Ouro Camada'&&!isNaN(mo)&&Math.abs(mo-3.5)<1e-9);
+  [['c_antialergico','c_antialergicoCortesia'],['c_niquel','c_niquelCortesia'],['c_niquelfree','c_niquelfreeCortesia'],['c_protetor','c_protetorCortesia']].forEach(function(par){
+    var pago=document.getElementById(par[0]);var cort=document.getElementById(par[1]);if(!pago)return;var lab=pago.closest?pago.closest('label'):null;
+    if(lock){if(pago.checked&&cort)cort.checked=true;pago.checked=false;pago.disabled=true;if(lab){lab.style.opacity='.45';lab.title='Incluso na MO 3,5 — marque a versão Cortesia';}}
+    else{pago.disabled=false;if(lab){lab.style.opacity='';lab.title='';}}
+  });
+}
+function calcItem(){moCortesiaRule();
   const it=lerItemModal();const p=precoBanhoItem(it);
   document.getElementById('itVBanho').textContent=brl(p.principal);
   document.getElementById('itVCompl').textContent=brl(p.compl);
@@ -1360,14 +1381,14 @@ const PRECO_CANETA={'Amarelo':0.50,'Branco':0.38,'Preto':0.48,'Vermelho':0.48};
 const PRECO_MILHEIRO={};
 const PRECO_UNIDADE={'Tarraxa':0.03,'Tarraxamento':0.03,'Engardenação':0.03,'Colocação de pedra':1.00};
 var CATALOGO=JSON.parse(localStorage.getItem('magri_catalogo_v1')||'null')||{banhos:[],compl:[],servicos:[],cores:[]};
-if(!CATALOGO.banhos)CATALOGO.banhos=[];if(!CATALOGO.compl)CATALOGO.compl=[];if(!CATALOGO.servicos)CATALOGO.servicos=[];if(!CATALOGO.cores)CATALOGO.cores=[];
+if(!CATALOGO.banhos)CATALOGO.banhos=[];if(!CATALOGO.compl)CATALOGO.compl=[];if(!CATALOGO.servicos)CATALOGO.servicos=[];if(!CATALOGO.cores)CATALOGO.cores=[];if(!CATALOGO.transportes)CATALOGO.transportes=[];
 var BANHO_CUSTOM={};CATALOGO.banhos.forEach(function(b){if(b&&b.nome)BANHO_CUSTOM[b.nome]=b;});
 var SERV_CUSTOM={};CATALOGO.servicos.forEach(function(sv){if(sv&&sv.nome){SERV_CUSTOM[sv.nome]=sv;if(sv.modelo==='unidade')PRECO_UNIDADE[sv.nome]=parseFloat(sv.preco)||0;}});
 CATALOGO.compl.forEach(function(c){if(c&&c.chave){PRECO_COMPL[c.chave]=parseFloat(c.precoG)||0;COMPL_LABEL[c.chave]=c.nome;}});
 function customBanho(nome){return BANHO_CUSTOM[nome]||null;}
 function salvarCatalogo(){localStorage.setItem('magri_catalogo_v1',JSON.stringify(CATALOGO));}
 function catalogoReload(msg){salvarCatalogo();var fin=function(ok){if(msg){alert(ok?msg:(msg+'\n\nATENÇÃO: pode não ter salvo na nuvem (verifique a internet). Tente novamente.'));}location.reload();};if(window.__sb){window.__sb.from('config').upsert({chave:'magri_catalogo_v1',valor:CATALOGO}).then(function(r){fin(!(r&&r.error));},function(){fin(false);});}else{fin(true);}}
-(function(){try{var sbn=document.getElementById('itBanho');if(sbn)CATALOGO.banhos.forEach(function(b){var o=document.createElement('option');o.textContent=b.nome;sbn.appendChild(o);});var ss=document.getElementById('servTipo');if(ss)CATALOGO.servicos.forEach(function(sv){var o=document.createElement('option');o.textContent=sv.nome;ss.appendChild(o);});var cb=document.getElementById('complBox');if(cb)CATALOGO.compl.forEach(function(c){var l=document.createElement('label');l.innerHTML='<input type="checkbox" id="c_'+c.chave+'" onchange="calcItem()"> '+c.nome+' ('+(parseFloat(c.precoG)||0).toFixed(2).replace('.',',')+')';cb.appendChild(l);});var _cors=CATALOGO.cores||[];['itCor','fbCor'].forEach(function(sid){var sel=document.getElementById(sid);if(sel)_cors.forEach(function(cn){var o=document.createElement('option');o.textContent=cn;sel.appendChild(o);});});}catch(e){}})();
+(function(){try{var sbn=document.getElementById('itBanho');if(sbn)CATALOGO.banhos.forEach(function(b){var o=document.createElement('option');o.textContent=b.nome;sbn.appendChild(o);});var ss=document.getElementById('servTipo');if(ss)CATALOGO.servicos.forEach(function(sv){var o=document.createElement('option');o.textContent=sv.nome;ss.appendChild(o);});var cb=document.getElementById('complBox');if(cb)CATALOGO.compl.forEach(function(c){var l=document.createElement('label');l.innerHTML='<input type="checkbox" id="c_'+c.chave+'" onchange="calcItem()"> '+c.nome+' ('+(parseFloat(c.precoG)||0).toFixed(2).replace('.',',')+')';cb.appendChild(l);});var _cors=CATALOGO.cores||[];['itCor','fbCor'].forEach(function(sid){var sel=document.getElementById(sid);if(sel)_cors.forEach(function(cn){var o=document.createElement('option');o.textContent=cn;sel.appendChild(o);});});var _tsel=document.getElementById('transporte');if(_tsel)(CATALOGO.transportes||[]).forEach(function(tn){var o=document.createElement('option');o.textContent=tn;_tsel.appendChild(o);});}catch(e){}})();
 let servicosTmp=[];
 function brl(v){return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function ehRodio(t){return t==='Aplique de Ródio';}
@@ -1421,7 +1442,7 @@ document.getElementById('osForm').addEventListener('submit',function(e){
   if(itensTmp.length===0){alert('Adicione pelo menos um item do serviço antes de cadastrar a O.S.');return;}
   const g=id=>document.getElementById(id).value;
   const editId=document.getElementById('editId').value;
-  const header={dataEntrada:g('dataEntrada'),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g('peso'),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
+  const header={dataEntrada:g('dataEntrada'),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g('peso'),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
   if(editId){const o=dados.find(x=>x.id===editId);Object.assign(o,header);}
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Financeiro',finRecebidoEm:hojeISO(),fb:null}));}
   try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();
@@ -1527,7 +1548,7 @@ function editarCom(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   if(o.setor&&o.setor!=='Comercial'){alert('Esta O.S. está no setor "'+o.setor+'". Para editar, ela precisa estar no Comercial — peça ao setor atual para devolver ao Comercial (botão Devolver → Comercial).');return;}
   document.getElementById('editId').value=o.id;
-  ['dataEntrada','numOS','etiqueta','cliente','peso','statusComercial','prevCat','observacao'].forEach(function(k){const el=document.getElementById(k);if(el)el.value=o[k]||'';});
+  ['dataEntrada','numOS','etiqueta','cliente','peso','statusComercial','prevCat','observacao','modalidade','transporte'].forEach(function(k){const el=document.getElementById(k);if(el)el.value=o[k]||'';});
   itensTmp=(o.itens||[]).map(function(x){return Object.assign({},x);});renderItens();
   servicosTmp=(o.servicos||[]).map(function(x){return Object.assign({},x);});renderServicos();servRefresh();
   recalc();
@@ -2081,7 +2102,7 @@ function buildCatalogoHTML(o){
   });});
   if(!cards)cards='<div style="padding:20px">Esta O.S. não tem sub-itens cadastrados no Foto/Bruto.</div>';
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Catálogo O.S. '+(o.numOS||'')+'</title>'+
-    '<style>*{box-sizing:border-box;}body{font-family:Arial,sans-serif;margin:0;padding:16px;color:#1a1a1a;}h1{font-size:20px;margin:0;color:#a9862f;}.head{border-bottom:2px solid #c8a24a;padding-bottom:10px;margin-bottom:14px;}.head .sub{font-size:13px;color:#555;margin-top:4px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}.card{border:1px solid #ccc;border-radius:8px;padding:10px;display:flex;gap:10px;page-break-inside:avoid;}.foto img{width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #ddd;}.foto .semfoto{width:90px;height:90px;border:1px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;text-align:center;}.dados{font-size:12px;flex:1;}.dados .l{margin:2px 0;}.dados .tot{margin-top:6px;font-weight:bold;color:#a9862f;font-size:13px;border-top:1px solid #eee;padding-top:5px;}.imprimir{margin:14px 0;text-align:center;}button{background:#c8a24a;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;}@media print{.imprimir{display:none;}@page{size:A4;margin:12mm;}}</style>'+
+    '<style>*{box-sizing:border-box;}body{font-family:Arial,sans-serif;margin:0;padding:16px;color:#1a1a1a;}h1{font-size:20px;margin:0;color:#123a6b;}.head{border-bottom:2px solid #123a6b;padding-bottom:10px;margin-bottom:14px;}.head .sub{font-size:13px;color:#555;margin-top:4px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}.card{border:1px solid #ccc;border-radius:8px;padding:10px;display:flex;gap:10px;page-break-inside:avoid;}.foto img{width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid #ddd;}.foto .semfoto{width:90px;height:90px;border:1px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;text-align:center;}.dados{font-size:12px;flex:1;}.dados .l{margin:2px 0;}.dados .tot{margin-top:6px;font-weight:bold;color:#123a6b;font-size:13px;border-top:1px solid #eee;padding-top:5px;}.imprimir{margin:14px 0;text-align:center;}button{background:#123a6b;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;}@media print{.imprimir{display:none;}@page{size:A4;margin:12mm;}}</style>'+
     '</head><body>'+
     '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Catálogo do Cliente</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+'</div></div>'+
     '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
@@ -2139,7 +2160,7 @@ function buildConferenciaHTML(o){
     '</body></html>';
 }
 function gerarConferencia(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a conferência.');return;}w.document.write(buildConferenciaHTML(o));w.document.close();}
-function docCobCSS(){return '<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;padding:10px;color:#1a1a1a}h1{font-size:16px;margin:0;color:#a9862f}.head{border-bottom:2px solid #c8a24a;padding-bottom:5px;margin-bottom:7px}.head .sub{font-size:10.5px;color:#555;margin-top:2px}h2{font-size:11.5px;color:#a9862f;margin:7px 0 3px;border-bottom:1px solid #eee;padding-bottom:2px}table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:4px;border:1px solid #555}th{background:#f4f5f7;text-align:left;padding:2.5px 4px;border:1px solid #888}td{padding:2.5px 4px;border:1px solid #999}.grp td{background:#faf3e0;font-weight:bold}.tot{margin-top:7px;text-align:right;font-size:11px;line-height:1.45}.tot .grand{font-size:15px;font-weight:bold;color:#a9862f}.nota{font-size:8.5px;color:#888;margin-top:6px;line-height:1.35}.imprimir{margin:8px 0;text-align:center}button{background:#c8a24a;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:13px}.itemh{font-weight:bold;font-size:10.5px;margin:5px 0 2px}.num{text-align:right}.ctr{text-align:center}tr.tl td,tr.bloco td{background:#fff2a8;font-weight:bold}table.fin{max-width:340px;margin-left:auto}table.fin td{font-size:10.5px}@media print{.imprimir{display:none}@page{size:A4;margin:8mm}}</style>';}
+function docCobCSS(){return '<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:0;padding:10px;color:#1a1a1a}h1{font-size:16px;margin:0;color:#123a6b}.head{border-bottom:2px solid #123a6b;padding-bottom:5px;margin-bottom:7px}.head .sub{font-size:10.5px;color:#555;margin-top:2px}h2{font-size:11.5px;color:#123a6b;margin:7px 0 3px;border-bottom:1px solid #eee;padding-bottom:2px}table{width:100%;border-collapse:collapse;font-size:9px;margin-bottom:4px;border:1px solid #555}th{background:#f4f5f7;text-align:left;padding:2px 3px;border:1px solid #888;word-break:break-word;overflow-wrap:anywhere}td{padding:2px 3px;border:1px solid #999;word-break:break-word;overflow-wrap:anywhere}.grp td{background:#e7eef8;font-weight:bold}.tot{margin-top:7px;text-align:right;font-size:11px;line-height:1.45}.tot .grand{font-size:15px;font-weight:bold;color:#123a6b}.nota{font-size:8.5px;color:#888;margin-top:6px;line-height:1.35}.imprimir{margin:8px 0;text-align:center}button{background:#123a6b;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:13px}.itemh{font-weight:bold;font-size:10.5px;margin:5px 0 2px}.num{text-align:right}.ctr{text-align:center}tr.tl td,tr.bloco td{background:#d7e3f5;font-weight:bold}table.fin{max-width:340px;margin-left:auto}table.fin td{font-size:10.5px}@media print{.imprimir{display:none}@page{size:A4 portrait;margin:8mm}}</style>';}
 function detalheItens(o,pesoFn,cortesiaOn){
   var rows='';
   (o.itens||[]).forEach(function(it,i){
@@ -2173,7 +2194,7 @@ function buildOSFormHTML(o){
   var setores=['Foto / Bruto','Amarra\u00e7\u00e3o / Gancheira','Banho / Galvanoplastia'];if(hasCat)setores.push('Verniz Catafor\u00e9tico');setores.push('Expedi\u00e7\u00e3o');
   var signoff='<h2>Controle de setores</h2><table><thead><tr><th>Setor</th><th>Respons\u00e1vel</th><th>In\u00edcio</th><th>Conclus\u00e3o</th><th>OK</th></tr></thead><tbody>'+setores.map(function(x){return '<tr><td>'+x+'</td><td></td><td></td><td></td><td style="text-align:center">\u2610</td></tr>';}).join('')+'</tbody></table>';
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>O.S. '+(o.numOS||'')+' \u2014 Produ\u00e7\u00e3o</title>'+docCobCSS()+'<style>@page{size:A4 landscape;margin:12mm}table{font-size:11px}th,td{padding:4px 6px}tr.sub td{background:#fbfbf5;color:#666;font-style:italic}.obs{border:1px solid #ddd;padding:8px 10px;font-size:13px;white-space:pre-wrap}</style></head><body>'+
-    '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS \u2014 Ordem de Servi\u00e7o (Produ\u00e7\u00e3o)</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Etiqueta:</b> '+(o.etiqueta||'')+' &nbsp;|&nbsp; <b>Entrada:</b> '+fmt(o.dataEntrada)+' &nbsp;|&nbsp; <b>Previs\u00e3o entrega:</b> '+fmt(o.prevEntregaISO)+(hasCat&&o.prevCat?(' &nbsp;|&nbsp; <b>Prev. catafor\u00e9tico:</b> '+fmt(o.prevCat)):'')+'</div></div>'+
+    '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS \u2014 Ordem de Servi\u00e7o (Produ\u00e7\u00e3o)</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Etiqueta:</b> '+(o.etiqueta||'')+' &nbsp;|&nbsp; <b>Entrada:</b> '+fmt(o.dataEntrada)+' &nbsp;|&nbsp; <b>Previs\u00e3o entrega:</b> '+fmt(o.prevEntregaISO)+(hasCat&&o.prevCat?(' &nbsp;|&nbsp; <b>Prev. catafor\u00e9tico:</b> '+fmt(o.prevCat)):'')+' &nbsp;|&nbsp; <b>Transporte:</b> '+transporteInfo(o)+'</div></div>'+
     '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
     '<h2>Detalhamento por lote \u2014 o que ser\u00e1 feito</h2>'+
     '<table><thead><tr><th>#</th><th>Produto</th><th>Banho</th><th>Cor</th><th>Camada</th><th>M.O.</th><th>Peso total</th><th>Peso s/ pedra</th><th>% pedra</th><th>Qtd</th><th>Tratamentos</th><th>Cat.</th></tr></thead><tbody>'+rows+'</tbody></table>'+
@@ -2193,6 +2214,7 @@ function rowsDoLote(it,pb){var rows=[];var b=it.banho||'';var cot=parseFloat(it.
   if(c.antialergicoCortesia)rows.push({tipo:'Hipoalergênico',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
   if(c.niquelfreeCortesia)rows.push({tipo:'Níquel Free',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
   if(c.niquelCortesia)rows.push({tipo:'Níquel',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
+  if(c.protetorCortesia)rows.push({tipo:'Verniz Protetor',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
   if(c.acetinado){var v=pesoG*PRECO_ACETINADO;rows.push({tipo:'Acetinado',fator:'',cor:'',camada:'',vlkg:PRECO_ACETINADO*1000,peso:pb,serv:v,ouro:0,total:v});}
   if(c.rodioNegro){var rn=parseFloat(c.rodioNegroPreco)||0;var v=pesoG*rn;rows.push({tipo:'Ródio Negro',fator:'',cor:'',camada:'',vlkg:rn*1000,peso:pb,serv:v,ouro:0,total:v});}
   return rows;}
@@ -2208,20 +2230,23 @@ function tabelaLotesHTML(o,pesoFn,cortesiaOn){var html='';var ouroTot=0,totLotes
   return {html:html,ouro:ouroTot,totLotes:totLotes};}
 function servAdicHTML(o){if(!(o.servicos||[]).length)return {html:'',total:0};var t=0;var rows='';(o.servicos||[]).forEach(function(x){var cheio=(x.valorCheio!==undefined?x.valorCheio:x.valor)||0;var un=x.precoUnit||((x.qtd>0)?(cheio/x.qtd):cheio);var desc=x.cortesia?cheio:(x.desconto||0);t+=(x.valor||0);var qtdC=x.aDefinir?'a definir':(x.qtd||'');var valC=x.aDefinir?'a definir':(x.cortesia?'Cortesia':('R$ '+g2(x.valor)));rows+='<tr><td>'+(x.servico||'')+(x.cor?' ('+x.cor+')':'')+'</td><td class="num">'+qtdC+'</td><td class="num">R$ '+g2(un)+'</td><td class="num">'+(desc>0?('R$ '+g2(desc)):'')+'</td><td class="num">'+valC+'</td></tr>';});
   var html='<div class="itemh">Serviços adicionais (na conclusão)</div><table><thead><tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Vlr Unit.</th><th class="num">Desconto</th><th class="num">Valor</th></tr></thead><tbody>'+rows+'<tr class="tl"><td colspan="4">Total Serviços Adicionais</td><td class="num">R$ '+g2(t)+'</td></tr></tbody></table>';return {html:html,total:t};}
+function transporteInfo(o){var m=(o.modalidade||''),t=(o.transporte||'');if(!m&&!t)return '—';return (m||'')+((m&&t)?' · ':'')+(t||'');}
 function buildOrcamentoHTML(o){
   var cots=[];(o.itens||[]).forEach(function(it){if(ehOuroBanho(it.banho)&&!ehEspecial(it)){var c=parseFloat(it.cotacao)||0;if(c>0&&cots.indexOf(c)<0)cots.push(c);}});
   var cotStr=cots.length?(cots.map(function(c){return 'R$ '+g2(c);}).join(' / ')+'/g'):'—';
   var lt=tabelaLotesHTML(o,function(it){return pesoLiqItem(it);},false);
   var sa=servAdicHTML(o);
-  var totalOrc=lt.totLotes+sa.total;var adiant=lt.ouro;var conclusao=totalOrc-adiant;
-  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Orçamento O.S. '+(o.numOS||'')+'</title>'+docCobCSS()+'<style>.marca-previa{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:120px;font-weight:800;color:rgba(169,134,47,.12);white-space:nowrap;z-index:-1;pointer-events:none;letter-spacing:10px;}</style>'+'</head><body>'+'<div class="marca-previa">Prévia</div>'+
-  '<div class="head">'+logoTag(64)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Orçamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Previsão de entrega:</b> '+fmt(o.prevEntregaISO)+' &nbsp;|&nbsp; <b>Cotação do ouro:</b> '+cotStr+'</div></div>'+
+  var _anyCat=(o.itens||[]).some(function(it){return it.compl&&it.compl.cataforetico;});var motoboy=_anyCat?12:0;
+  var motoboyHTML=motoboy>0?('<div class="itemh">Transporte</div><table><thead><tr><th>Descrição</th><th class="num">Valor</th></tr></thead><tbody><tr><td>Motoboy (leva/retorno do cataforético)</td><td class="num">R$ '+g2(motoboy)+'</td></tr></tbody></table>'):'';
+  var totalOrc=lt.totLotes+sa.total+motoboy;var adiant=lt.ouro;var conclusao=totalOrc-adiant;
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Orçamento O.S. '+(o.numOS||'')+'</title>'+docCobCSS()+'<style>.marca-previa{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-35deg);font-size:120px;font-weight:800;color:rgba(18,58,107,.22);white-space:nowrap;z-index:-1;pointer-events:none;letter-spacing:10px;}</style>'+'</head><body>'+'<div class="marca-previa">Prévia</div>'+
+  '<div class="head">'+logoTag(64)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Orçamento</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+' &nbsp;|&nbsp; <b>Previsão de entrega:</b> '+fmt(o.prevEntregaISO)+' &nbsp;|&nbsp; <b>Transporte:</b> '+transporteInfo(o)+' &nbsp;|&nbsp; <b>Cotação do ouro:</b> <span style="font-size:17px;font-weight:800;color:#123a6b">'+cotStr+'</span></div></div>'+
   '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
-  '<h2>Detalhamento por item</h2>'+lt.html+sa.html+
+  '<h2>Detalhamento por item</h2>'+lt.html+sa.html+motoboyHTML+
   '<table class="fin"><tbody>'+
-  '<tr class="tl"><td>Total Orçamento</td><td class="num">R$ '+g2(totalOrc)+'</td></tr>'+
-  '<tr class="tl"><td>À Vista</td><td class="num">R$ '+g2(adiant)+'</td></tr>'+
-  '<tr class="tl"><td>Na entrega</td><td class="num">R$ '+g2(conclusao)+'</td></tr>'+
+  '<tr class="tl"><td>Valor do Ouro</td><td class="num">R$ '+g2(adiant)+'</td></tr>'+
+  '<tr class="tl"><td>Valor dos Serviços</td><td class="num">R$ '+g2(conclusao)+'</td></tr>'+
+  '<tr class="tl" style="border-top:2px solid #123a6b"><td><b>TOTAL</b></td><td class="num"><b>R$ '+g2(adiant+conclusao)+'</b></td></tr>'+
   '</tbody></table>'+
   '<div class="nota">* O <b>metal (ouro)</b> é pago à vista; os <b>serviços</b> (mão de obra, complementares, prata, ródio e adicionais) na conclusão. Todos os itens aplicados estão listados, inclusive os sem custo. Valores estimados sobre o peso declarado; o valor final é confirmado após a pesagem pós-produção.</div>'+
   '<div class="nota" style="margin-top:22px">De acordo com os itens e valores acima:<br><br>____________________________________  &nbsp;&nbsp; Data: ____ / ____ / ______<br>Cliente: '+(o.cliente||'')+'</div>'+
@@ -2447,6 +2472,7 @@ function addEstoque(){var cli=document.getElementById('esCliente').value.trim();
 function delEstoque(id){if(!confirm('Remover este item do estoque?'))return;estoque=estoque.filter(function(x){return x.id!==id;});salvarEstoque();render();}
 function liberarEstoque(id){var e=estoque.find(function(x){return x.id===id;});if(!e)return;var saldo=Math.round(((parseFloat(e.peso)||0)-(parseFloat(e.liberado)||0))*1000)/1000;if(saldo<=0){alert('Não há saldo para liberar.');return;}var v=prompt('Quanto liberar para banhar? (kg)\nSaldo disponível: '+saldo.toFixed(3)+' kg',saldo.toFixed(3));if(v===null)return;var val=parseFloat((''+v).replace(',','.'))||0;if(val<=0){alert('Valor inválido.');return;}if(val>saldo+0.000001){alert('Não pode liberar mais que o saldo ('+saldo.toFixed(3)+' kg).');return;}e.liberado=Math.round(((parseFloat(e.liberado)||0)+val)*1000)/1000;e.liberacoes=e.liberacoes||[];e.liberacoes.push({data:hojeISO(),peso:val});salvarEstoque();var os={id:'os_'+Date.now(),numOS:'',dataEntrada:hojeISO(),etiqueta:'',cliente:e.cliente,peso:val,statusComercial:'Recebido',prevCat:'',prevEntregaISO:'',observacao:'Liberado do estoque — '+(e.tipo||'')+' ('+val.toFixed(3)+' kg)',itens:[],servicos:[],setor:'Comercial'};dados.unshift(os);salvar();render();alert('Liberado '+val.toFixed(3)+' kg para banhar.\nUma O.S. rascunho foi criada no Comercial para '+e.cliente+'. Complete os lotes e o nº da O.S., depois envie para o Financeiro.');}
 function renderEstoque(){var q=((document.getElementById('buscaEs')||{}).value||'').toLowerCase();var lista=estoque.filter(function(e){return !q||JSON.stringify(e).toLowerCase().includes(q);});var tb=document.getElementById('tbodyEs');if(tb){tb.innerHTML='';lista.forEach(function(e){var saldo=(parseFloat(e.peso)||0)-(parseFloat(e.liberado)||0);var tr=document.createElement('tr');tr.innerHTML='<td>'+(e.cliente||'')+'</td><td>'+(e.tipo||'')+'</td><td>'+fmt(e.dataEntrega)+'</td><td class="num">'+((parseFloat(e.peso)||0).toFixed(3))+'</td><td class="num">'+((parseFloat(e.liberado)||0).toFixed(3))+'</td><td class="num" style="font-weight:700;color:'+(saldo>0.000001?'var(--verde)':'#999')+'">'+saldo.toFixed(3)+'</td><td class="row-act">'+(saldo>0.000001?'<button class="btn-excel" onclick="liberarEstoque(\''+e.id+'\')">Liberar p/ banhar</button> ':'')+'<button class="btn-del" onclick="delEstoque(\''+e.id+'\')">Excluir</button></td>';tb.appendChild(tr);});}var emp=document.getElementById('emptyEs');if(emp)emp.style.display=lista.length?'none':'block';var cnt=document.getElementById('cnt-estoque');if(cnt)cnt.textContent=estoque.filter(function(e){return ((parseFloat(e.peso)||0)-(parseFloat(e.liberado)||0))>0.000001;}).length;var cards=document.getElementById('cards-estoque');if(cards){var totS=estoque.reduce(function(s,e){return s+Math.max(0,(parseFloat(e.peso)||0)-(parseFloat(e.liberado)||0));},0);var nCli=(new Set(estoque.map(function(e){return e.cliente;}))).size;cards.innerHTML='<div class="card"><div class="n">'+estoque.length+'</div><div class="l">Itens no estoque</div></div><div class="card azul"><div class="n" style="font-size:20px">'+totS.toFixed(3)+'</div><div class="l">Saldo total (kg)</div></div><div class="card verde"><div class="n">'+nCli+'</div><div class="l">Clientes</div></div>';}}
+function ordenarOS(lista){return (lista||[]).slice().sort(function(a,b){var na=parseInt((''+(a.numOS||'')).replace(/\D/g,''));var nb=parseInt((''+(b.numOS||'')).replace(/\D/g,''));if(isNaN(na))na=Infinity;if(isNaN(nb))nb=Infinity;if(na!==nb)return na-nb;var ca=(''+(a.cliente||'')).toLowerCase(),cb=(''+(b.cliente||'')).toLowerCase();if(ca!==cb)return ca<cb?-1:1;return (''+(a.prevEntregaISO||'')).localeCompare(''+(b.prevEntregaISO||''));});}
 function render(){
   renderFinanceiro();
   renderEstoque();
@@ -2456,7 +2482,7 @@ function render(){
   const tbC=document.getElementById('tbodyCom');tbC.innerHTML='';
   const _cs=(document.getElementById('comSetor')||{}).value||'todos';const _cst=(document.getElementById('comStatus')||{}).value||'todos';const listaC=dados.filter(o=>(!qC||JSON.stringify(o).toLowerCase().includes(qC))&&(_cs==='todos'||(o.setor||'Comercial')===_cs)&&(_cst==='todos'||(o.statusComercial||'')===_cst));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
-  listaC.forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
+  ordenarOS(listaC).forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
     tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button>'+(o.setor==='Comercial'?'<button class="btn-excel" onclick="comEnviarFoto(\''+o.id+'\')">Enviar p/ Financeiro</button>':'')+'<button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
@@ -2468,7 +2494,7 @@ function render(){
   const listaFb=naFila.filter(o=>!qF||JSON.stringify(o).toLowerCase().includes(qF));
   const tbF=document.getElementById('tbodyFb');tbF.innerHTML='';
   document.getElementById('emptyFb').style.display=listaFb.length?'none':'block';
-  listaFb.forEach(function(o){const f=o.fb||{};const ps=prazoSetor(o.fbRecebidoEm,f.concluidoEm);
+  ordenarOS(listaFb).forEach(function(o){const f=o.fb||{};const ps=prazoSetor(o.fbRecebidoEm,f.concluidoEm);
     var _fto=primeiraFotoOS(o);const foto=_fto?'<img src="'+fotoSrc(_fto)+'" class="thumb" onclick="verFoto(\''+_fto+'\')">':'<div class="thumb-ph">F</div>';
     const pp=f.precoPacote?Number(f.precoPacote).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
     const pu=f.precoUnit?Number(f.precoUnit).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
@@ -2485,7 +2511,7 @@ function render(){
   const listaAm=naAm.filter(o=>!qA||JSON.stringify(o).toLowerCase().includes(qA));
   const tbA=document.getElementById('tbodyAm');tbA.innerHTML='';
   document.getElementById('emptyAm').style.display=listaAm.length?'none':'block';
-  listaAm.forEach(function(o){const f=o.fb||{};const concl=o.amStatus==='Concluído';const ps=prazoSetor(o.amRecebidoEm,concl);
+  ordenarOS(listaAm).forEach(function(o){const f=o.fb||{};const concl=o.amStatus==='Concluído';const ps=prazoSetor(o.amRecebidoEm,concl);
     var _fto=primeiraFotoOS(o);const foto=_fto?'<img src="'+fotoSrc(_fto)+'" class="thumb" onclick="verFoto(\''+_fto+'\')">':'<div class="thumb-ph">F</div>';
     const st=o.amStatus||'Recebido';
     const sel='<select onchange="amStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
@@ -2502,7 +2528,7 @@ function render(){
   const listaBa=naBa.filter(o=>!qB||JSON.stringify(o).toLowerCase().includes(qB));
   const tbB=document.getElementById('tbodyBa');tbB.innerHTML='';
   document.getElementById('emptyBa').style.display=listaBa.length?'none':'block';
-  listaBa.forEach(function(o){const concl=o.banhoStatus==='Concluído';const ps=prazoSetor(o.banhoRecebidoEm,concl);
+  ordenarOS(listaBa).forEach(function(o){const concl=o.banhoStatus==='Concluído';const ps=prazoSetor(o.banhoRecebidoEm,concl);
     const nlin=(o.itens||[]).filter(function(it){return it.pesoBanho!==undefined&&it.pesoBanho!=='';}).length+'/'+((o.itens||[]).length);
     const st=o.banhoStatus||'Recebido';
     const sel='<select onchange="banhoStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
@@ -2522,7 +2548,7 @@ function render(){
   const listaQu=naQu.filter(o=>!qQu||JSON.stringify(o).toLowerCase().includes(qQu));
   const tbQu=document.getElementById('tbodyQu');
   if(tbQu){tbQu.innerHTML='';var eqEl=document.getElementById('emptyQu');if(eqEl)eqEl.style.display=listaQu.length?'none':'block';
-    listaQu.forEach(function(o){const concl=o.qualStatus==='Concluído';const ps=prazoSetor(o.qualRecebidoEm,concl);
+    ordenarOS(listaQu).forEach(function(o){const concl=o.qualStatus==='Concluído';const ps=prazoSetor(o.qualRecebidoEm,concl);
       const nap=apont.filter(a=>a.osId===o.id).length;
       const pbT=(o.itens||[]).reduce(function(sm,it){return sm+(parseFloat(it.pesoBanho)||0);},0);
       const st=o.qualStatus||'Recebido';
@@ -2577,7 +2603,7 @@ function render(){
   const listaEx=naEx.filter(o=>!qEx||JSON.stringify(o).toLowerCase().includes(qEx));
   const tbEx=document.getElementById('tbodyEx');tbEx.innerHTML='';
   document.getElementById('emptyEx').style.display=listaEx.length?'none':'block';
-  listaEx.forEach(function(o){const f=o.fb||{};const e=o.exp||{};const concl=o.expStatus==='Concluído';const ps=prazoSetor(o.expRecebidoEm,concl);
+  ordenarOS(listaEx).forEach(function(o){const f=o.fb||{};const e=o.exp||{};const concl=o.expStatus==='Concluído';const ps=prazoSetor(o.expRecebidoEm,concl);
     var _fto=primeiraFotoOS(o);const foto=_fto?'<img src="'+fotoSrc(_fto)+'" class="thumb" onclick="verFoto(\''+_fto+'\')">':'<div class="thumb-ph">F</div>';
     const st=o.expStatus||'Recebido';
     const sel='<select onchange="expStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
