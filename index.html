@@ -180,7 +180,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07w</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07x</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -610,9 +610,9 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07w</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07x</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
-          <div class="actions"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button></div>
+          <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
         </div></div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Tipos de banho (personalizados)</h2></div><div class="panel-body">
@@ -825,6 +825,22 @@
       <div class="hint" style="margin-bottom:8px">Marque os lotes que saem para a nova O.S. O restante continua na O.S. de origem, sem travar.</div>
       <div class="table-scroll" style="max-height:240px"><table><thead><tr><th>Sair?</th><th>Lote</th><th>Produto</th><th>Banho/Cor</th><th>Peso</th></tr></thead><tbody id="desmLotes"></tbody></table></div>
       <div class="actions"><button class="btn-primary" onclick="confirmarDesm()">Confirmar</button><button class="btn-ghost" onclick="closeDesm()">Cancelar</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="recModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head"><h3>Recuperar itens de backup</h3><button class="x" onclick="closeRec()">×</button></div>
+    <div class="modal-body">
+      <div class="grid" style="margin-bottom:6px">
+        <div><label>Nº da O.S.</label><input type="text" id="recOs" placeholder="Ex.: 8018"></div>
+        <div><label>Backup (data)</label><select id="recData"></select></div>
+        <div style="align-self:end"><button class="btn-azul" onclick="recCarregar()">Carregar itens</button></div>
+      </div>
+      <div class="hint" id="recInfo" style="margin-bottom:6px"></div>
+      <div class="table-scroll" style="max-height:280px"><table><thead><tr><th>Restaurar</th><th>Item</th><th>Produto</th><th>Banho/Cor</th><th>Peças</th><th>Fotos</th></tr></thead><tbody id="recLotes"></tbody></table></div>
+      <div class="actions"><button class="btn-primary" onclick="confirmarRec()">Restaurar selecionados na O.S. atual</button><button class="btn-ghost" onclick="closeRec()">Fechar</button></div>
     </div>
   </div>
 </div>
@@ -1712,6 +1728,56 @@ function fotoSrc(v){if(v&&(''+v).indexOf('fid:')===0){return (window.__fotos&&wi
 function verFoto(src){document.getElementById('imgBig').src=fotoSrc(src);document.getElementById('imgModal').classList.add('show');}
 let sbFotoData='';
 let sbFotoPend=false;
+var _recBk=null;
+function abrirRecuperar(){
+  if(!window.__sb){alert('Sem conexao com a nuvem. Abra o sistema logado no navegador.');return;}
+  _recBk=null;document.getElementById('recOs').value='';document.getElementById('recLotes').innerHTML='';document.getElementById('recInfo').textContent='Carregando lista de backups...';
+  document.getElementById('recModal').classList.add('show');
+  window.__sb.from('backups').select('id').order('id',{ascending:false}).then(function(r){
+    var sel=document.getElementById('recData');var ds=(r.data||[]).map(function(x){return x.id;});
+    sel.innerHTML=ds.length?ds.map(function(d){return '<option value="'+d+'">'+d+'</option>';}).join(''):'<option value="">(nenhum)</option>';
+    document.getElementById('recInfo').textContent=ds.length?('Backups na nuvem: '+ds.length+' (de '+ds[ds.length-1]+' a '+ds[0]+'). Informe a O.S., escolha a data anterior a exclusao e clique em Carregar itens.'):'Nenhum backup diario encontrado. Os backups sao gerados quando alguem deixa o sistema aberto apos as 22h.';
+  },function(e){document.getElementById('recInfo').textContent='Erro ao ler backups: '+((e&&e.message)||e);});
+}
+function closeRec(){document.getElementById('recModal').classList.remove('show');}
+function recCarregar(){
+  var os=(document.getElementById('recOs').value||'').trim();if(!os){alert('Informe o numero da O.S.');return;}
+  var d=document.getElementById('recData').value;if(!d){alert('Selecione um backup.');return;}
+  document.getElementById('recInfo').textContent='Buscando O.S. '+os+' no backup de '+d+'...';document.getElementById('recLotes').innerHTML='';
+  window.__sb.from('backups').select('dados').eq('id',d).maybeSingle().then(function(r){
+    if(r.error||!r.data){document.getElementById('recInfo').textContent='Backup nao encontrado ('+d+').';return;}
+    var ords=(r.data.dados&&r.data.dados.ordens)||[];_recBk=ords;
+    var o=ords.find(function(x){return (''+(x.numOS||''))===os;});
+    var tb=document.getElementById('recLotes');
+    if(!o){tb.innerHTML='';document.getElementById('recInfo').innerHTML='A O.S. '+os+' nao existe no backup de '+d+'. Tente uma data anterior.';return;}
+    var its=o.itens||[];
+    document.getElementById('recInfo').innerHTML='O.S. '+os+' no backup de '+d+' tinha <b>'+its.length+'</b> item(ns). Marque os que quer trazer de volta (com fotos/catalogacao) para a O.S. atual.';
+    tb.innerHTML=its.map(function(it,i){var nsub=(it.subitens||[]).length;var nf=(it.subitens||[]).filter(function(sb){return sb.foto;}).length;return '<tr><td style="text-align:center"><input type="checkbox" id="rec_'+i+'"></td><td><b>'+(i+1)+'</b></td><td>'+(it.produto||'')+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+nsub+'</td><td>'+nf+'</td></tr>';}).join('')||'<tr><td colspan="6" class="hint">O.S. sem itens nesse backup.</td></tr>';
+  },function(e){document.getElementById('recInfo').textContent='Erro ao ler o backup: '+((e&&e.message)||e);});
+}
+function confirmarRec(){
+  var os=(document.getElementById('recOs').value||'').trim();
+  if(!_recBk){alert('Clique em Carregar itens primeiro.');return;}
+  var bo=_recBk.find(function(x){return (''+(x.numOS||''))===os;});if(!bo){alert('O.S. nao encontrada no backup.');return;}
+  var atual=dados.find(function(x){return (''+(x.numOS||''))===os;});
+  if(!atual){alert('A O.S. '+os+' nao esta na base atual.');return;}
+  var sel=[];(bo.itens||[]).forEach(function(it,i){var el=document.getElementById('rec_'+i);if(el&&el.checked)sel.push(it);});
+  if(!sel.length){alert('Marque ao menos um item para restaurar.');return;}
+  var add=JSON.parse(JSON.stringify(sel));
+  add.forEach(function(it){it.produto=(it.produto||'')+' [recuperado]';});
+  atual.itens=(atual.itens||[]).concat(add);
+  if(typeof recalcFbResumo==='function')recalcFbResumo(atual);
+  salvar();render();closeRec();
+  var nf=add.reduce(function(s,it){return s+((it.subitens||[]).filter(function(sb){return sb.foto;}).length);},0);
+  alert(add.length+' item(ns) restaurado(s) na O.S. '+os+' (com '+nf+' foto(s)) e marcados com [recuperado]. Se voce ja refez esses itens, apague os duplicados apos conferir as fotos.');
+}
+function verFotosOrfas(){
+  if(!window.__fotos){alert('As fotos ainda nao carregaram. Aguarde alguns segundos e tente de novo.');return;}
+  var used={};dados.forEach(function(o){(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){var v=sb.foto;if(v&&(''+v).indexOf('fid:')===0)used[(''+v).slice(4)]=1;});});});
+  var orf=Object.keys(window.__fotos).filter(function(k){return !used[k];});
+  var w=window.open('','_blank');if(!w){alert('Permita pop-ups.');return;}
+  w.document.write('<html><head><meta charset="utf-8"><title>Fotos sem vinculo</title></head><body style="font-family:Arial;padding:12px"><h3>Fotos sem vinculo (orfas) — '+orf.length+'</h3><p style="color:#555;font-size:13px">Fotos que existem na nuvem mas nao estao ligadas a nenhuma O.S. atual (ex.: itens excluidos). Clique com o botao direito para salvar.</p><div style="display:flex;flex-wrap:wrap;gap:8px">'+orf.map(function(k){return '<div style="border:1px solid #ccc;border-radius:6px;padding:4px;font-size:10px;text-align:center"><img src="'+(window.__fotos[k]||'')+'" style="width:150px;height:150px;object-fit:cover;border-radius:4px"><div>'+k+'</div></div>';}).join('')+'</div></body></html>');w.document.close();
+}
 async function migrarFotosNuvem(){
   if(!window.__sb){alert('Disponível só na versão online (nuvem).');return;}
   var st=document.getElementById('migStatus');
