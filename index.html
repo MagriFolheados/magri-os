@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08b</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08c</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -611,7 +611,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08b</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08c</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -756,12 +756,13 @@
         <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
         <div style="grid-column:1/-1"><label>Observação da peça (detalhes)</label><input type="text" id="sbObs" placeholder="Ex.: detalhes, avaria, referência da peça..."></div>
         <div style="grid-column:1/-1;display:none" id="sbBrincoBox"><label>Serviços por unidade (só para brinco)</label><label style="font-weight:normal;margin-right:16px"><input type="checkbox" id="sbTarraxa"> Tarraxa</label><label style="font-weight:normal"><input type="checkbox" id="sbTarraxamento"> Tarraxamento</label> <span class="hint">cobrado por peça inspecionada na expedição</span></div>
-        <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><button type="button" class="btn-ghost" onclick="document.getElementById('sbFotoInput').click()" style="padding:8px 14px">Anexar foto</button> <button type="button" class="btn-ghost" onclick="document.getElementById('sbCamInput').click()" style="padding:8px 14px">Tirar foto (câmera)</button><input type="file" id="sbFotoInput" accept="image/*" style="display:none"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="display:none"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
+        <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><button type="button" class="btn-ghost" onclick="document.getElementById('sbFotoInput').click()" style="padding:8px 14px">Anexar foto</button> <button type="button" class="btn-ghost" onclick="document.getElementById('sbCamInput').click()" style="padding:8px 14px">Tirar foto (câmera)</button> <button type="button" class="btn-ghost" onclick="abrirOrfaPicker()" style="padding:8px 14px">Foto da nuvem</button><input type="file" id="sbFotoInput" accept="image/*" style="display:none"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="display:none"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
       </div>
       <div class="hint" id="sbInfo" style="padding:2px"></div>
       <div class="actions" style="margin-top:4px"><button type="button" class="btn-azul" id="sbAddBtn" onclick="addSubitem()">+ Adicionar sub-item</button></div>
+      <div style="margin:6px 0"><label style="font-size:12px;font-weight:600">Filtrar fotos por lote: </label><select id="sbFiltroLote" onchange="renderSubitens()" style="padding:4px 8px;font-size:12px"><option value="">Todos os lotes</option></select></div>
       <div class="table-scroll" style="max-height:200px"><table>
-        <thead><tr><th>Lote</th><th>Banho</th><th>Foto</th><th>Tipo de peça</th><th>Código</th><th>Peso</th><th>Qtd</th><th>Preço un.</th><th></th></tr></thead>
+        <thead><tr><th>Lote</th><th>Banho</th><th>Foto</th><th>Tipo de peça</th><th>Código</th><th>Peso</th><th>Qtd</th><th>Preço un.</th><th>Fornecedor</th><th></th></tr></thead>
         <tbody id="sbLista"></tbody>
       </table></div>
       <datalist id="tiposPeca"><option>Anel</option><option>Aliança</option><option>Brinco</option><option>Argola</option><option>Corrente</option><option>Pingente</option><option>Pulseira</option><option>Bracelete</option><option>Berloque</option><option>Tornozeleira</option><option>Piercing</option></datalist>
@@ -842,6 +843,16 @@
       <div class="hint" id="recInfo" style="margin-bottom:6px"></div>
       <div class="table-scroll" style="max-height:280px"><table><thead><tr><th>Restaurar</th><th>Item</th><th>Produto</th><th>Banho/Cor</th><th>Peças</th><th>Fotos</th></tr></thead><tbody id="recLotes"></tbody></table></div>
       <div class="actions"><button class="btn-primary" onclick="confirmarRec()">Restaurar selecionados na O.S. atual</button><button class="btn-ghost" onclick="closeRec()">Fechar</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="orfaModal">
+  <div class="modal" style="max-width:660px">
+    <div class="modal-head"><h3>Fotos na nuvem sem vínculo</h3><button class="x" onclick="closeOrfa()">×</button></div>
+    <div class="modal-body">
+      <div class="hint" id="orfaInfo" style="margin-bottom:8px"></div>
+      <div id="orfaGrid" style="display:flex;flex-wrap:wrap;gap:8px;max-height:440px;overflow:auto"></div>
     </div>
   </div>
 </div>
@@ -1656,6 +1667,7 @@ async function salvarOSVerificado(o){
 }
 async function salvarFb(concluir){
   const id=document.getElementById('fbId').value;const o=dados.find(x=>x.id===id);if(!o)return;
+  if(window.__sb){try{await mergeSubitensCloud(o);renderSubitens();}catch(_em){}}
   const g=id=>document.getElementById(id).value;
   const q=parseFloat(g('fbQtd'))||0;
   if(concluir&&q<=0){alert('Informe a quantidade de peças antes de concluir.');return;}
@@ -1736,6 +1748,16 @@ function verFoto(src){document.getElementById('imgBig').src=fotoSrc(src);documen
 let sbFotoData='';
 let sbFotoPend=false;
 var _recBk=null;
+function abrirOrfaPicker(){
+  if(!window.__fotos){alert('As fotos ainda nao carregaram. Aguarde alguns segundos e tente de novo.');return;}
+  var used={};dados.forEach(function(o){(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){var v=sb.foto;if(v&&(''+v).indexOf('fid:')===0)used[(''+v).slice(4)]=1;});});});
+  var orf=Object.keys(window.__fotos).filter(function(k){return !used[k];});
+  document.getElementById('orfaInfo').innerHTML=orf.length?('Toque na foto para usa-la neste sub-item ('+orf.length+' sem vinculo). Depois preencha o tipo de peca e clique em Adicionar sub-item.'):'Nenhuma foto sem vinculo na nuvem.';
+  document.getElementById('orfaGrid').innerHTML=orf.map(function(k){return '<div style="border:1px solid #ccc;border-radius:6px;padding:4px;text-align:center;cursor:pointer" onclick="pickOrfa(\''+k+'\')"><img src="'+(window.__fotos[k]||'')+'" style="width:130px;height:130px;object-fit:cover;border-radius:4px"><div style="font-size:9px;color:#888">'+k.slice(-6)+'</div></div>';}).join('');
+  document.getElementById('orfaModal').classList.add('show');
+}
+function closeOrfa(){document.getElementById('orfaModal').classList.remove('show');}
+function pickOrfa(fid){sbFotoData='fid:'+fid;sbFotoPend=false;var pv=document.getElementById('sbFotoPrev');if(pv){pv.src=(window.__fotos&&window.__fotos[fid])||'';pv.style.display='inline';pv.title='foto da nuvem';}closeOrfa();alert('Foto selecionada. Preencha o tipo de peca e clique em Adicionar sub-item para vincula-la.');}
 function abrirRecuperar(){
   if(!window.__sb){alert('Sem conexao com a nuvem. Abra o sistema logado no navegador.');return;}
   _recBk=null;document.getElementById('recOs').value='';document.getElementById('recLotes').innerHTML='';document.getElementById('recInfo').textContent='Carregando lista de backups...';
@@ -1853,7 +1875,7 @@ var sbEdit=null;
 function editarSubitem(li,si){
   var o=osAtualFb();if(!o)return;var it=(o.itens||[])[li];if(!it||!it.subitens||it.subitens[si]===undefined)return;var sb=it.subitens[si];
   document.getElementById('sbItem').value=li;
-  document.getElementById('sbTipo').value=sb.tipoPeca||'';document.getElementById('sbPeso').value=sb.peso||'';document.getElementById('sbQtd').value=sb.qtd||'';document.getElementById('sbCodigo').value=sb.codigo||'';document.getElementById('sbPrecoUnit').value=sb.precoUnit||'';
+  document.getElementById('sbTipo').value=sb.tipoPeca||'';document.getElementById('sbPeso').value=sb.peso||'';document.getElementById('sbQtd').value=sb.qtd||'';document.getElementById('sbCodigo').value=sb.codigo||'';document.getElementById('sbPrecoUnit').value=sb.precoUnit||'';var _ffe=document.getElementById('fbFornecedor');if(_ffe)_ffe.value=sb.fornecedor||'';
   var _ob=document.getElementById('sbObs');if(_ob)_ob.value=sb.obs||'';
   var _t1=document.getElementById('sbTarraxa');if(_t1)_t1.checked=!!sb.tarraxa;var _t2=document.getElementById('sbTarraxamento');if(_t2)_t2.checked=!!sb.tarraxamento;
   try{sbTipoChange();}catch(e){}
@@ -1862,7 +1884,7 @@ function editarSubitem(li,si){
   try{sbRefresh();}catch(e){}
   var _st=document.getElementById('sbTipo');if(_st)_st.scrollIntoView({behavior:'smooth',block:'center'});
 }
-function addSubitem(){
+async function addSubitem(){
   const o=osAtualFb();if(!o)return;
   const idx=parseInt(document.getElementById('sbItem').value);const it=(o.itens||[])[idx];if(!it){alert('Selecione o lote da OS.');return;}
   const tipo=document.getElementById('sbTipo').value.trim();const peso=parseFloat(document.getElementById('sbPeso').value)||0;const qtd=document.getElementById('sbQtd').value;
@@ -1874,20 +1896,30 @@ function addSubitem(){
   if(total>0 && (usado+peso)>total+0.000001){alert('O peso dos sub-itens ('+(usado+peso).toFixed(3)+' kg) ultrapassaria o peso do lote ('+total.toFixed(3)+' kg).\nDisponível: '+(total-usado).toFixed(3)+' kg.');return;}
   var _ehBrinco=/brinco/i.test(tipo);var _tar=_ehBrinco&&document.getElementById('sbTarraxa')&&document.getElementById('sbTarraxa').checked;var _trx=_ehBrinco&&document.getElementById('sbTarraxamento')&&document.getElementById('sbTarraxamento').checked;
   var _obs=document.getElementById('sbObs')?document.getElementById('sbObs').value.trim():'';
-  var novoSb={tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:document.getElementById('sbPeso').value,qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx,obs:_obs};
+  var novoSb={id:'sb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,fornecedor:document.getElementById('fbFornecedor').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:document.getElementById('sbPeso').value,qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx,obs:_obs};
   if(sbEdit&&(o.itens||[])[sbEdit.li]&&((o.itens[sbEdit.li].subitens)||[])[sbEdit.si]!==undefined){
-    o.itens[sbEdit.li].subitens[sbEdit.si]=novoSb;sbEdit=null;var _ab=document.getElementById('sbAddBtn');if(_ab)_ab.textContent='+ Adicionar sub-item';
+    novoSb.id=(o.itens[sbEdit.li].subitens[sbEdit.si]&&o.itens[sbEdit.li].subitens[sbEdit.si].id)||novoSb.id;o.itens[sbEdit.li].subitens[sbEdit.si]=novoSb;sbEdit=null;var _ab=document.getElementById('sbAddBtn');if(_ab)_ab.textContent='+ Adicionar sub-item';
   } else { if(!it.subitens)it.subitens=[];it.subitens.push(novoSb); }
   salvar();
   document.getElementById('sbTipo').value='';document.getElementById('sbPeso').value='';document.getElementById('sbQtd').value='';document.getElementById('sbCodigo').value='';document.getElementById('sbPrecoUnit').value='';if(document.getElementById('sbObs'))document.getElementById('sbObs').value='';var _t1=document.getElementById('sbTarraxa');if(_t1)_t1.checked=false;var _t2=document.getElementById('sbTarraxamento');if(_t2)_t2.checked=false;var _bb=document.getElementById('sbBrincoBox');if(_bb)_bb.style.display='none';
   sbFotoData='';sbFotoPend=false;var pv=document.getElementById('sbFotoPrev');if(pv){pv.style.display='none';pv.src='';}document.getElementById('sbFotoInput').value='';
   sbRefresh();renderSubitens();
+  if(window.__sb){try{await mergeSubitensCloud(o);renderSubitens();var up=await window.__sb.from('ordens').upsert({id:String(o.id),num_os:o.numOS||null,cliente:o.cliente||null,setor:o.setor||null,dados:o});if(up&&up.error){alert('\u26a0 Sub-item salvo no aparelho, mas NAO confirmou na nuvem: '+up.error.message+'. Toque em Salvar para tentar de novo.');}}catch(e){alert('\u26a0 Sub-item salvo no aparelho, mas houve erro na nuvem: '+((e&&e.message)||e));}}
 }
 function delSubitem(idx,si){const o=osAtualFb();if(!o)return;const it=(o.itens||[])[idx];if(!it||!it.subitens)return;it.subitens.splice(si,1);salvar();sbRefresh();renderSubitens();}
+function sbSig(sb){return sb.id||((sb.tipoPeca||'')+'|'+(sb.codigo||'')+'|'+(sb.peso||'')+'|'+(sb.qtd||'')+'|'+(sb.foto||''));}
+function fornecedoresOS(o){var s={};(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.fornecedor)s[sb.fornecedor]=1;});});var a=Object.keys(s);if(!a.length)return (o.fb&&o.fb.fornecedor)||'';return a.length===1?a[0]:(a.length+' fornec.');}
+async function mergeSubitensCloud(o){
+  if(!window.__sb)return;
+  try{var r=await window.__sb.from('ordens').select('dados').eq('id',String(o.id)).maybeSingle();var cloud=r&&r.data&&r.data.dados;if(!cloud)return;
+    (o.itens||[]).forEach(function(it,i){var cit=(cloud.itens||[])[i];if(!cit||!cit.subitens)return;it.subitens=it.subitens||[];var have={};it.subitens.forEach(function(sb){have[sbSig(sb)]=true;});cit.subitens.forEach(function(csb){var k=sbSig(csb);if(!have[k]){it.subitens.push(csb);have[k]=true;}});});
+  }catch(e){}
+}
 function renderSubitens(){
   const o=osAtualFb();if(!o)return;const tb=document.getElementById('sbLista');if(!tb)return;tb.innerHTML='';
-  (o.itens||[]).forEach(function(it,i){(it.subitens||[]).forEach(function(sb,si){var tr=document.createElement('tr');
-    var fdi=sb.foto?'<img src="'+fotoSrc(sb.foto)+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+((sb.tarraxa||sb.tarraxamento)?' <span style=\'color:#a9862f;font-size:11px\'>('+[sb.tarraxa?'Tarraxa':'',sb.tarraxamento?'Tarraxamento':''].filter(Boolean).join(', ')+')</span>':'')+(sb.obs?'<div class="hint" style="font-size:10px;white-space:normal">'+sb.obs+'</div>':'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+(sb.peso||'')+'</td><td>'+(sb.qtd||'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td class="row-act"><button class="btn-azul" onclick="editarSubitem('+i+','+si+')" style="padding:4px 8px;font-size:12px;background:#6b7b8c">Editar</button><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
+  var _flt=document.getElementById('sbFiltroLote');var _fv='';if(_flt){var _cur=_flt.value;_flt.innerHTML='<option value="">Todos os lotes</option>'+(o.itens||[]).map(function(it,i){return '<option value="'+i+'">Lote '+(i+1)+(it.produto?(' \u2014 '+it.produto):'')+'</option>';}).join('');_flt.value=_cur;_fv=_flt.value;}
+  (o.itens||[]).forEach(function(it,i){if(_fv!==''&&(''+i)!==(''+_fv))return;(it.subitens||[]).forEach(function(sb,si){var tr=document.createElement('tr');
+    var fdi=sb.foto?'<img src="'+fotoSrc(sb.foto)+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+((sb.tarraxa||sb.tarraxamento)?' <span style=\'color:#a9862f;font-size:11px\'>('+[sb.tarraxa?'Tarraxa':'',sb.tarraxamento?'Tarraxamento':''].filter(Boolean).join(', ')+')</span>':'')+(sb.obs?'<div class="hint" style="font-size:10px;white-space:normal">'+sb.obs+'</div>':'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+(sb.peso||'')+'</td><td>'+(sb.qtd||'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td>'+(sb.fornecedor||'')+'</td><td class="row-act"><button class="btn-azul" onclick="editarSubitem('+i+','+si+')" style="padding:4px 8px;font-size:12px;background:#6b7b8c">Editar</button><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
     tb.appendChild(tr);});});
   updatePacoteTotais();
 }
@@ -2198,7 +2230,7 @@ function buildCatalogoHTML(o){
     var brutoUN=parseFloat(sb.precoUnit)||0;var banhoUN=catBanhoUN(it,sb);var finalUN=brutoUN+banhoUN;
     var foto=sb.foto?'<img src="'+fotoSrc(sb.foto)+'">':'<div class="semfoto">sem foto</div>';
     cards+='<div class="card"><div class="foto">'+foto+'</div><div class="dados">'+
-      '<div class="l"><b>Forn.:</b> '+((o.fb&&o.fb.fornecedor)||'-')+' &nbsp; <b>Código:</b> '+((sb.codigo)||'-')+'</div>'+
+      '<div class="l"><b>Forn.:</b> '+(sb.fornecedor||(o.fb&&o.fb.fornecedor)||'-')+' &nbsp; <b>Código:</b> '+((sb.codigo)||'-')+'</div>'+
       '<div class="l"><b>Tipo de Peça:</b> '+(sb.tipoPeca||'-')+'</div>'+
       '<div class="l"><b>Peso UN:</b> '+g2(pesoU*1000)+' g &nbsp;|&nbsp; <b>Peso Total:</b> '+g2(pesoT*1000)+' g</div>'+
       '<div class="l"><b>Preço do Bruto UN:</b> R$ '+g2(brutoUN)+' &nbsp;|&nbsp; <b>Preço do banho UN:</b> R$ '+g2(banhoUN)+'</div>'+
@@ -2517,7 +2549,7 @@ function buildEtiquetasClienteHTML(o){
       (tarUN?'<div class="l">+ Tarraxa R$ '+g2(tarUN)+'</div>':'')+
       (traxUN?'<div class="l">+ Tarraxamento R$ '+g2(traxUN)+'</div>':'')+
       ((tarUN||traxUN)?'<div class="l dest">Total un ~ R$ '+g2(totalUN)+'</div>':'')+
-      '<div class="l">Forn: '+((o.fb&&o.fb.fornecedor)||'-')+'</div>'+
+      '<div class="l">Forn: '+(sb.fornecedor||(o.fb&&o.fb.fornecedor)||'-')+'</div>'+
     '</div><div class="etq-r">'+(logoData?'<img src="'+logoData+'">':'<b>MAGRI</b>')+'</div></div>');
   });});
   var rows='';
@@ -2634,7 +2666,7 @@ function render(){
     const pu=f.precoUnit?Number(f.precoUnit).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
     const stt=f.qtd?'<span class="st st-recebido">Em andamento</span>':'<span class="st st-nfechado">Pendente</span>';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.fbRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+(f.fornecedor||'')+'</td><td>'+(f.qtd||'')+'</td><td>'+pu+'</td><td>'+pp+'</td><td>'+stt+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirFb(\''+o.id+'\')">Processar</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
+    tr.innerHTML='<td>'+foto+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b></td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+fmt(o.fbRecebidoEm)+'</td><td><span class="prazo '+ps.cls+'">'+ps.txt+'</span></td><td>'+fornecedoresOS(o)+'</td><td>'+(f.qtd||'')+'</td><td>'+pu+'</td><td>'+pp+'</td><td>'+stt+'</td><td class="row-act"><button class="btn-abrir" onclick="abrirFb(\''+o.id+'\')">Processar</button><button class="btn-ghost" style="background:#e6f0fa;color:#123a6b" onclick="abrirDesm(\''+o.id+'\')">Desmembrar</button><button class="btn-ghost" style="background:var(--amarelo-bg);color:var(--amarelo)" onclick="abrirDev(\''+o.id+'\')">Devolver</button></td>';
     tbF.appendChild(tr);});
   const fbTot=naFila.length,fbPend=naFila.filter(o=>!o.fb||!o.fb.qtd).length,fbAtr=naFila.filter(o=>prazoSetor(o.fbRecebidoEm,o.fb&&o.fb.concluidoEm).cls==='prazo-atraso').length;
   const totPecas=dados.reduce((s,o)=>s+(o.fb&&o.fb.qtd?parseInt(o.fb.qtd):0),0);
@@ -2801,7 +2833,7 @@ function exportFb(){
   const lin=[];
   l.forEach(function(o){var f=o.fb;var subs=[];(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){subs.push(sb);});});
     if(!subs.length){lin.push([f.resp,fmt(o.fbRecebidoEm),f.nota,f.letra,o.cliente,o.numOS,f.fornecedor,'','','','','',f.categoria,f.camada,f.cor,f.anti,f.verniz]);}
-    else subs.forEach(function(sb){lin.push([f.resp,fmt(o.fbRecebidoEm),f.nota,f.letra,o.cliente,o.numOS,f.fornecedor,sb.tipoPeca||'',sb.codigo||'',sb.qtd||'',sb.precoUnit||'',sb.peso||'',f.categoria,f.camada,f.cor,f.anti,f.verniz]);});
+    else subs.forEach(function(sb){lin.push([f.resp,fmt(o.fbRecebidoEm),f.nota,f.letra,o.cliente,o.numOS,sb.fornecedor||f.fornecedor,sb.tipoPeca||'',sb.codigo||'',sb.qtd||'',sb.precoUnit||'',sb.peso||'',f.categoria,f.camada,f.cor,f.anti,f.verniz]);});
   });
   baixarXls('Controle_Brutos_Magri',cols,lin);
 }
