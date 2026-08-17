@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08a</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08b</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -611,7 +611,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08a</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08b</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1672,7 +1672,13 @@ async function salvarFb(concluir){
       if(!r.ok){alert('⚠ NÃO consegui confirmar a gravação no servidor.\n\nErro: '+r.err+'\n\nNÃO atualize a tela — verifique a internet e toque em Concluir de novo. (Me mande esse erro.)');return;}
     }
     closeFb();alert('O.S. '+(o.numOS||'')+' concluída no Foto/Bruto e encaminhada para Amarração. (gravação confirmada no servidor)');
-  } else { alert('Dados salvos.'); }
+  } else {
+    if(window.__sb){
+      var r2=await salvarOSVerificado(o);
+      if(!r2.ok){alert('⚠ NÃO consegui confirmar a gravação no servidor.\n\nErro: '+r2.err+'\n\nNÃO atualize a tela — verifique a internet e toque em Salvar de novo. (Me mande esse erro.)');return;}
+      alert('Dados salvos e confirmados na nuvem.');
+    } else { alert('Dados salvos (somente neste aparelho — sem internet/nuvem).'); }
+  }
 }
 function etqCamadaItem(it){var b=it.banho||'';if(b==='Ouro Camada')return it.camada?(it.camada+' ML'):'';if(b==='Ouro Flash')return 'FLASH';if(b==='Ouro 1 Milésimo')return '1 ML';var m=b.match(/(\d+)ML/);if(m)return m[1]+' ML';return '';}
 function etqVernizItem(it){var c=it.compl||{};if(c.cataforetico)return 'CAT';if(c.protetor)return 'PROT 300';return '0';}
