@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08d</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08e</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -611,7 +611,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08d</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08e</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -842,6 +842,7 @@
       </div>
       <div class="hint" id="recInfo" style="margin-bottom:6px"></div>
       <div class="table-scroll" style="max-height:280px"><table><thead><tr><th>Restaurar</th><th>Item</th><th>Produto</th><th>Banho/Cor</th><th>Peças</th><th>Fotos</th></tr></thead><tbody id="recLotes"></tbody></table></div>
+      <label style="display:block;font-size:13px;margin:6px 0"><input type="checkbox" id="recSubstituir"> Substituir os itens atuais (marque quando os itens atuais estão vazios/perdidos — evita duplicar)</label>
       <div class="actions"><button class="btn-primary" onclick="confirmarRec()">Restaurar selecionados na O.S. atual</button><button class="btn-ghost" onclick="closeRec()">Fechar</button></div>
     </div>
   </div>
@@ -1794,7 +1795,7 @@ function recCarregar(){
     tb.innerHTML=its.map(function(it,i){var nsub=(it.subitens||[]).length;var nf=(it.subitens||[]).filter(function(sb){return sb.foto;}).length;return '<tr><td style="text-align:center"><input type="checkbox" id="rec_'+i+'"></td><td><b>'+(i+1)+'</b></td><td>'+(it.produto||'')+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+nsub+'</td><td>'+nf+'</td></tr>';}).join('')||'<tr><td colspan="6" class="hint">O.S. sem itens nesse backup.</td></tr>';
   },function(e){document.getElementById('recInfo').textContent='Erro ao ler o backup: '+((e&&e.message)||e);});
 }
-function confirmarRec(){
+async function confirmarRec(){
   var os=(document.getElementById('recOs').value||'').trim();
   if(!_recBk){alert('Clique em Carregar itens primeiro.');return;}
   var bo=_recBk.find(function(x){return (''+(x.numOS||''))===os;});if(!bo){alert('O.S. nao encontrada no backup.');return;}
@@ -1803,12 +1804,25 @@ function confirmarRec(){
   var sel=[];(bo.itens||[]).forEach(function(it,i){var el=document.getElementById('rec_'+i);if(el&&el.checked)sel.push(it);});
   if(!sel.length){alert('Marque ao menos um item para restaurar.');return;}
   var add=JSON.parse(JSON.stringify(sel));
-  add.forEach(function(it){it.produto=(it.produto||'')+' [recuperado]';});
-  atual.itens=(atual.itens||[]).concat(add);
+  var subst=document.getElementById('recSubstituir')&&document.getElementById('recSubstituir').checked;
+  if(subst){
+    if(!confirm('Substituir os '+((atual.itens||[]).length)+' item(ns) atuais da O.S. '+os+' pelos '+add.length+' item(ns) do backup?'))return;
+    atual.itens=add;
+    if(bo.fb&&(!atual.fb||!atual.fb.qtd)){atual.fb=JSON.parse(JSON.stringify(bo.fb));}
+  } else {
+    add.forEach(function(it){it.produto=(it.produto||'')+' [recuperado]';});
+    atual.itens=(atual.itens||[]).concat(add);
+  }
   if(typeof recalcFbResumo==='function')recalcFbResumo(atual);
-  salvar();render();closeRec();
+  salvar();render();
   var nf=add.reduce(function(s,it){return s+((it.subitens||[]).filter(function(sb){return sb.foto;}).length);},0);
-  alert(add.length+' item(ns) restaurado(s) na O.S. '+os+' (com '+nf+' foto(s)) e marcados com [recuperado]. Se voce ja refez esses itens, apague os duplicados apos conferir as fotos.');
+  if(window.__sb){
+    try{var up=await window.__sb.from('ordens').upsert({id:String(atual.id),num_os:atual.numOS||null,cliente:atual.cliente||null,setor:atual.setor||null,dados:atual});
+      if(up&&up.error){alert('\u26a0 Restaurado no aparelho, mas NAO confirmou na nuvem: '+up.error.message+'. Verifique a internet e refaca.');return;}
+    }catch(e){alert('\u26a0 Restaurado no aparelho, erro na nuvem: '+((e&&e.message)||e));return;}
+  }
+  closeRec();
+  alert((subst?('Itens substituidos'):(add.length+' item(ns) adicionados'))+' na O.S. '+os+' (com '+nf+' foto(s)). Gravacao confirmada na nuvem.'+(subst?'':' Se ja refez os itens, apague os duplicados [recuperado].'));
 }
 function verFotosOrfas(){
   if(!window.__fotos){alert('As fotos ainda nao carregaram. Aguarde alguns segundos e tente de novo.');return;}
