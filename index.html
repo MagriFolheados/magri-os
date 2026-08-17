@@ -110,7 +110,8 @@
   .etq .lin{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;}
   .etq .os{font-size:22px;text-align:center;font-weight:800;letter-spacing:1px;margin:6px 0;}
   .footer-note{font-size:12px;color:#9ca3af;text-align:center;margin-top:20px;}
-  @media(max-width:640px){.mob-hide{display:none!important}#view-fotobruto table thead th:nth-child(7),#view-fotobruto table thead th:nth-child(8),#view-fotobruto table thead th:nth-child(9),#view-fotobruto table thead th:nth-child(10),#view-fotobruto table tbody td:nth-child(7),#view-fotobruto table tbody td:nth-child(8),#view-fotobruto table tbody td:nth-child(9),#view-fotobruto table tbody td:nth-child(10){display:none!important}}
+  .mob-only{display:none}
+  @media(max-width:640px){.mob-hide{display:none!important}.mob-only{display:inline-block!important}.mob-opt{display:none}.mob-opt.show{display:block!important}#view-fotobruto table thead th:nth-child(7),#view-fotobruto table thead th:nth-child(8),#view-fotobruto table thead th:nth-child(9),#view-fotobruto table thead th:nth-child(10),#view-fotobruto table tbody td:nth-child(7),#view-fotobruto table tbody td:nth-child(8),#view-fotobruto table tbody td:nth-child(9),#view-fotobruto table tbody td:nth-child(10){display:none!important}}
   @media print{body *{visibility:hidden;} #printArea,#printArea *{visibility:visible;} #printArea{position:absolute;left:0;top:0;width:100%;}}
   .mobmenu{display:none;}
   @media (max-width:860px){
@@ -180,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-07y</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08a</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -610,7 +611,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-07y</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08a</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -750,9 +751,9 @@
         <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola" oninput="sbTipoChange()"></div>
         <div><label>Peso (Kg)</label><input type="number" step="0.001" id="sbPeso"></div>
         <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div>
-        <div class="mob-hide"><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor"></div>
+        <div><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor"></div>
         <div><label>Código da peça</label><input type="text" id="sbCodigo"></div>
-        <div class="mob-hide"><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
+        <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
         <div style="grid-column:1/-1"><label>Observação da peça (detalhes)</label><input type="text" id="sbObs" placeholder="Ex.: detalhes, avaria, referência da peça..."></div>
         <div style="grid-column:1/-1;display:none" id="sbBrincoBox"><label>Serviços por unidade (só para brinco)</label><label style="font-weight:normal;margin-right:16px"><input type="checkbox" id="sbTarraxa"> Tarraxa</label><label style="font-weight:normal"><input type="checkbox" id="sbTarraxamento"> Tarraxamento</label> <span class="hint">cobrado por peça inspecionada na expedição</span></div>
         <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><button type="button" class="btn-ghost" onclick="document.getElementById('sbFotoInput').click()" style="padding:8px 14px">Anexar foto</button> <button type="button" class="btn-ghost" onclick="document.getElementById('sbCamInput').click()" style="padding:8px 14px">Tirar foto (câmera)</button><input type="file" id="sbFotoInput" accept="image/*" style="display:none"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="display:none"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
@@ -2546,6 +2547,7 @@ function gerarEtiquetaCliente(){
   var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir as etiquetas.');return;}
   w.document.write(buildEtiquetasClienteHTML(o));w.document.close();
 }
+function toggleMobPreco(btn){var sh=false;document.querySelectorAll('.mob-opt').forEach(function(el){el.classList.toggle('show');sh=el.classList.contains('show');});if(btn)btn.textContent=sh?'Ocultar preço e fornecedor':'Mostrar preço e fornecedor';}
 function desmDestRefresh(){var d=document.getElementById('desmDest').value;var mb=document.getElementById('desmMotivoBox');if(mb)mb.style.display=(d==='retrab')?'block':'none';}
 function desmBase(o){if(o.familiaBase)return o.familiaBase;return (''+(o.numOS||'')).replace(/-(?:[B-Z]|R\d+)$/,'');}
 function desmProxLetra(base){var used={};dados.forEach(function(o){if(desmBase(o)===base){var m=(''+(o.numOS||'')).match(/-([B-Z])$/);if(m)used[m[1]]=1;}});for(var c=66;c<=90;c++){var L=String.fromCharCode(c);if(!used[L])return L;}return 'X'+(''+Date.now()).slice(-3);}
