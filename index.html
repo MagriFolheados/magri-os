@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08c</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08d</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -611,7 +611,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08c</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-08-08d</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -852,6 +852,7 @@
     <div class="modal-head"><h3>Fotos na nuvem sem vínculo</h3><button class="x" onclick="closeOrfa()">×</button></div>
     <div class="modal-body">
       <div class="hint" id="orfaInfo" style="margin-bottom:8px"></div>
+      <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input type="text" id="orfaFidManual" placeholder="Ou cole o código da foto (fid_...)" style="flex:1;min-width:200px;padding:6px"><button class="btn-azul" type="button" onclick="usarFidManual()">Usar este código</button></div>
       <div id="orfaGrid" style="display:flex;flex-wrap:wrap;gap:8px;max-height:440px;overflow:auto"></div>
     </div>
   </div>
@@ -1757,7 +1758,16 @@ function abrirOrfaPicker(){
   document.getElementById('orfaModal').classList.add('show');
 }
 function closeOrfa(){document.getElementById('orfaModal').classList.remove('show');}
-function pickOrfa(fid){sbFotoData='fid:'+fid;sbFotoPend=false;var pv=document.getElementById('sbFotoPrev');if(pv){pv.src=(window.__fotos&&window.__fotos[fid])||'';pv.style.display='inline';pv.title='foto da nuvem';}closeOrfa();alert('Foto selecionada. Preencha o tipo de peca e clique em Adicionar sub-item para vincula-la.');}
+async function pickOrfa(fid){
+  fid=(''+fid).replace(/^fid:/,'').trim();if(!fid){alert('Codigo de foto invalido.');return;}
+  if(window.__sb&&(!window.__fotos||!window.__fotos[fid])){
+    try{var r=await window.__sb.from('fotos').select('b64').eq('id',fid).maybeSingle();if(r&&r.data&&r.data.b64){window.__fotos=window.__fotos||{};window.__fotos[fid]=r.data.b64;}else{alert('Nao encontrei essa foto na nuvem (codigo: '+fid+'). Confira o codigo.');return;}}catch(e){alert('Erro ao buscar a foto: '+((e&&e.message)||e));return;}
+  }
+  if(!(window.__fotos&&window.__fotos[fid])){alert('Essa foto nao esta disponivel (codigo: '+fid+').');return;}
+  sbFotoData='fid:'+fid;sbFotoPend=false;var pv=document.getElementById('sbFotoPrev');if(pv){pv.src=window.__fotos[fid]||'';pv.style.display='inline';pv.title='foto da nuvem';}
+  closeOrfa();alert('Foto vinculada ao campo. Agora preencha o Tipo de peca (e peso) e clique em "+ Adicionar sub-item".');
+}
+function usarFidManual(){var v=(document.getElementById('orfaFidManual').value||'').trim();if(!v){alert('Cole o codigo da foto (fid_...).');return;}pickOrfa(v);}
 function abrirRecuperar(){
   if(!window.__sb){alert('Sem conexao com a nuvem. Abra o sistema logado no navegador.');return;}
   _recBk=null;document.getElementById('recOs').value='';document.getElementById('recLotes').innerHTML='';document.getElementById('recInfo').textContent='Carregando lista de backups...';
