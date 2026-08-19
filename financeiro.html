@@ -215,9 +215,10 @@ function temAjuste(l){ return (Number(l.juros)||0)>0 || (Number(l.desconto)||0)>
 
 /* ---------- PERSISTÊNCIA ---------- */
 function salvar(){ localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
+function limparMovimentosOrfaos(){ if(!DB||!Array.isArray(DB.movimentos))return 0; var ids={}; (DB.lancamentos||[]).forEach(function(l){ids[String(l.id)]=1;}); var antes=DB.movimentos.length; DB.movimentos=DB.movimentos.filter(function(m){ return !(m&&m.origem==='lancamento'&&m.origemId!=null&&!ids[String(m.origemId)]); }); return antes-DB.movimentos.length; }
 function carregar(){
   const raw = localStorage.getItem(DB_KEY);
-  if(raw){ try{ DB = JSON.parse(raw); return; }catch(e){} }
+  if(raw){ try{ DB = JSON.parse(raw); try{ if(limparMovimentosOrfaos()>0) salvar(); }catch(_e){} return; }catch(e){} }
   if(typeof DADOS_INICIAIS!=='undefined' && DADOS_INICIAIS){ DB = JSON.parse(JSON.stringify(DADOS_INICIAIS)); salvar(); return; }
   DB = novoBanco();
   salvar();
@@ -372,7 +373,9 @@ function delLancamento(id){
   if(l && (l.origem==='venda'||l.origem==='compra')){
     toast('Este lançamento veio de uma venda/compra. Exclua pela origem.', true); return;
   }
-  if(!confirm('Excluir este lançamento?')) return;
+  const nMov = DB.movimentos.filter(m=>m.origem==='lancamento'&&m.origemId===id).length;
+  if(!confirm('Excluir este lançamento?'+(nMov?(' Ele tem '+nMov+' movimento(s) no fluxo de caixa que também serão removidos.'):''))) return;
+  DB.movimentos = DB.movimentos.filter(m=>!(m.origem==='lancamento'&&m.origemId===id));
   DB.lancamentos = DB.lancamentos.filter(x=>x.id!==id); salvar(); render();
   toast('Lançamento excluído.');
 }
