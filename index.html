@@ -750,7 +750,7 @@
         <div><label>Item / Lote da OS</label><select id="sbItem" onchange="sbRefresh()"></select></div>
         <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola" oninput="sbTipoChange()"></div>
         <div><label>Peso (Kg)</label><input type="number" step="0.001" id="sbPeso"></div>
-        <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div><div><label>Unidade</label><select id="sbUnid"><option>Peça</option><option>Par</option><option>Trio</option><option>Dúzia</option><option>Cento</option><option>Kg</option></select></div>
+        <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div><div><label>Unidade</label><select id="sbUnid"><option>Peça</option><option>Par</option><option>Trio</option><option>Conjunto</option><option>Dúzia</option><option>Cento</option><option>Kg</option></select></div>
         <div><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor"></div>
         <div><label>Código da peça</label><input type="text" id="sbCodigo"></div>
         <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
@@ -998,7 +998,7 @@ const LOGO_DEFAULT='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAACACAYAAA
 let logoData=localStorage.getItem('magri_logo')||LOGO_DEFAULT;
 function logoTag(h){return logoData?'<img src="'+logoData+'" style="height:'+(h||46)+'px;vertical-align:middle;margin-right:12px">':'';}
 function aplicarLogoHeader(){var el=document.getElementById('appLogo');if(el)el.innerHTML=logoData?'<img src="'+logoData+'" style="width:100%;height:100%;object-fit:contain;border-radius:8px">':'M';}
-const DEFAULT_USERS=[{user:'admin',pass:'admin',role:'Admin'},{user:'Comercial',pass:'Comercial',role:'Comercial'},{user:'Foto',pass:'Foto',role:'Foto/Bruto'},{user:'Gancheira',pass:'Gancheira',role:'Amarração'},{user:'Banho',pass:'Banho',role:'Banho'},{user:'Qualidade',pass:'Qualidade',role:'Qualidade'},{user:'Expedição',pass:'Expedição',role:'Expedição'},{user:'Financeiro',pass:'Financeiro',role:'Financeiro'},{user:'Tablet',pass:'tablet',role:'Expedição'},{user:'Celular',pass:'celular',role:'Foto/Bruto'},{user:'Produção',pass:'Produção',role:'Produção'}];
+const DEFAULT_USERS=[{user:'admin',pass:'admin',role:'Admin'}];
 let usuarios=JSON.parse(localStorage.getItem('magri_users')||'null')||[];
 DEFAULT_USERS.forEach(function(du){if(!usuarios.find(function(u){return (u.user||'').toLowerCase()===du.user.toLowerCase();}))usuarios.push(du);});
 localStorage.setItem('magri_users',JSON.stringify(usuarios));
