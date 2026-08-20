@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08e</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b style="color:#c8a24a">v2026-08-08e</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -1002,7 +1002,39 @@ const DEFAULT_USERS=[{user:'admin',pass:'admin',role:'Admin'}];
 let usuarios=JSON.parse(localStorage.getItem('magri_users')||'null')||[];
 DEFAULT_USERS.forEach(function(du){if(!usuarios.find(function(u){return (u.user||'').toLowerCase()===du.user.toLowerCase();}))usuarios.push(du);});
 localStorage.setItem('magri_users',JSON.stringify(usuarios));
-function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usuarios));}
+function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usuarios));}function trocarSenha(){
+  if(!window.__sb){alert('Troca de senha disponível apenas na versão online (nuvem).');return;}
+  var bg=document.createElement('div');
+  bg.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center';
+  var quem=(typeof sessao!=='undefined'&&sessao&&sessao.user)?sessao.user:'';
+  bg.innerHTML='<div style="background:#fff;color:#222;border-radius:12px;padding:20px 22px;width:330px;max-width:92%;box-shadow:0 8px 30px rgba(0,0,0,.35);font-family:Arial,sans-serif">'
+    +'<div style="font-weight:800;font-size:16px;margin-bottom:4px">Trocar minha senha</div>'
+    +'<div style="font-size:12px;color:#666;margin-bottom:12px">Conta: <b>'+quem+'</b></div>'
+    +'<label style="font-size:12px;font-weight:600">Nova senha (mínimo 6)</label>'
+    +'<input id="__ns1" type="password" autocomplete="new-password" style="width:100%;padding:8px;margin:4px 0 10px;border:1px solid #ccc;border-radius:6px">'
+    +'<label style="font-size:12px;font-weight:600">Repita a nova senha</label>'
+    +'<input id="__ns2" type="password" autocomplete="new-password" style="width:100%;padding:8px;margin:4px 0 6px;border:1px solid #ccc;border-radius:6px">'
+    +'<div id="__nsmsg" style="font-size:12px;color:#b3343e;min-height:16px;margin-bottom:6px"></div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button id="__nsCancel" style="padding:8px 14px;border:none;border-radius:6px;background:#eee;cursor:pointer">Cancelar</button>'
+    +'<button id="__nsOk" style="padding:8px 14px;border:none;border-radius:6px;background:#8a6d1f;color:#fff;font-weight:700;cursor:pointer">Salvar</button>'
+    +'</div></div>';
+  document.body.appendChild(bg);
+  function fechar(){bg.remove();}
+  document.getElementById('__nsCancel').onclick=fechar;
+  bg.addEventListener('click',function(e){if(e.target===bg)fechar();});
+  document.getElementById('__nsOk').onclick=async function(){
+    var p1=document.getElementById('__ns1').value,p2=document.getElementById('__ns2').value,msg=document.getElementById('__nsmsg');
+    if((p1||'').length<6){msg.textContent='A senha precisa ter ao menos 6 caracteres.';return;}
+    if(p1!==p2){msg.textContent='As senhas não conferem.';return;}
+    var botao=this;botao.disabled=true;botao.textContent='Salvando...';
+    try{
+      var r=await window.__sb.auth.updateUser({password:p1});
+      if(r.error){msg.textContent='Erro: '+r.error.message;botao.disabled=false;botao.textContent='Salvar';return;}
+      fechar();alert('Senha alterada com sucesso! Use a nova senha no próximo login.');
+    }catch(e){msg.textContent='Erro: '+((e&&e.message)||e);botao.disabled=false;botao.textContent='Salvar';}
+  };
+}
 let sessao=JSON.parse(localStorage.getItem('magri_session')||'null');
 const ALL_VIEWS=['gestao','comercial','clientes','estoque','financeiro','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','diretoria','catalogo','cobranca'];
 const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Produção','Expedição','Financeiro'];
