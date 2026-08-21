@@ -386,7 +386,7 @@ function modalBaixa(id){
   if(!contas.length){ toast('Cadastre ao menos uma conta (banco/caixa) no Fluxo de Caixa.', true); go('caixa'); return; }
   const isRec=l.tipo==='receita';
   const rec=recebidoTitulo(l), saldo=saldoTitulo(l), bs=baixasDe(l);
-  const linhasBx = bs.length? bs.map(b=>`<tr><td>${dataBR(b.data)}</td><td>${esc(b.forma||'')}</td><td>${esc(nomeConta(b.contaId)||'')}</td><td class="num"><b>${fmt(b.valor)}</b></td><td class="num"><button class="icon-btn" title="Excluir" onclick="delBaixa(${id},'${b.id}')">🗑</button></td></tr>`).join('') : `<tr><td colspan="5" class="hint">Nenhum ${isRec?'recebimento':'pagamento'} lançado.</td></tr>`;
+  const linhasBx = bs.length? bs.map(b=>`<tr><td>${dataBR(b.data)}</td><td>${esc(b.forma||'')}${b.obs?`<div class="hint" style="font-size:11px">📝 ${esc(b.obs)}</div>`:''}</td><td>${esc(nomeConta(b.contaId)||'')}</td><td class="num"><b>${fmt(b.valor)}</b></td><td class="num"><button class="icon-btn" title="Excluir" onclick="delBaixa(${id},'${b.id}')">🗑</button></td></tr>`).join('') : `<tr><td colspan="5" class="hint">Nenhum ${isRec?'recebimento':'pagamento'} lançado.</td></tr>`;
   abrirModal(`
     <div class="modal-head"><h3>${isRec?'Receber título':'Pagar título'}</h3><button class="close-x" onclick="fecharModal()">×</button></div>
     <div class="modal-body">
@@ -694,6 +694,11 @@ function chartOpts(){
 
 /* ---------- CONTAS A RECEBER / PAGAR ---------- */
 let filtroContas = {status:'todos', busca:'', modo:'tudo', mes:hoje().slice(0,7), ano:hoje().slice(0,4), de:'', ate:'', baseData:'vencimento'};
+function _finEsc(x){return (''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _finRelXLSX(nome,sheets){if(window.XLSX){var wb=XLSX.utils.book_new();sheets.forEach(function(sh){XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sh.rows),sh.name.slice(0,28));});XLSX.writeFile(wb,nome+'_'+hoje()+'.xlsx');}else{toast('Excel indisponivel.',true);}}
+function _finRelPDF(titulo,body){var css='body{font-family:Arial,sans-serif;margin:18px;color:#222}h1{color:#123a6b;font-size:18px;margin:0 0 2px}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}th{background:#123a6b;color:#fff;padding:5px 7px;text-align:left}td{border:1px solid #eee;padding:5px 7px}.num{text-align:right}.tot{font-weight:bold;background:#f0f0f0}@media print{.noprint{display:none}}';var w=window.open('','_blank');if(!w){alert('Permita pop-ups para gerar o PDF.');return;}w.document.write('<html><head><meta charset="utf-8"><title>'+titulo+'</title><style>'+css+'</style></head><body><h1>Magri Folheados — '+titulo+'</h1><div style="font-size:11px;color:#555">Gerado em '+new Date().toLocaleString('pt-BR')+'</div><div class="noprint" style="margin:8px 0"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer">Imprimir / Salvar PDF</button></div>'+body+'</body></html>');w.document.close();}
+async function importarOSNuvem(){if(!window.__sb){toast('Disponivel so na versao online (nuvem).',true);return;}toast('Buscando OS na nuvem...');try{var r=await window.__sb.from('ordens').select('id,num_os,dados');if(r.error){toast('Erro ao ler a nuvem: '+r.error.message,true);return;}if(!DB.osImportadas||Array.isArray(DB.osImportadas)){var _m={};if(Array.isArray(DB.osImportadas))DB.osImportadas.forEach(function(x){_m[x]=null;});DB.osImportadas=_m;}garantirCategoria('Recebimento de O.S.','receita','outras_receitas');var add=0,upd=0,skip=0;(r.data||[]).forEach(function(row){var o=row.dados||{};var fr=o.finReceber;if(!fr||!(Number(fr.valor)>0))return;var novoValor=Number(fr.valor)||0;var desc='O.S. '+(fr.numOS||o.numOS||'')+' — '+(fr.cliente||o.cliente||'');var lancId=DB.osImportadas[row.id];var lanc=lancId?DB.lancamentos.find(function(l){return l.id===lancId;}):null;if(lanc){if(lanc.status==='pago'){skip++;return;}var pago=(Number(lanc.valor)||0)-saldoTitulo(lanc);if(Math.abs((Number(lanc.valor)||0)-novoValor)<0.005){skip++;return;}if(novoValor<pago-0.005){skip++;return;}lanc.valor=novoValor;lanc.descricao=desc;try{atualizarStatusTitulo(lanc);}catch(e){}upd++;}else{var dt=fr.data||hoje();var id=addLancamentoRet({tipo:'receita',descricao:desc,valor:novoValor,categoria:'Recebimento de O.S.',documento:(''+(fr.numOS||o.numOS||'')),data:dt,vencimento:fr.vencimento||dt,status:'pendente',origem:'os-producao'});DB.osImportadas[row.id]=id;add++;}});salvar();render();toast(add+' criada(s), '+upd+' atualizada(s)'+(skip?(' - '+skip+' sem mudanca/quitada(s)'):'')+'.');}catch(e){toast('Erro: '+((e&&e.message)||e),true);}}
+function relatorioContas(tipo,formato){var isRec=tipo==='receita';var list=DB.lancamentos.filter(function(l){return l.tipo===tipo;});if(filtroContas.status==='pendente')list=list.filter(function(l){return (l.status==='pendente'||l.status==='parcial')&&!estaVencido(l);});else if(filtroContas.status==='vencido')list=list.filter(estaVencido);else if(filtroContas.status==='pago')list=list.filter(function(l){return l.status==='pago';});if(filtroContas.busca){var q=filtroContas.busca.toLowerCase();list=list.filter(function(l){return (l.descricao+' '+(l.contraparte||'')+' '+l.categoria).toLowerCase().includes(q);});}var perC=periodoRange(filtroContas);if(filtroContas.modo!=='tudo')list=list.filter(function(l){var dt=(filtroContas.baseData==='competencia'?(l.data||l.vencimento):(l.vencimento||l.data))||'';return dt>=perC.ini&&dt<=perC.fim;});list.sort(function(a,b){return (a.vencimento||a.data||'').localeCompare(b.vencimento||b.data||'');});if(!list.length){toast('Nenhum lancamento no periodo/filtro.',true);return;}var titulo=(isRec?'Contas a Receber':'Contas a Pagar')+' — '+perC.label;var totalValor=list.reduce(function(s,l){return s+Number(l.valor||0);},0);var totalSaldo=list.reduce(function(s,l){return s+saldoTitulo(l);},0);var recPago=totalValor-totalSaldo;var head=['Descricao',(isRec?'Cliente':'Fornecedor'),'Documento','Categoria','Vencimento','Valor',(isRec?'Recebido':'Pago'),'Saldo','Situacao'];var linhas=list.map(function(l){var sit=l.status==='pago'?'Quitado':(l.status==='parcial'?'Parcial':(estaVencido(l)?'Vencido':'A vencer'));var rec=(Number(l.valor||0)-saldoTitulo(l));return [l.descricao||'',l.contraparte||'',l.documento||'',l.categoria||'',l.vencimento||'',Number(l.valor||0),Number(rec.toFixed(2)),Number(saldoTitulo(l).toFixed(2)),sit];});if(formato==='excel'){var rows=[head].concat(linhas);rows.push(['TOTAL','','','','',Number(totalValor.toFixed(2)),Number(recPago.toFixed(2)),Number(totalSaldo.toFixed(2)),'']);_finRelXLSX((isRec?'Contas_a_Receber':'Contas_a_Pagar'),[{name:'Lancamentos',rows:rows}]);}else{var body='<table><thead><tr>'+head.map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>'+linhas.map(function(r){return '<tr><td>'+_finEsc(r[0])+'</td><td>'+_finEsc(r[1])+'</td><td>'+_finEsc(r[2])+'</td><td>'+_finEsc(r[3])+'</td><td>'+dataBR(r[4])+'</td><td class="num">'+fmt(r[5])+'</td><td class="num">'+fmt(r[6])+'</td><td class="num">'+fmt(r[7])+'</td><td>'+_finEsc(r[8])+'</td></tr>';}).join('')+'</tbody><tfoot><tr class="tot"><td colspan="5">TOTAL ('+list.length+' lancamento(s))</td><td class="num">'+fmt(totalValor)+'</td><td class="num">'+fmt(recPago)+'</td><td class="num">'+fmt(totalSaldo)+'</td><td></td></tr></tfoot></table>';_finRelPDF(titulo,body);}}
 function viewContas(tipo){
   const isRec = tipo==='receita';
   let list = DB.lancamentos.filter(l=>l.tipo===tipo);
@@ -721,7 +726,7 @@ function viewContas(tipo){
       <option value="pago"${sel('pago')}>Quitados</option></select></div>
     ${periodoToolbar(filtroContas,'setContasPer')}<div class="field"><label>Filtrar por</label><select onchange="filtroContas.baseData=this.value;render()"><option value="vencimento"${filtroContas.baseData==='vencimento'?' selected':''}>Vencimento</option><option value="competencia"${filtroContas.baseData==='competencia'?' selected':''}>Competência (data)</option></select></div>
     <div class="spacer"></div>
-    ${!isRec?`<button class="btn" onclick="modalRecorrente()">+ Despesa recorrente</button> `:''}<button class="btn primary" onclick="modalLancamento('${tipo}')">+ ${isRec?'Nova conta a receber':'Nova conta a pagar'}</button>
+    ${!isRec?`<button class="btn" onclick="modalRecorrente()">+ Despesa recorrente</button> `:''}${isRec?`<button class="btn" onclick="importarOSNuvem()">⭳ Importar OS (nuvem)</button> `:''}<button class="btn" onclick="relatorioContas('${tipo}','pdf')">Relatorio PDF</button> <button class="btn" onclick="relatorioContas('${tipo}','excel')">Relatorio Excel</button> <button class="btn primary" onclick="modalLancamento('${tipo}')">+ ${isRec?'Nova conta a receber':'Nova conta a pagar'}</button>
   </div>
   <div class="card" style="padding:0">
   <div class="tbl-wrap"><table>
@@ -962,15 +967,15 @@ function caixaMovimentos(){
     <td>${esc(nomeConta(m.contaId))}</td>
     <td><span class="pill ${m.tipo==='entrada'?'receita':'despesa'}">${m.tipo}</span></td>
     <td class="num ${m.tipo==='entrada'?'pos':'neg'}">${m.tipo==='entrada'?'+':'-'}${fmt(m.valor)}</td>
-    <td class="num">${['manual','transferencia','ajuste'].includes(m.origem)?`<button class="icon-btn" onclick="delMovimento(${m.id})">🗑</button>`:`<span class="hint" title="Gerado por ${esc(m.origem||'')}">🔗</span>`}</td>
+    <td class="num" style="text-align:center">${m.conciliado?`<button class="icon-btn" title="Conciliado — clique para desmarcar" onclick="conciliarMov(${m.id})" style="color:#3ecf8e;font-weight:bold">✓</button>`:`<button class="icon-btn" title="Marcar como conciliado (confere com o extrato)" onclick="conciliarMov(${m.id})" style="color:#f4b740">○</button>`}</td><td class="num">${['manual','transferencia','ajuste'].includes(m.origem)?`<button class="icon-btn" onclick="delMovimento(${m.id})">🗑</button>`:`<span class="hint" title="Gerado por ${esc(m.origem||'')}">🔗</span>`}</td>
   </tr>`).join('');
-  const entMes=movs.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+Number(m.valor),0);
-  const saiMes=movs.filter(m=>m.tipo==='saida').reduce((s,m)=>s+Number(m.valor),0);
+  const entMes=movs.filter(m=>m.tipo==='entrada'&&m.conciliado).reduce((s,m)=>s+Number(m.valor),0);
+  const saiMes=movs.filter(m=>m.tipo==='saida'&&m.conciliado).reduce((s,m)=>s+Number(m.valor),0);const pendConc=movs.filter(m=>!m.conciliado).length;
   return `
   <div class="grid kpis" style="margin-bottom:16px">
-    ${kpi('Entradas · '+perM.label, fmt(entMes),'Recebimentos no caixa','pos')}
-    ${kpi('Saídas · '+perM.label, fmt(saiMes),'Pagamentos no caixa','neg')}
-    ${kpi('Resultado · '+perM.label, fmt(entMes-saiMes),'Entradas − Saídas', entMes-saiMes>=0?'pos':'neg')}
+    ${kpi('Entradas conciliadas · '+perM.label, fmt(entMes),'Só o que bate com o extrato','pos')}
+    ${kpi('Saídas conciliadas · '+perM.label, fmt(saiMes),'Só o que bate com o extrato','neg')}
+    ${kpi('Resultado conciliado · '+perM.label, fmt(entMes-saiMes),(pendConc>0?(pendConc+' lançamento(s) pendente(s) de conciliação'):'Tudo conciliado'), entMes-saiMes>=0?'pos':'neg')}
   </div>
   <div class="toolbar">
     <div class="field"><label>Conta</label><select onchange="movFiltro.conta=this.value;render()">
@@ -983,8 +988,8 @@ function caixaMovimentos(){
     <button class="btn primary" onclick="modalMovimento('transferencia')">⇄ Transferência</button>
   </div>
   <div class="card" style="padding:0"><div class="tbl-wrap"><table>
-    <thead><tr><th>Data</th><th>Descrição</th><th>Conta</th><th>Tipo</th><th class="num">Valor</th><th></th></tr></thead>
-    <tbody>${rows||`<tr><td colspan="6"><div class="empty"><div class="big">💵</div>Nenhuma movimentação. Registre entradas, saídas ou transferências.</div></td></tr>`}</tbody>
+    <thead><tr><th>Data</th><th>Descrição</th><th>Conta</th><th>Tipo</th><th class="num">Valor</th><th style="text-align:center">Conc.</th><th></th></tr></thead>
+    <tbody>${rows||`<tr><td colspan="7"><div class="empty"><div class="big">💵</div>Nenhuma movimentação. Registre entradas, saídas ou transferências.</div></td></tr>`}</tbody>
   </table></div></div>`;
 }
 function modalMovimento(tipo){
@@ -1027,6 +1032,7 @@ function salvarMovimento(tipo){
   }
   salvar(); fecharModal(); render(); toast('Movimentação registrada.');
 }
+function conciliarMov(id){var m=DB.movimentos.find(function(x){return x.id===id;});if(!m)return;m.conciliado=!m.conciliado;salvar();render();}
 function delMovimento(id){
   if(!confirm('Excluir esta movimentação?')) return;
   const m=DB.movimentos.find(x=>x.id===id);
