@@ -204,6 +204,7 @@ function fmt(v){
   return (v<0?'-':'') + 'R$ ' + Math.abs(Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 function fmtN(v){ return (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function numBR(v){ if(typeof v==='number') return v; if(v==null) return 0; var s=String(v).trim(); if(!s) return 0; s=s.replace(/\s/g,'').replace(/r\$/gi,''); if(s.indexOf(',')>=0){ s=s.replace(/\./g,'').replace(',','.'); } else if((s.match(/\./g)||[]).length>1){ s=s.replace(/\./g,''); } else { var m=s.match(/^(-?\d+)\.(\d{3})$/); if(m) s=m[1]+m[2]; } var n=parseFloat(s); return isNaN(n)?0:n; }
 function dataBR(iso){ if(!iso) return '—'; const [a,m,d]=iso.split('-'); return `${d}/${m}/${a}`; }
 function mesLabel(ym){ const [a,m]=ym.split('-'); const nomes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']; return `${nomes[+m-1]}/${a.slice(2)}`; }
 function ym(iso){ return iso ? iso.slice(0,7) : ''; }
@@ -434,9 +435,9 @@ function addBaixa(id){
 }
 function delBaixa(id,bid){
   const l=DB.lancamentos.find(x=>x.id===id); if(!l||!l.baixas) return;
-  const b=l.baixas.find(x=>x.id===bid); if(!b) return;
+  const b=l.baixas.find(x=>String(x.id)===String(bid)); if(!b) return;
   if(b.movId) DB.movimentos=DB.movimentos.filter(m=>m.id!==b.movId);
-  l.baixas=l.baixas.filter(x=>x.id!==bid);
+  l.baixas=l.baixas.filter(x=>String(x.id)!==String(bid));
   atualizarStatusTitulo(l);
   salvar(); render(); modalBaixa(id);
   toast('Lançamento removido.');
@@ -2302,10 +2303,10 @@ function ckCalc(base){
 }
 
 /* ---- edições ---- */
-function ckSet(k,v){ DB.custoKg[k]= (k==='competencia')? v : (Number(v)||0); if(k==='competencia') DB.custoKg[k]=v; salvar(); render(); }
-function ckSetTax(k,v){ DB.custoKg.imposto[k]=Number(v)||0; salvar(); render(); }
+function ckSet(k,v){ DB.custoKg[k]= (k==='competencia')? v : numBR(v); if(k==='competencia') DB.custoKg[k]=v; salvar(); render(); }
+function ckSetTax(k,v){ DB.custoKg.imposto[k]=numBR(v); salvar(); render(); }
 function ckSetClasse(cat,v){ DB.custoKg.classe[cat]=v; salvar(); render(); }
-function ckEditFolha(i,f,v){ DB.custoKg.folha[i][f]= (f==='nome'||f==='setor')? v : (Number(v)||0); salvar(); render(); }
+function ckEditFolha(i,f,v){ DB.custoKg.folha[i][f]= (f==='nome'||f==='setor')? v : numBR(v); salvar(); render(); }
 function ckDelFolha(i){ DB.custoKg.folha.splice(i,1); salvar(); render(); }
 function ckAddFolha(){ DB.custoKg.folha.push({nome:'Novo colaborador',setor:'',bruto:0,ajuda:0}); salvar(); render(); }
 function ckEditIns(i,f,v){ DB.custoKg.insumos[i][f]= (f==='nome')? v : (Number(v)||0); salvar(); render(); }
@@ -2427,8 +2428,8 @@ function viewCustoKg(){
         <tbody>${ck.folha.map((e,i)=>{const pv=((Number(e.bruto)||0)+(Number(e.ajuda)||0))*(1+Number(ck.provisao)/100);return `<tr>
           <td><input value="${esc(e.nome)}" onchange="ckEditFolha(${i},'nome',this.value)" style="min-width:130px"></td>
           <td><input value="${esc(e.setor||'')}" onchange="ckEditFolha(${i},'setor',this.value)" style="width:100px"></td>
-          <td class="num"><input type="number" value="${e.bruto}" onchange="ckEditFolha(${i},'bruto',this.value)" style="width:90px;text-align:right"></td>
-          <td class="num"><input type="number" value="${e.ajuda}" onchange="ckEditFolha(${i},'ajuda',this.value)" style="width:90px;text-align:right"></td>
+          <td class="num"><input type="text" inputmode="decimal" value="${fmtN(e.bruto)}" onchange="ckEditFolha(${i},'bruto',this.value)" style="width:90px;text-align:right"></td>
+          <td class="num"><input type="text" inputmode="decimal" value="${fmtN(e.ajuda)}" onchange="ckEditFolha(${i},'ajuda',this.value)" style="width:90px;text-align:right"></td>
           <td class="num">${fmt(pv)}</td>
           <td><button class="icon-btn" onclick="ckDelFolha(${i})">✕</button></td></tr>`;}).join('')}</tbody>
         <tfoot><tr><td colspan="4">Total Folha + Encargos</td><td class="num">${fmt(comp.folha)}</td><td></td></tr></tfoot>
@@ -2484,10 +2485,12 @@ render();
     var cfg=await sb.from('config').select('valor').eq('chave','role_por_email').maybeSingle();
     var map=(cfg.data&&cfg.data.valor)||{};var role=map[email];
     if(role!=='Financeiro'&&role!=='Admin'){await sb.auth.signOut();loginUI('Este usuário não tem acesso ao Financeiro.');return;}
-    var fin=await sb.from('financeiro').select('dados').eq('id',1).maybeSingle();
+    var fin=await sb.from('financeiro').select('dados,atualizado_em').eq('id',1).maybeSingle();
     if(fin.error){loginUI('Erro ao acessar o Financeiro: '+fin.error.message);return;}
-    if(fin.data&&fin.data.dados){_set(DB_KEY,JSON.stringify(fin.data.dados));}
-    localStorage.setItem=function(k,v){_set(k,v);try{if(k===DB_KEY){sb.from('financeiro').upsert({id:1,dados:JSON.parse(v||'null'),atualizado_em:new Date().toISOString()}).then(function(){},function(e){console.warn('fin sync',e&&e.message);});}}catch(e){console.warn(e);}};
+    if(fin.data&&fin.data.dados){_set(DB_KEY,JSON.stringify(fin.data.dados));}window.__finVer=(fin.data&&fin.data.atualizado_em)||null;var _finCnt=function(d){d=d||{};return ((d.lancamentos||[]).length)+((d.movimentos||[]).length)+((d.recebiveis||[]).length);};(async function(){try{var _bt='fin_'+new Date().toISOString().slice(0,10);var _now=JSON.parse(localStorage.getItem(DB_KEY)||'{}');if(_finCnt(_now)>0){var _bk=await sb.from('backups').select('id').eq('id',_bt).maybeSingle();if(!_bk.error&&!_bk.data){await sb.from('backups').insert({id:_bt,dados:{financeiro:_now}});}}}catch(e){}})();try{setInterval(async function(){try{var _d=JSON.parse(localStorage.getItem(DB_KEY)||'{}');if(_finCnt(_d)<=0)return;var _id='finauto_'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');await sb.from('backups').insert({id:_id,dados:{financeiro:_d}});var _l=await sb.from('backups').select('id').like('id','finauto_%').order('id',{ascending:false});var _ids=(_l.data||[]).map(function(r){return r.id;});if(_ids.length>50){sb.from('backups').delete().in('id',_ids.slice(50)).then(function(){},function(){});}}catch(e){}},7200000);}catch(_e){}
+    function _finConflito(){try{var el=document.getElementById('__finconf');if(!el){el=document.createElement('div');el.id='__finconf';el.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#b3343e;color:#fff;font-family:Arial;font-size:13px;padding:12px 14px;text-align:center;font-weight:bold;cursor:pointer';el.onclick=function(){location.reload();};document.body.appendChild(el);}el.textContent='⚠ A nuvem foi atualizada por outro dispositivo. Sua ultima alteracao NAO foi salva (para nao apagar nada). Toque aqui para RECARREGAR e continuar.';el.style.display='';}catch(e){}}
+async function _finSync(v){try{var nova=JSON.parse(v||'null')||{};var cur=await sb.from('financeiro').select('atualizado_em').eq('id',1).maybeSingle();var cloudVer=(cur.data&&cur.data.atualizado_em)||null;if(window.__finVer&&cloudVer&&cloudVer!==window.__finVer){_finConflito();return;}var ts=new Date().toISOString();var up=await sb.from('financeiro').upsert({id:1,dados:nova,atualizado_em:ts});if(up&&up.error){console.warn('fin sync',up.error.message);return;}window.__finVer=ts;}catch(e){console.warn('fin sync',e&&e.message);}}
+localStorage.setItem=function(k,v){_set(k,v);try{if(k===DB_KEY){_finSync(v);}}catch(e){console.warn(e);}};
     var d=document.getElementById('__gate');if(d)d.remove();
     var code=document.getElementById('__mainfin').textContent;var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
   }
