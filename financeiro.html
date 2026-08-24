@@ -1435,14 +1435,9 @@ function delRecebivel(id){
   DB.movimentos=DB.movimentos.filter(m=>!(m.origem==='recebivel'&&m.origemId===id));
   DB.recebiveis=DB.recebiveis.filter(r=>r.id!==id); salvar(); render();
 }
-function estornarRecebivel(id){
-  const r=DB.recebiveis.find(x=>x.id===id); if(!r) return;
-  if(!(Number(r.recebidoLiq||0)>0.005||r.status==='recebido')){ toast('Não há recebimento para estornar.', true); return; }
-  if(!confirm('Estornar os recebimentos deste recebível? Os créditos lançados na conta serão removidos e o recebível volta a ficar em aberto.')) return;
-  DB.movimentos=DB.movimentos.filter(m=>!(m.origem==='recebivel'&&m.origemId===id));
-  r.recebidoLiq=0; r.status='previsto'; delete r.dataRecebido; delete r.contaDestino;
-  salvar(); render(); toast('Recebimento estornado · recebível reaberto.');
-}
+function estornarRecebivel(id){var r=DB.recebiveis.find(function(x){return x.id===id;});if(!r)return;var recs=DB.movimentos.filter(function(m){return m.origem==='recebivel'&&m.origemId===id;}).sort(function(a,b){return (''+(b.data||'')).localeCompare(''+(a.data||''));});if(!recs.length){toast('Não há recebimento para estornar.',true);return;}var linhas=recs.map(function(m){return '<tr><td>'+dataBR(m.data)+'</td><td>'+esc(nomeConta(m.contaId)||'')+'</td><td class="num"><b>'+fmt(m.valor)+'</b></td><td class="num"><button class="btn sm ghost" onclick="estornarRecebParcial('+id+',\''+m.id+'\')">Estornar este</button></td></tr>';}).join('');abrirModal('<div class="modal-head"><h3>Estornar recebimento — '+esc(r.operadora||'')+' '+r.parcela+'/'+r.totalParcelas+'</h3><button class="close-x" onclick="fecharModal()">×</button></div><div class="modal-body"><p class="hint" style="margin-bottom:10px">Escolha o recebimento específico que quer estornar (ex.: o valor lançado errado). O saldo é recalculado.</p><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left">Data</th><th style="text-align:left">Conta</th><th class="num">Valor</th><th></th></tr></thead><tbody>'+linhas+'</tbody></table></div><div class="modal-foot"><button class="btn ghost" onclick="fecharModal()">Fechar</button><button class="btn" style="color:var(--red)" onclick="estornarRecebTodos('+id+')">Estornar TODOS</button></div>');}
+function estornarRecebParcial(id,movId){var r=DB.recebiveis.find(function(x){return x.id===id;});if(!r)return;var m=DB.movimentos.find(function(x){return String(x.id)===String(movId)&&x.origem==='recebivel'&&x.origemId===id;});if(!m)return;var val=Number(m.valor)||0;DB.movimentos=DB.movimentos.filter(function(x){return !(String(x.id)===String(movId)&&x.origem==='recebivel'&&x.origemId===id);});r.recebidoLiq=Math.max(0,Math.round(((Number(r.recebidoLiq||0))-val)*100)/100);if(r.recebidoLiq<=0.005){r.recebidoLiq=0;r.status='previsto';delete r.dataRecebido;}else if(r.recebidoLiq<Number(r.valorLiquido)-0.005){r.status='previsto';delete r.dataRecebido;}salvar();fecharModal();render();toast('Recebimento de '+fmt(val)+' estornado. Saldo reaberto.');}
+function estornarRecebTodos(id){var r=DB.recebiveis.find(function(x){return x.id===id;});if(!r)return;if(!confirm('Estornar TODOS os recebimentos deste recebível?'))return;DB.movimentos=DB.movimentos.filter(function(m){return !(m.origem==='recebivel'&&m.origemId===id);});r.recebidoLiq=0;r.status='previsto';delete r.dataRecebido;delete r.contaDestino;salvar();fecharModal();render();toast('Todos os recebimentos estornados · recebível reaberto.');}
 
 /* ---------- VENDAS ---------- */
 function viewVendas(){
