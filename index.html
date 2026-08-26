@@ -909,6 +909,19 @@
   <div style="max-width:90%"><img id="imgBig" style="max-width:100%;max-height:85vh;border-radius:10px"></div>
 </div>
 
+<div class="modal-bg" id="fotoAdminModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="fotoAdminTitle">Trocar fotos — Admin</h3><button class="x" onclick="closeFotosAdmin()">×</button></div>
+    <div class="modal-body">
+      <div class="hint" style="margin-bottom:8px">Como administrador, você pode trocar a foto de qualquer sub-item, em qualquer setor e a qualquer momento. A troca vale só para esta O.S.</div>
+      <div id="fotoAdminBox"></div>
+      <input type="file" id="fotoAdminFile" accept="image/*" style="display:none" onchange="_processFotoAdmin(this.files[0])">
+      <input type="file" id="fotoAdminCam" accept="image/*" capture="environment" style="display:none" onchange="_processFotoAdmin(this.files[0])">
+    </div>
+    <div class="actions"><button class="btn-ghost" onclick="closeFotosAdmin()">Fechar</button></div>
+  </div>
+</div>
+
 <div class="modal-bg" id="pesagemModal">
   <div class="modal">
     <div class="modal-head"><h3 id="pesTitle">Pesagem do banho</h3><button class="x" onclick="closePesagem()">×</button></div>
@@ -2501,6 +2514,51 @@ function decompBanho(it){
 function banhoFinalItem(it){return decompBanho(it).total;}
 function canetaSubitem(sb){if(!sb)return 0;return (parseFloat(sb.canetaPontos)||0)*(PRECO_CANETA[sb.canetaCor]||0);}
 function canetaItem(it){if(!it||it.cortesia)return 0;return (it.subitens||[]).reduce(function(s,sb){return s+canetaSubitem(sb);},0);}
+var _fotoAdminAlvo={osId:'',li:-1,si:-1};
+function abrirFotosAdmin(osId){
+  if(!sessao||sessao.role!=='Admin'){alert('Apenas o administrador pode trocar fotos por aqui.');return;}
+  var o=dados.find(function(x){return x.id===osId;});if(!o)return;
+  document.getElementById('fotoAdminTitle').textContent='Trocar fotos — O.S. '+(o.numOS||'');
+  _fotoAdminAlvo={osId:osId,li:-1,si:-1};
+  renderFotosAdmin(o);
+  document.getElementById('fotoAdminModal').classList.add('show');
+}
+function renderFotosAdmin(o){
+  var box=document.getElementById('fotoAdminBox');if(!box)return;var html='';var n=0;
+  (o.itens||[]).forEach(function(it,li){(it.subitens||[]).forEach(function(sb,si){n++;
+    var foto=sb.foto?'<img src="'+fotoSrc(sb.foto)+'" style="width:90px;height:90px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph" style="width:90px;height:90px">F</div>';
+    html+='<div style="display:flex;gap:12px;align-items:center;border:1px solid var(--cinza2);border-radius:10px;padding:10px;margin-bottom:8px">'+
+      '<div>'+foto+'</div>'+
+      '<div style="flex:1;font-size:13px"><b>Nº '+n+' · Lote '+(li+1)+' — '+(it.banho||'')+(it.cor?' '+it.cor:'')+'</b><br>Tipo: '+(sb.tipoPeca||'')+' · Cód: '+(sb.codigo||'')+' · Qtd '+(sb.qtd||'')+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:6px"><button class="btn-azul" style="padding:6px 10px" onclick="trocarFotoAdmin('+li+','+si+',false)">Trocar foto</button><button class="btn-ghost" style="padding:6px 10px" onclick="trocarFotoAdmin('+li+','+si+',true)">Câmera</button></div>'+
+    '</div>';
+  });});
+  if(!html)html='<div class="hint">Esta O.S. não tem sub-itens cadastrados.</div>';
+  box.innerHTML=html;
+}
+function trocarFotoAdmin(li,si,cam){
+  _fotoAdminAlvo.li=li;_fotoAdminAlvo.si=si;
+  var inp=document.getElementById(cam?'fotoAdminCam':'fotoAdminFile');
+  if(inp){inp.value='';inp.click();}
+}
+function _processFotoAdmin(file){
+  if(!file)return;
+  var alvo=_fotoAdminAlvo;var o=dados.find(function(x){return x.id===alvo.osId;});
+  if(!o||!o.itens||!o.itens[alvo.li]||!o.itens[alvo.li].subitens||!o.itens[alvo.li].subitens[alvo.si]){alert('Não localizei o sub-item. Reabra a galeria e tente de novo.');return;}
+  var sb=o.itens[alvo.li].subitens[alvo.si];
+  var r=new FileReader();
+  r.onload=function(ev){var img=new Image();img.onload=function(){
+    var iw=img.width,ih=img.height;var side=Math.min(iw,ih);var sx=(iw-side)/2,sy=(ih-side)/2;var out=Math.min(side,400);
+    var c=document.createElement('canvas');c.width=out;c.height=out;var ctx=c.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,out,out);ctx.drawImage(img,sx,sy,side,side,0,0,out,out);
+    var durl=c.toDataURL('image/jpeg',0.65);
+    if(!window.__sb){sb.foto=durl;salvar();renderFotosAdmin(o);render();alert('Foto trocada (modo local).');return;}
+    var fid='fid_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    _insFoto(fid,durl,4,function(){window.__fotos=window.__fotos||{};window.__fotos[fid]=durl;sb.foto='fid:'+fid;salvar();renderFotosAdmin(o);render();alert('Foto trocada e salva na nuvem.');},function(err){console.warn('foto admin',err&&err.message);alert('Não consegui salvar a nova foto na nuvem após várias tentativas. Verifique a internet e refaça.');});
+  };img.src=ev.target.result;};
+  r.readAsDataURL(file);
+}
+function closeFotosAdmin(){document.getElementById('fotoAdminModal').classList.remove('show');render();}
+
 function abrirCaneta(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;document.getElementById('canetaOsId').value=id;document.getElementById('canetaTitle').textContent='Caneta de Ródio — O.S. '+(o.numOS||'');document.getElementById('canetaInfo').innerHTML='<div><b>Nº O.S.</b>'+(o.numOS||'')+'</div><div><b>Cliente</b>'+(o.cliente||'')+'</div>';renderCanetaPecas(o);document.getElementById('canetaModal').classList.add('show');}
 function closeCaneta(){document.getElementById('canetaModal').classList.remove('show');}
 function _canCorSel(cur,onch){var cores=['Amarelo','Branco','Preto','Vermelho'];return '<select onchange="'+onch+'" style="padding:4px"><option value=""'+((cur||'')===''?' selected':'')+'>—</option>'+cores.map(function(c){return '<option value="'+c+'"'+((cur||'')===c?' selected':'')+'>'+c+'</option>';}).join('')+'</select>';}
@@ -2732,7 +2790,7 @@ function render(){
   const _cs=(document.getElementById('comSetor')||{}).value||'todos';const _cst=(document.getElementById('comStatus')||{}).value||'todos';const listaC=dados.filter(o=>(!qC||JSON.stringify(o).toLowerCase().includes(qC))&&(_cs==='todos'||(o.setor||'Comercial')===_cs)&&(_cst==='todos'||(o.statusComercial||'')===_cst));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
   ordenarOS(listaC).forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b>'+((o.liberadaProducaoEm&&!o.comercialVisto)?' <span class="tag tag-prioridade" style="background:#1f6f43;color:#fff">Liberada p/ produção</span>':'')+'</td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button>'+(o.setor==='Comercial'?'<button class="btn-excel" onclick="comEnviarFoto(\''+o.id+'\')">Enviar p/ Financeiro</button>':'')+'<button class="btn-azul" style="padding:5px 9px;font-size:12px;background:'+(o.pendCaneta?'#8a2be2':'#7a5ea8')+'" onclick="abrirCaneta(\''+o.id+'\')">'+(o.pendCaneta?'⚠ Caneta':'Caneta')+'</button>'+((o.liberadaProducaoEm&&!o.comercialVisto)?'<button class="btn-excel" style="background:#1f6f43" onclick="marcarVistoCom(\''+o.id+'\')">Ciente</button>':'')+'<button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
+    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+'<b>'+(o.numOS||'')+'</b>'+((o.liberadaProducaoEm&&!o.comercialVisto)?' <span class="tag tag-prioridade" style="background:#1f6f43;color:#fff">Liberada p/ produção</span>':'')+'</td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.peso||'')+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act">'+((sessao&&sessao.role==='Admin')?'<button class="btn-azul" style="padding:5px 9px;font-size:12px;background:#0a7ea4" onclick="abrirFotosAdmin(\''+o.id+'\')">🖼 Fotos</button>':'')+'<button class="btn-azul" onclick="gerarFormularioOS(\''+o.id+'\')" style="padding:5px 9px;font-size:12px;background:#6b7b8c">O.S. Produção</button><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button>'+(o.setor==='Comercial'?'<button class="btn-excel" onclick="comEnviarFoto(\''+o.id+'\')">Enviar p/ Financeiro</button>':'')+'<button class="btn-azul" style="padding:5px 9px;font-size:12px;background:'+(o.pendCaneta?'#8a2be2':'#7a5ea8')+'" onclick="abrirCaneta(\''+o.id+'\')">'+(o.pendCaneta?'⚠ Caneta':'Caneta')+'</button>'+((o.liberadaProducaoEm&&!o.comercialVisto)?'<button class="btn-excel" style="background:#1f6f43" onclick="marcarVistoCom(\''+o.id+'\')">Ciente</button>':'')+'<button class="btn-edit" onclick="editarCom(\''+o.id+'\')">Editar</button><button class="btn-del" onclick="excluirCom(\''+o.id+'\')">Excluir</button></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
   let atras=0,hoje=0;dados.forEach(function(o){const s=statusEntrega(o);if(s.txt.indexOf('Atrasada')===0)atras++;if(s.txt==='Vence hoje')hoje++;});
