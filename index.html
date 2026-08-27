@@ -1834,6 +1834,10 @@ function gerarEtiquetaLote(idx){
   abrirEtiquetaBruto(o,{cor:it.cor||'',cam:etqCamadaItem(it),anti:anti,vern:etqVernizItem(it),nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value,sub:'Lote '+(idx+1)+(it.produto?(' — '+it.produto):'')+' · '+(it.banho||'')});
 }
 function fotoSrc(v){if(v&&(''+v).indexOf('fid:')===0){return (window.__fotos&&window.__fotos[(''+v).slice(4)])||'';}return v||'';}
+function fotoThumb(ref){if(!ref)return '<div class="thumb-ph">F</div>';var src=fotoSrc(ref);if(src)return '<img src="'+src+'" class="thumb" onclick="verFoto(\''+ref+'\')">';if((''+ref).indexOf('fid:')===0){var fid=(''+ref).slice(4);return '<img data-fid="'+fid+'" class="thumb" style="background:#eee" onclick="verFoto(\''+ref+'\')">';}return '<div class="thumb-ph">F</div>';}
+var _lazyBusy=false;
+async function _lazyThumbs(){if(!window.__sb||_lazyBusy)return;var imgs=document.querySelectorAll('img[data-fid]');if(!imgs.length)return;window.__fotos=window.__fotos||{};var need={};imgs.forEach(function(im){var fdd=im.getAttribute('data-fid');if(!fdd)return;if(window.__fotos[fdd]){if(!im.getAttribute('src'))im.src=window.__fotos[fdd];}else{need[fdd]=1;}});var ids=Object.keys(need);if(!ids.length)return;_lazyBusy=true;try{for(var i=0;i<ids.length;i+=20){try{var r=await window.__sb.from('fotos').select('id,b64').in('id',ids.slice(i,i+20));if(r&&r.data)r.data.forEach(function(row){window.__fotos[row.id]=row.b64;});}catch(e){}}}finally{_lazyBusy=false;}document.querySelectorAll('img[data-fid]').forEach(function(im){var fdd=im.getAttribute('data-fid');if(window.__fotos[fdd])im.src=window.__fotos[fdd];});}
+try{setInterval(_lazyThumbs,2500);}catch(_le){}
 function verFoto(src){document.getElementById('imgBig').src=fotoSrc(src);document.getElementById('imgModal').classList.add('show');}
 let sbFotoData='';
 let sbFotoPend=false;
@@ -2031,9 +2035,9 @@ function renderSubitens(){
   const o=osAtualFb();if(!o)return;const tb=document.getElementById('sbLista');if(!tb)return;tb.innerHTML='';
   var _flt=document.getElementById('sbFiltroLote');var _fv='';if(_flt){var _cur=_flt.value;_flt.innerHTML='<option value="">Todos os lotes</option>'+(o.itens||[]).map(function(it,i){return '<option value="'+i+'">Lote '+(i+1)+(it.produto?(' \u2014 '+it.produto):'')+'</option>';}).join('');_flt.value=_cur;_fv=_flt.value;}
   var _gn=0;(o.itens||[]).forEach(function(it,i){var _show=(_fv===''||(''+i)===(''+_fv));(it.subitens||[]).forEach(function(sb,si){_gn++;if(!_show)return;var tr=document.createElement('tr');
-    var fdi=sb.foto?'<img src="'+fotoSrc(sb.foto)+'" class="thumb" onclick="verFoto(\''+sb.foto+'\')">':'<div class="thumb-ph">F</div>';tr.innerHTML='<td><b>'+_gn+'</b></td><td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+((sb.tarraxa||sb.tarraxamento)?' <span style=\'color:#a9862f;font-size:11px\'>('+[sb.tarraxa?'Tarraxa':'',sb.tarraxamento?'Tarraxamento':''].filter(Boolean).join(', ')+')</span>':'')+(sb.obs?'<div class="hint" style="font-size:10px;white-space:normal">'+sb.obs+'</div>':'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+kg2g(sb.peso)+'</td><td>'+(sb.qtd||'')+(sb.unidade&&sb.unidade!=='Peça'?(' '+sb.unidade):'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td>'+(sb.fornecedor||'')+'</td><td class="row-act"><button class="btn-azul" onclick="editarSubitem('+i+','+si+')" style="padding:4px 8px;font-size:12px;background:#6b7b8c">Editar</button><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
+    var fdi=fotoThumb(sb.foto);tr.innerHTML='<td><b>'+_gn+'</b></td><td>Lote '+(i+1)+'</td><td>'+(it.banho||'')+(it.cor?' '+it.cor:'')+'</td><td>'+fdi+'</td><td>'+(sb.tipoPeca||'')+((sb.tarraxa||sb.tarraxamento)?' <span style=\'color:#a9862f;font-size:11px\'>('+[sb.tarraxa?'Tarraxa':'',sb.tarraxamento?'Tarraxamento':''].filter(Boolean).join(', ')+')</span>':'')+(sb.obs?'<div class="hint" style="font-size:10px;white-space:normal">'+sb.obs+'</div>':'')+'</td><td>'+(sb.codigo||'')+'</td><td>'+kg2g(sb.peso)+'</td><td>'+(sb.qtd||'')+(sb.unidade&&sb.unidade!=='Peça'?(' '+sb.unidade):'')+'</td><td>'+(sb.precoUnit?('R$ '+sb.precoUnit):'')+'</td><td>'+(sb.fornecedor||'')+'</td><td class="row-act"><button class="btn-azul" onclick="editarSubitem('+i+','+si+')" style="padding:4px 8px;font-size:12px;background:#6b7b8c">Editar</button><button class="btn-azul" onclick="gerarEtiquetaLote('+i+')" style="padding:4px 8px;font-size:12px">Etiqueta</button><button class="btn-del" onclick="delSubitem('+i+','+si+')">x</button></td>';
     tb.appendChild(tr);});});
-  updatePacoteTotais();
+  updatePacoteTotais();try{_lazyThumbs();}catch(e){}
 }
 function updatePacoteTotais(){
   const o=osAtualFb();if(!o)return;
@@ -2813,7 +2817,7 @@ function render(){
   const tbF=document.getElementById('tbodyFb');tbF.innerHTML='';
   document.getElementById('emptyFb').style.display=listaFb.length?'none':'block';
   ordenarOS(listaFb).forEach(function(o){const f=o.fb||{};const ps=prazoSetor(o.fbRecebidoEm,f.concluidoEm);
-    var _fto=primeiraFotoOS(o);const foto=_fto?'<img src="'+fotoSrc(_fto)+'" class="thumb" onclick="verFoto(\''+_fto+'\')">':'<div class="thumb-ph">F</div>';
+    var _fto=primeiraFotoOS(o);const foto=fotoThumb(_fto);
     const pp=f.precoPacote?Number(f.precoPacote).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
     const pu=f.precoUnit?Number(f.precoUnit).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
     const stt=f.qtd?'<span class="st st-recebido">Em andamento</span>':'<span class="st st-nfechado">Pendente</span>';
@@ -2830,7 +2834,7 @@ function render(){
   const tbA=document.getElementById('tbodyAm');tbA.innerHTML='';
   document.getElementById('emptyAm').style.display=listaAm.length?'none':'block';
   ordenarOS(listaAm).forEach(function(o){const f=o.fb||{};const concl=o.amStatus==='Concluído';const ps=prazoSetor(o.amRecebidoEm,concl);
-    var _fto=primeiraFotoOS(o);const foto=_fto?'<img src="'+fotoSrc(_fto)+'" class="thumb" onclick="verFoto(\''+_fto+'\')">':'<div class="thumb-ph">F</div>';
+    var _fto=primeiraFotoOS(o);const foto=fotoThumb(_fto);
     const st=o.amStatus||'Recebido';
     const sel='<select onchange="amStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
     const btn=concl?'<button class="btn-excel" onclick="amEncaminhar(\''+o.id+'\')">Encaminhar p/ Banho</button>':'<button class="btn-ghost" onclick="amEncaminhar(\''+o.id+'\')" style="background:var(--amarelo-bg);color:var(--amarelo)">Encaminhar p/ Banho</button>';
@@ -2922,7 +2926,7 @@ function render(){
   const tbEx=document.getElementById('tbodyEx');tbEx.innerHTML='';
   document.getElementById('emptyEx').style.display=listaEx.length?'none':'block';
   ordenarOS(listaEx).forEach(function(o){const f=o.fb||{};const e=o.exp||{};const concl=o.expStatus==='Concluído';const ps=prazoSetor(o.expRecebidoEm,concl);
-    var _fto=primeiraFotoOS(o);const foto=_fto?'<img src="'+fotoSrc(_fto)+'" class="thumb" onclick="verFoto(\''+_fto+'\')">':'<div class="thumb-ph">F</div>';
+    var _fto=primeiraFotoOS(o);const foto=fotoThumb(_fto);
     const st=o.expStatus||'Recebido';
     const sel='<select onchange="expStatusChange(\''+o.id+'\',this.value)" style="padding:5px 8px"><option'+(st==='Recebido'?' selected':'')+'>Recebido</option><option'+(st==='Em processo'?' selected':'')+'>Em processo</option><option'+(st==='Concluído'?' selected':'')+'>Concluído</option></select>';
     var _cr=confResumoExp(o);const conf=_cr==='Sim'?'<span class="st st-entregue">Sim</span>':(_cr==='Não'?'<span class="st" style="background:var(--vermelho-bg);color:var(--vermelho)">Não</span>':'<span class="st st-recebido">'+_cr+'</span>');
