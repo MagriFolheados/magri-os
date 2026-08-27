@@ -1477,7 +1477,7 @@ function salvarItem(){
   const novo=parseFloat(it.peso)||0;
   if(totalOS>0 && (usadoOutros+novo)>totalOS+0.000001){alert('O peso dos lotes ('+kg2g(usadoOutros+novo)+' g) ultrapassaria o peso total da OS ('+kg2g(totalOS)+' g).\nDisponível: '+kg2g(totalOS-usadoOutros)+' g.');return;}
   const pr=precoBanhoItem(it);it.precoPrincipal=pr.principal;it.precoCompl=pr.compl;it.precoBanho=pr.total;
-  if(idx>=0){it=Object.assign({},itensTmp[idx]||{},it);itensTmp[idx]=it;}else itensTmp.push(it);try{var _eid=(document.getElementById('editId')||{}).value;if(_eid){var _o=dados.find(function(x){return x.id===_eid;});if(_o){_o.itens=itensTmp.slice();_o.servicos=servicosTmp.slice();salvar();}}}catch(_e){console.warn('persist item',_e);}
+  if(idx>=0){it=Object.assign({},itensTmp[idx]||{},it);itensTmp[idx]=it;}else itensTmp.push(it);
   closeItemModal();renderItens();recalc();
 }
 function delItem(i){itensTmp.splice(i,1);renderItens();recalc();}
