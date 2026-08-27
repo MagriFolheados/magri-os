@@ -212,7 +212,7 @@
         <div class="panel">
           <div class="panel-head"><span class="dot"></span><h2 id="form-title">Cadastrar nova Ordem de Serviço</h2></div>
           <div class="panel-body">
-            <form id="osForm" autocomplete="off">
+            <form id="osForm" autocomplete="off" novalidate>
               <input type="hidden" id="editId">
               <div class="grid">
                 <div><label>Data de entrada <span class="req">*</span></label><input type="date" id="dataEntrada" required></div>
@@ -1578,8 +1578,10 @@ document.getElementById('osForm').addEventListener('submit',function(e){
   e.preventDefault();
   if(itensTmp.length===0){alert('Adicione pelo menos um item do serviço antes de cadastrar a O.S.');return;}
   const g=id=>document.getElementById(id).value;
+  if(!(''+g('cliente')).trim()){alert('Informe o Cliente para salvar a O.S.');var _c=document.getElementById('cliente');if(_c)_c.focus();return;}
+  if(!(''+g('numOS')).trim()){alert('Informe o Nº da O.S. para salvar.');var _n=document.getElementById('numOS');if(_n)_n.focus();return;}
   const editId=document.getElementById('editId').value;
-  const header={dataEntrada:g('dataEntrada'),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g2kg(g('peso')),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
+  const header={dataEntrada:g('dataEntrada')||hojeISO(),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g2kg(g('peso')),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
   var _wasEdit=!!editId;var _nOS=header.numOS||'';
   if(editId){const o=dados.find(x=>x.id===editId);if(o)Object.assign(o,header);}
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Comercial',fb:null}));}
