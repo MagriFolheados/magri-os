@@ -1580,9 +1580,10 @@ document.getElementById('osForm').addEventListener('submit',function(e){
   const g=id=>document.getElementById(id).value;
   const editId=document.getElementById('editId').value;
   const header={dataEntrada:g('dataEntrada'),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),peso:g2kg(g('peso')),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
-  if(editId){const o=dados.find(x=>x.id===editId);Object.assign(o,header);}
+  var _wasEdit=!!editId;var _nOS=header.numOS||'';
+  if(editId){const o=dados.find(x=>x.id===editId);if(o)Object.assign(o,header);}
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Comercial',fb:null}));}
-  try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();
+  try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();alert(_wasEdit?('\u2714 Altera\u00e7\u00f5es da O.S. '+_nOS+' salvas.'):('\u2714 O.S. '+_nOS+' cadastrada.'));
 });
 function comEnviarFoto(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.setor='Financeiro';o.finRecebidoEm=hojeISO();o.devolvido=false;salvar();render();alert('O.S. '+(o.numOS||'')+' enviada para o Financeiro.');}function marcarVistoCom(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.comercialVisto=true;salvar();render();}
 function renderFinanceiro(){
