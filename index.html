@@ -1469,7 +1469,7 @@ function openItemModal(idx){
 function closeItemModal(){document.getElementById('itemModal').classList.remove('show');}
 function salvarItem(){
   const idx=parseInt(document.getElementById('itemIdx').value);
-  const it=lerItemModal();
+  let it=lerItemModal();
   if((parseFloat(it.peso)||0)<=0){alert('Informe o peso do lote.');return;}
   if(ehOuroBanho(it.banho)&&!(it.cor||'').trim()){alert('Para banho de Ouro, a Cor é obrigatória.');return;}
   const totalOS=g2kg(document.getElementById('peso').value);
