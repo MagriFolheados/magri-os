@@ -747,12 +747,12 @@
       <div class="sec-title">Ramificação em sub-itens (por tipo de peça)</div>
       <div class="hint" style="margin-bottom:8px">Escolha o lote da OS e ramifique em tipos de peça. O banho é herdado do lote e não muda; controla o saldo de peso.</div>
       <div class="grid">
-        <div><label>Item / Lote da OS</label><select id="sbItem" onchange="sbRefresh()"></select></div>
+        <div><label>Item / Lote da OS</label><select id="sbItem" onchange="sbRefresh()"></select></div><div style="grid-column:1/-1" class="hint">💡 Preencha <b>Código</b> e <b>Fornecedor</b> primeiro — se a peça já estiver no banco, o tipo, o preço e a foto são preenchidos automaticamente.</div><div><label>Código da peça</label><input type="text" id="sbCodigo" onchange="buscarPecaSb()"></div><div><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor" onchange="buscarPecaSb()"></div>
         <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola" oninput="sbTipoChange()"></div>
         <div><label>Peso (g)</label><input type="number" step="0.1" id="sbPeso"></div>
         <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div><div><label>Unidade</label><select id="sbUnid"><option>Peça</option><option>Par</option><option>Trio</option><option>Conjunto</option><option>Dúzia</option><option>Cento</option><option>Kg</option></select></div>
-        <div><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor" onchange="buscarPecaSb()"></div>
-        <div><label>Código da peça</label><input type="text" id="sbCodigo" onchange="buscarPecaSb()"></div>
+        
+        
         <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
         <div style="grid-column:1/-1"><label>Observação da peça (detalhes)</label><input type="text" id="sbObs" placeholder="Ex.: detalhes, avaria, referência da peça..."></div>
         <div style="grid-column:1/-1;display:none" id="sbBrincoBox"><label>Serviços por unidade (só para brinco)</label><label style="font-weight:normal;margin-right:16px"><input type="checkbox" id="sbTarraxa"> Tarraxa</label><label style="font-weight:normal"><input type="checkbox" id="sbTarraxamento"> Tarraxamento</label> <span class="hint">cobrado por peça inspecionada na expedição</span></div>
@@ -1477,7 +1477,7 @@ function salvarItem(){
   const novo=parseFloat(it.peso)||0;
   if(totalOS>0 && (usadoOutros+novo)>totalOS+0.000001){alert('O peso dos lotes ('+kg2g(usadoOutros+novo)+' g) ultrapassaria o peso total da OS ('+kg2g(totalOS)+' g).\nDisponível: '+kg2g(totalOS-usadoOutros)+' g.');return;}
   const pr=precoBanhoItem(it);it.precoPrincipal=pr.principal;it.precoCompl=pr.compl;it.precoBanho=pr.total;
-  if(idx>=0)itensTmp[idx]=it;else itensTmp.push(it);
+  if(idx>=0){it=Object.assign({},itensTmp[idx]||{},it);itensTmp[idx]=it;}else itensTmp.push(it);var _eid=(document.getElementById('editId')||{}).value;if(_eid){var _o=dados.find(function(x){return x.id===_eid;});if(_o){_o.itens=itensTmp.slice();_o.servicos=servicosTmp.slice();salvar();}}
   closeItemModal();renderItens();recalc();
 }
 function delItem(i){itensTmp.splice(i,1);renderItens();recalc();}
