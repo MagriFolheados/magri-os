@@ -1683,7 +1683,7 @@ function notificarFinanceiroEnvio(n){
 }
 function editarCom(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
-  if(o.setor&&o.setor!=='Comercial'){alert('Esta O.S. está no setor "'+o.setor+'". Para editar, ela precisa estar no Comercial — peça ao setor atual para devolver ao Comercial (botão Devolver → Comercial).');return;}
+  if(o.setor&&o.setor!=='Comercial'){if(!confirm('Esta O.S. está no setor "'+o.setor+'". Deseja editar mesmo assim? As alterações passam a valer para a produção.'))return;}
   document.getElementById('editId').value=o.id;
   ['dataEntrada','numOS','etiqueta','cliente','peso','statusComercial','prevCat','observacao','modalidade','transporte'].forEach(function(k){const el=document.getElementById(k);if(el)el.value=o[k]||'';});var _pEl=document.getElementById('peso');if(_pEl)_pEl.value=kg2g(o.peso);
   itensTmp=(o.itens||[]).map(function(x){return Object.assign({},x);});renderItens();
@@ -2206,7 +2206,7 @@ function renderExpConf(o){
     html+='<div style="border:1px solid var(--cinza2);border-radius:10px;padding:10px;margin-bottom:8px">'+
       '<div style="display:flex;gap:12px;align-items:center">'+
         '<div>'+foto+'</div>'+
-        '<div style="flex:1;font-size:13px"><b>Nº '+_en+' · Lote '+(li+1)+' — '+(it.banho||'')+(it.cor?' '+it.cor:'')+'</b><br>Tipo: '+(sb.tipoPeca||'')+' &nbsp;|&nbsp; Foto/Bruto: Qtd '+qtdFoto+' · Peso '+kg2g(sb.peso)+' g</div>'+
+        '<div style="flex:1;font-size:13px"><b>Nº '+_en+' · Lote '+(li+1)+' — '+(it.banho||'')+(it.cor?' '+it.cor:'')+(camadaDoItem(it)>0?' &middot; Camada '+camadaDoItem(it):'')+'</b><br>Tipo: '+(sb.tipoPeca||'')+' &nbsp;|&nbsp; Foto/Bruto: Qtd '+qtdFoto+' · Peso '+kg2g(sb.peso)+' g</div>'+
         '<div><label style="font-size:11px;text-transform:none">Confere (foto)?</label><select onchange="expSetSub('+li+','+si+',\'confExp\',this.value)" style="padding:6px"><option value="">—</option><option'+(conf==='Sim'?' selected':'')+'>Sim</option><option'+(conf==='Não'?' selected':'')+'>Não</option></select></div>'+
       '</div>'+
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px">'+
@@ -2320,7 +2320,7 @@ function buildCatalogoHTML(o){
   (o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){
     var qtd=parseFloat(sb.qtd)||0,pesoT=parseFloat(sb.peso)||0,pesoU=qtd>0?pesoT/qtd:0;
     var brutoUN=parseFloat(sb.precoUnit)||0;var banhoUN=catBanhoUN(it,sb);var finalUN=brutoUN+banhoUN;
-    var foto=sb.foto?'<img src="'+fotoSrc(sb.foto)+'">':'<div class="semfoto">sem foto</div>';
+    var _fs=sb.foto?fotoSrc(sb.foto):'';var foto=_fs?'<img src="'+_fs+'">':'<div class="semfoto">sem foto</div>';
     cards+='<div class="card"><div class="foto">'+foto+'</div><div class="dados">'+
       '<div class="l"><b>Forn.:</b> '+(sb.fornecedor||(o.fb&&o.fb.fornecedor)||'-')+' &nbsp; <b>Código:</b> '+((sb.codigo)||'-')+'</div>'+
       '<div class="l"><b>Tipo de Peça:</b> '+(sb.tipoPeca||'-')+'</div>'+
@@ -2340,7 +2340,8 @@ function buildCatalogoHTML(o){
     '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
     '<div class="grid">'+cards+'</div></body></html>';
 }
-function gerarCatalogo(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o catálogo.');return;}w.document.write(buildCatalogoHTML(o));w.document.close();}
+async function _ensureFotosOS(o){if(!window.__sb)return;window.__fotos=window.__fotos||{};var need={};(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){var v=sb.foto;if(v&&(''+v).indexOf('fid:')===0){var k=(''+v).slice(4);if(!window.__fotos[k])need[k]=1;}});});var ids=Object.keys(need);for(var i=0;i<ids.length;i+=20){try{var r=await window.__sb.from('fotos').select('id,b64').in('id',ids.slice(i,i+20));if(r&&r.data)r.data.forEach(function(row){window.__fotos[row.id]=row.b64;});}catch(e){console.warn('ensureFotos',e&&e.message);}}}
+async function gerarCatalogo(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o catálogo.');return;}try{w.document.write('<div style="font-family:Arial;padding:24px;color:#123a6b">Carregando catálogo e fotos…</div>');}catch(e){}try{await _ensureFotosOS(o);}catch(e){}try{w.document.open();w.document.write(buildCatalogoHTML(o));w.document.close();}catch(e){alert('Erro ao gerar catálogo: '+((e&&e.message)||e));}}
 function fracMetalItem(it){var g=parseFloat(it.peso)||0;return g>0?pesoLiqItem(it)/g:1;}
 function decompOrc(it){
   var pesoKg=pesoLiqItem(it),pesoG=pesoKg*1000;var b=it.banho;var metal=0,mo=0;
