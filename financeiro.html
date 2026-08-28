@@ -286,7 +286,7 @@ function saldoConta(id, ateData){
   return s;
 }
 function saldoDisponivel(ate){ return contasPorTipo('banco','caixa').reduce((s,c)=>s+saldoConta(c.id,ate),0); }
-function saldoCheques(){ return contasPorTipo('cheque').reduce((a,c)=>a+saldoConta(c.id),0); }
+function saldoCheques(){ return DB.cheques.filter(function(k){return k.natureza==='recebido'&&['carteira','depositado'].includes(k.status);}).reduce(function(s,k){return s+(Number(k.valor)||0);},0); }
 function saldoCredito(){ return contasPorTipo('credito').reduce((a,c)=>a+saldoConta(c.id),0); }
 function saldoConsolidado(){ return saldoDisponivel()+saldoCheques()+saldoCredito(); }
 
@@ -834,7 +834,7 @@ function caixaResumo(){
   return `
   <div class="grid kpis" style="margin-bottom:18px">
     ${kpi('💵 Disponível hoje', fmt(disp),'Banco + Caixa', disp>=0?'pos':'neg')}
-    ${kpi('🧾 Cheques a compensar', fmt(chq),'Em carteira','')}
+    ${kpi('🧾 Cheques a compensar', fmt(chq),'A compensar','')}
     ${kpi('💳 A receber cartão', fmt(cred),'Recebíveis previstos','')}
     ${kpi('📊 Saldo consolidado', fmt(saldoConsolidado()),'Disponível + a receber', saldoConsolidado()>=0?'pos':'neg')}
   </div>
