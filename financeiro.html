@@ -578,8 +578,10 @@ function render(){
   const fn = {dashboard:viewDashboard, dre:viewDRE, valuation:viewValuation, custokg:viewCustoKg, receber:()=>viewContas('receita'), pagar:()=>viewContas('despesa'), vendas:viewVendas, compras:viewCompras, caixa:viewCaixa, produtos:viewProdutos, pessoas:viewPessoas, config:viewConfig}[ROUTE];
   v.innerHTML = fn ? fn() : '';
   if(afterRender){ const f=afterRender; afterRender=null; f(); }
+  try{if(_buscaFoco){var _bel=document.getElementById(_buscaFoco.id);if(_bel){_bel.focus();try{_bel.setSelectionRange(_buscaFoco.pos,_buscaFoco.pos);}catch(e){}}_buscaFoco=null;}}catch(e){}
 }
 let afterRender = null;
+let _buscaFoco = null;
 
 /* ---------- DASHBOARD ---------- */
 function viewDashboard(){
@@ -706,7 +708,7 @@ function viewContas(tipo){
   if(filtroContas.status==='pendente') list=list.filter(l=>(l.status==='pendente'||l.status==='parcial')&&!estaVencido(l));
   else if(filtroContas.status==='vencido') list=list.filter(estaVencido);
   else if(filtroContas.status==='pago') list=list.filter(l=>l.status==='pago');
-  if(filtroContas.busca){ const q=filtroContas.busca.toLowerCase(); list=list.filter(l=>(l.descricao+' '+(l.contraparte||'')+' '+l.categoria).toLowerCase().includes(q)); }
+  if(filtroContas.busca){ const q=filtroContas.busca.toLowerCase(); list=list.filter(l=>((l.descricao||'')+' '+(l.contraparte||'')+' '+(l.categoria||'')+' '+dataBR(l.vencimento||l.data)).toLowerCase().includes(q)); }
   const perC=periodoRange(filtroContas);
   if(filtroContas.modo!=='tudo') list=list.filter(l=>{const dt=(filtroContas.baseData==='competencia'?(l.data||l.vencimento):(l.vencimento||l.data))||''; return dt>=perC.ini&&dt<=perC.fim;});
   list.sort((a,b)=>(b.vencimento||b.data||'').localeCompare(a.vencimento||a.data||''));
@@ -719,7 +721,7 @@ function viewContas(tipo){
     ${kpi('Recebido/Pago no mês', fmt(pagoNoMes(tipo)), hoje().slice(5,7)+'/'+hoje().slice(0,4),'pos')}
   </div>
   <div class="toolbar">
-    <div class="field"><label>Buscar</label><input class="search" placeholder="descrição, ${isRec?'cliente':'fornecedor'}..." value="${esc(filtroContas.busca)}" oninput="filtroContas.busca=this.value;render()"></div>
+    <div class="field"><label>Buscar</label><input class="search" id="_bCont" placeholder="descrição, ${isRec?'cliente':'fornecedor'}, data..." value="${esc(filtroContas.busca)}" oninput="_buscaFoco={id:'_bCont',pos:this.selectionStart};filtroContas.busca=this.value;render()"></div>
     <div class="field"><label>Situação</label><select onchange="filtroContas.status=this.value;render()">
       <option value="todos"${sel('todos')}>Todos</option>
       <option value="pendente"${sel('pendente')}>A vencer</option>
@@ -760,8 +762,9 @@ function linhaConta(l){
    ============================================================ */
 const TIPO_CONTA = {banco:'🏦 Banco', caixa:'💵 Caixa', cheque:'🧾 Cheques', credito:'💳 Cartão/Crédito'};
 let caixaTab = 'resumo';
-let movFiltro = {conta:'todas', modo:'mes', mes:hoje().slice(0,7), ano:hoje().slice(0,4), de:'', ate:''};
-let recebFiltro = {status:'previsto'};
+let movFiltro = {conta:'todas', modo:'mes', mes:hoje().slice(0,7), ano:hoje().slice(0,4), de:'', ate:'', busca:''};
+let recebFiltro = {status:'previsto', busca:''};
+let chFiltro = {busca:''};
 let dashPeriodo = {modo:'mes', mes:hoje().slice(0,7), ano:hoje().slice(0,4), de:'', ate:''};
 function ultDiaMes(ymv){ const p=ymv.split('-'); return new Date(+p[0], +p[1], 0).toISOString().slice(0,10); }
 function periodoRange(p){
@@ -961,6 +964,7 @@ function caixaMovimentos(){
   let movs=[...DB.movimentos];
   if(movFiltro.conta!=='todas') movs=movs.filter(m=>m.contaId===parseInt(movFiltro.conta));
   movs=movs.filter(m=> (m.data||'')>=perM.ini && (m.data||'')<=perM.fim );
+  if(movFiltro.busca){var _qm=movFiltro.busca.toLowerCase();movs=movs.filter(m=>((m.descricao||'')+' '+(m.categoria||'')+' '+nomeConta(m.contaId)+' '+dataBR(m.data)).toLowerCase().includes(_qm));}
   movs.sort((a,b)=>(b.data+String(b.id).padStart(6,'0')).localeCompare(a.data+String(a.id).padStart(6,'0')));
   const rows=movs.slice(0,300).map(m=>`<tr>
     <td>${dataBR(m.data)}</td>
@@ -979,7 +983,7 @@ function caixaMovimentos(){
     ${kpi('Resultado conciliado · '+perM.label, fmt(entMes-saiMes),(pendConc>0?(pendConc+' lançamento(s) pendente(s) de conciliação'):'Tudo conciliado'), entMes-saiMes>=0?'pos':'neg')}
   </div>
   <div class="toolbar">
-    <div class="field"><label>Conta</label><select onchange="movFiltro.conta=this.value;render()">
+    <div class="field"><label>Buscar</label><input class="search" id="_bMov" value="${esc(movFiltro.busca||'')}" oninput="_buscaFoco={id:'_bMov',pos:this.selectionStart};movFiltro.busca=this.value;render()" placeholder="data, descrição, conta..."></div><div class="field"><label>Conta</label><select onchange="movFiltro.conta=this.value;render()">
       <option value="todas">Todas as contas</option>${DB.contas.map(c=>`<option value="${c.id}" ${movFiltro.conta==c.id?'selected':''}>${esc(c.nome)}</option>`).join('')}</select></div>
     ${periodoToolbar(movFiltro,'setMovPer')}
     <div class="spacer"></div>
@@ -1238,7 +1242,7 @@ function baixarModeloImport(){
 function caixaCheques(){
   const emCarteira=DB.cheques.filter(k=>k.natureza==='recebido'&&['carteira','depositado'].includes(k.status)).reduce((s,k)=>s+Number(k.valor),0);
   const aPagar=DB.cheques.filter(k=>k.natureza==='emitido'&&k.status!=='compensado').reduce((s,k)=>s+Number(k.valor),0);
-  const rows=[...DB.cheques].sort((a,b)=>(b.bomPara||'').localeCompare(a.bomPara||'')).map(k=>{
+  const rows=[...DB.cheques].filter(function(k){if(!chFiltro.busca)return true;var _qc=chFiltro.busca.toLowerCase();return ((k.numero||'')+' '+(k.banco||'')+' '+(k.pessoa||'')+' '+(k.natureza||'')+' '+(k.status||'')+' '+dataBR(k.bomPara)).toLowerCase().includes(_qc);}).sort((a,b)=>(b.bomPara||'').localeCompare(a.bomPara||'')).map(k=>{
     const stCls={carteira:'pendente',depositado:'receita',compensado:'pago',devolvido:'vencido',emitido:'pendente'}[k.status]||'pendente';
     const acoes = k.status!=='compensado'&&k.status!=='devolvido' ?
       `<button class="btn sm" onclick="compensarCheque(${k.id})">Compensar</button> <button class="icon-btn" onclick="devolverCheque(${k.id})" title="Devolvido">↩</button>`
@@ -1258,7 +1262,7 @@ function caixaCheques(){
     ${kpi('Cheques emitidos', fmt(aPagar),'A compensar (saída)','neg')}
   </div>
   <div class="help-box">Cheques <b>recebidos</b> entram como saldo a compensar; ao compensar, viram entrada na conta bancária escolhida. Cheques <b>emitidos</b> viram saída quando compensam.</div>
-  <div class="toolbar"><div class="spacer"></div><button class="btn primary" onclick="modalCheque()">+ Novo cheque</button></div>
+  <div class="toolbar"><div class="field"><label>Buscar</label><input class="search" id="_bChq" value="${esc(chFiltro.busca||'')}" oninput="_buscaFoco={id:'_bChq',pos:this.selectionStart};chFiltro.busca=this.value;render()" placeholder="data, número, banco, pessoa..."></div><div class="spacer"></div><button class="btn primary" onclick="modalCheque()">+ Novo cheque</button></div>
   <div class="card" style="padding:0"><div class="tbl-wrap"><table>
     <thead><tr><th>Natureza</th><th>Número / origem</th><th>Bom para</th><th class="num">Valor</th><th>Status</th><th></th></tr></thead>
     <tbody>${rows||`<tr><td colspan="6"><div class="empty"><div class="big">🧾</div>Nenhum cheque cadastrado.</div></td></tr>`}</tbody>
@@ -1324,11 +1328,12 @@ function delCheque(id){
 function caixaRecebiveis(){
   let list=[...DB.recebiveis];
   if(recebFiltro.status!=='todos') list=list.filter(r=>r.status===recebFiltro.status);
+  if(recebFiltro.busca){var _qr=recebFiltro.busca.toLowerCase();list=list.filter(r=>((_recDesc(r)||'')+' '+(r.operadora||'')+' '+nomeConta(r.contaId)+' '+dataBR(r.dataPrevista)).toLowerCase().includes(_qr));}
   list.sort((a,b)=>(a.dataPrevista||'').localeCompare(b.dataPrevista||''));
   const previsto=DB.recebiveis.filter(r=>r.status==='previsto').reduce((s,r)=>s+(Number(r.valorLiquido)-Number(r.recebidoLiq||0)),0);
   const bruto=DB.recebiveis.filter(r=>r.status==='previsto').reduce((s,r)=>{const liq=Number(r.valorLiquido)||0;const rem=liq-Number(r.recebidoLiq||0);const frac=liq>0?rem/liq:1;return s+Number(r.valorBruto)*frac;},0);
   const rows=list.map(r=>`<tr>
-    <td>${esc(nomeConta(r.contaId))}${r.operadora?`<div class="hint">${esc(r.operadora)}</div>`:''}</td>
+    <td>${esc(nomeConta(r.contaId))}${r.operadora?`<div class="hint">${esc(r.operadora)}</div>`:''}<div class="hint" style="color:#e6b800">📝 ${esc(_recDesc(r)||'—')} <span style="cursor:pointer" title="Editar descrição" onclick="editRecDesc(${r.id})">✎</span></div></td>
     <td>${dataBR(r.dataPrevista)}</td>
     <td>${r.parcela}/${r.totalParcelas}</td>
     <td class="num">${fmt(r.valorBruto)}</td>
@@ -1345,7 +1350,7 @@ function caixaRecebiveis(){
   </div>
   <div class="help-box">Vendas no crédito geram parcelas aqui, com data prevista, taxa da operadora e valor líquido. Ao "Receber", o líquido entra na conta bancária escolhida.</div>
   <div class="toolbar">
-    <div class="field"><label>Situação</label><select onchange="recebFiltro.status=this.value;render()">
+    <div class="field"><label>Buscar</label><input class="search" id="_bRec" value="${esc(recebFiltro.busca||'')}" oninput="_buscaFoco={id:'_bRec',pos:this.selectionStart};recebFiltro.busca=this.value;render()" placeholder="data, descrição, operadora..."></div><div class="field"><label>Situação</label><select onchange="recebFiltro.status=this.value;render()">
       <option value="previsto" ${recebFiltro.status==='previsto'?'selected':''}>Previstos</option>
       <option value="recebido" ${recebFiltro.status==='recebido'?'selected':''}>Recebidos</option>
       <option value="todos" ${recebFiltro.status==='todos'?'selected':''}>Todos</option></select></div>
@@ -1357,6 +1362,8 @@ function caixaRecebiveis(){
     <tbody>${rows||`<tr><td colspan="8"><div class="empty"><div class="big">💳</div>Nenhum recebível. Vendas no crédito aparecem aqui.</div></td></tr>`}</tbody>
   </table></div></div>`;
 }
+function _recDesc(r){if(!r)return '';if(r.desc)return r.desc;if(r.vendaId){var v=(DB.vendas||[]).find(function(x){return x.id===r.vendaId;});if(v)return v.cliente||v.descricao||'';}return '';}
+function editRecDesc(id){var r=DB.recebiveis.find(function(x){return x.id===id;});if(!r){if(typeof toast==='function')toast('Recebível não encontrado.',true);return;}var v=prompt('Descrição / identificação deste recebível:', r.desc||'');if(v===null)return;r.desc=(''+v).trim();salvar();render();}
 function modalRecebiveis(){
   const contasCred=contasPorTipo('credito');
   if(!contasCred.length){ toast('Cadastre uma conta do tipo Cartão/Crédito primeiro.', true); setCaixaTab('contas'); return; }
