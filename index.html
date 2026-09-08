@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-03m</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-03n</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -612,7 +612,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-03m</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-03n</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1180,7 +1180,7 @@ function statusEntrega(o){
   return {cls:'prazo-ok',txt:'Faltam '+diff+'d'};
 }
 function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.setor==='Amarração')return o.amRecebidoEm;if(o.setor==='Banho')return o.banhoRecebidoEm;if(o.setor==='Qualidade')return o.qualRecebidoEm;if(o.setor==='Expedição')return o.expRecebidoEm;return o.dataEntrada;}
-function farolSetor(recISO){var d=diasUteisEntre(recISO);if(!recISO)return {cls:'verde',cor:'var(--verde)',txt:'—',dias:0};if(d<=0)return {cls:'verde',cor:'var(--verde)',txt:'No prazo',dias:d};if(d<=2)return {cls:'amarelo',cor:'var(--amarelo)',txt:d+'d no setor',dias:d};return {cls:'vermelho',cor:'var(--vermelho)',txt:'Atrasada '+d+'d',dias:d};}
+function farolSetor(recISO,o){if(o&&o.statusComercial==='Entregue')return {cls:'verde',cor:'var(--verde)',txt:'Entregue',dias:0};var d=diasUteisEntre(recISO);if(!recISO)return {cls:'verde',cor:'var(--verde)',txt:'—',dias:0};if(d<=0)return {cls:'verde',cor:'var(--verde)',txt:'No prazo',dias:d};if(d<=2)return {cls:'amarelo',cor:'var(--amarelo)',txt:d+'d no setor',dias:d};return {cls:'vermelho',cor:'var(--vermelho)',txt:'Atrasada '+d+'d',dias:d};}
 function osEmProducao(){return dados.filter(function(o){return o.setor&&['Expedido','Comercial','Verniz'].indexOf(o.setor)===-1;});}
 function renderGestao(){
   const SET=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição'];
@@ -1188,23 +1188,23 @@ function renderGestao(){
   var box=document.getElementById('gvSetores');
   if(box){box.innerHTML=SET.map(function(sec){
     var lista=emProd.filter(function(o){return o.setor===sec;});
-    var v=0,a=0,r=0;lista.forEach(function(o){var f=farolSetor(setorRecebido(o));if(f.cls==='verde')v++;else if(f.cls==='amarelo')a++;else r++;});
+    var v=0,a=0,r=0;lista.forEach(function(o){var f=farolSetor(setorRecebido(o),o);if(f.cls==='verde')v++;else if(f.cls==='amarelo')a++;else r++;});
     var bord=r>0?'var(--vermelho)':(a>0?'var(--amarelo)':'var(--verde)');
     return '<div class="card" style="border-left-color:'+bord+'"><div style="font-weight:700;margin-bottom:8px">'+sec+' <span style="color:#9ca3af;font-weight:400">('+lista.length+')</span></div><div style="display:flex;gap:14px;font-size:15px;font-weight:700"><span style="color:var(--verde)">● '+v+'</span><span style="color:var(--amarelo)">● '+a+'</span><span style="color:var(--vermelho)">● '+r+'</span></div></div>';
   }).join('');}
   var q=(document.getElementById('buscaGv').value||'').toLowerCase();
   var _fs=(document.getElementById('gvSetor')||{}).value||'todos';
   var _ff=(document.getElementById('gvFarol')||{}).value||'todos';
-  var lista=emProd.filter(function(o){return (!q||JSON.stringify(o).toLowerCase().includes(q))&&(_fs==='todos'||o.setor===_fs)&&(_ff==='todos'||farolSetor(setorRecebido(o)).cls===_ff);});
+  var lista=emProd.filter(function(o){return (!q||JSON.stringify(o).toLowerCase().includes(q))&&(_fs==='todos'||o.setor===_fs)&&(_ff==='todos'||farolSetor(setorRecebido(o),o).cls===_ff);});
   lista.sort(function(x,y){return diasUteisEntre(setorRecebido(y))-diasUteisEntre(setorRecebido(x));});
   var tb=document.getElementById('tbodyGv');
   if(tb){tb.innerHTML='';
     var ev=document.getElementById('emptyGv');if(ev)ev.style.display=lista.length?'none':'block';
-    lista.forEach(function(o){var f=farolSetor(setorRecebido(o));var tr=document.createElement('tr');
+    lista.forEach(function(o){var f=farolSetor(setorRecebido(o),o);var tr=document.createElement('tr');
       var _cat=osTemCat(o);tr.style.background=_cat?'#f7f1ff':'';tr.innerHTML='<td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:'+f.cor+'"></span></td><td>'+retrabTag(o)+''+etqNum(o)+''+(_cat?' <span style="background:#6b3fb0;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700">CAT</span>':'')+'</td><td>'+(o.cliente||'')+'</td><td>'+o.setor+'</td><td>'+fmt(setorRecebido(o))+'</td><td>'+f.dias+'</td><td style="color:'+f.cor+';font-weight:700">'+f.txt+'</td>';
       tb.appendChild(tr);});
   }
-  var tv=0,ta=0,trr=0;emProd.forEach(function(o){var f=farolSetor(setorRecebido(o));if(f.cls==='verde')tv++;else if(f.cls==='amarelo')ta++;else trr++;});
+  var tv=0,ta=0,trr=0;emProd.forEach(function(o){var f=farolSetor(setorRecebido(o),o);if(f.cls==='verde')tv++;else if(f.cls==='amarelo')ta++;else trr++;});
   var cg=document.getElementById('cards-gv');if(cg)cg.innerHTML='<div class="card"><div class="n">'+emProd.length+'</div><div class="l">Em produção</div></div><div class="card verde"><div class="n">'+tv+'</div><div class="l">No prazo</div></div><div class="card amarelo"><div class="n">'+ta+'</div><div class="l">Em atenção</div></div><div class="card vermelho"><div class="n">'+trr+'</div><div class="l">Atrasadas</div></div>';
   var cnt=document.getElementById('cnt-gestao');if(cnt)cnt.textContent=trr;
 }
@@ -1232,7 +1232,7 @@ w.document.write('<html><head><meta charset="utf-8"><title>Relatorio de OS</titl
 function exportGv(){
   const emProd=osEmProducao();if(!emProd.length){alert('Nenhuma O.S. em produção.');return;}
   const cols=['Nº O.S.','Cliente','Setor','Recebido no setor','Dias úteis no setor','Situação'];
-  const lin=emProd.map(function(o){var f=farolSetor(setorRecebido(o));return [o.numOS,o.cliente,o.setor,fmt(setorRecebido(o)),f.dias,f.txt];});
+  const lin=emProd.map(function(o){var f=farolSetor(setorRecebido(o),o);return [o.numOS,o.cliente,o.setor,fmt(setorRecebido(o)),f.dias,f.txt];});
   baixarXls('GestaoVista_Magri',cols,lin);
 }
 var MESES=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -1287,7 +1287,7 @@ function renderDiretoria(){
   if(tbc){if(!cliPairs.length){tbc.innerHTML='<tr><td class="hint" style="padding:8px">Sem banhos no mês.</td></tr>';}else{var totv=cliPairs.reduce(function(s,pp){return s+pp[1];},0);var maxv=cliPairs[0][1]||0.0001;tbc.innerHTML=cliPairs.map(function(pp,i){var pct=totv>0?(pp[1]/totv*100):0;var bar=(pp[1]/maxv*100);return '<tr><td style="padding:5px 8px;white-space:nowrap"><b>'+(i+1)+'º</b> '+pp[0]+'</td><td style="padding:5px 8px;width:50%"><div style="background:var(--ouro);height:14px;border-radius:3px;width:'+bar.toFixed(0)+'%;min-width:2px"></div></td><td style="padding:5px 8px;text-align:right;font-weight:700;white-space:nowrap">'+g3(pp[1]*1000)+' g</td><td style="padding:5px 8px;text-align:right;color:#888;white-space:nowrap">'+g2(pct)+'%</td></tr>';}).join('');}}
   var SET=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição'];var emProd=osEmProducao();
   var fcards='',slrows='';
-  SET.forEach(function(sec){var lista=emProd.filter(function(o){return o.setor===sec;});var v=0,a=0,r=0,tsum=0;lista.forEach(function(o){var ff=farolSetor(setorRecebido(o));if(ff.cls==='verde')v++;else if(ff.cls==='amarelo')a++;else r++;tsum+=Math.max(0,ff.dias);});var tmed=lista.length?(tsum/lista.length):0;var bord=r>0?'var(--vermelho)':(a>0?'var(--amarelo)':'var(--verde)');
+  SET.forEach(function(sec){var lista=emProd.filter(function(o){return o.setor===sec;});var v=0,a=0,r=0,tsum=0;lista.forEach(function(o){var ff=farolSetor(setorRecebido(o),o);if(ff.cls==='verde')v++;else if(ff.cls==='amarelo')a++;else r++;tsum+=Math.max(0,ff.dias);});var tmed=lista.length?(tsum/lista.length):0;var bord=r>0?'var(--vermelho)':(a>0?'var(--amarelo)':'var(--verde)');
     fcards+='<div class="card" style="border-left-color:'+bord+'"><div style="font-weight:700;margin-bottom:6px">'+sec+' <span style="color:#9ca3af;font-weight:400">('+lista.length+')</span></div><div style="display:flex;gap:12px;font-weight:700"><span style="color:var(--verde)">● '+v+'</span><span style="color:var(--amarelo)">● '+a+'</span><span style="color:var(--vermelho)">● '+r+'</span></div></div>';
     slrows+='<tr><td>'+sec+'</td><td>'+lista.length+'</td><td style="color:var(--verde);font-weight:700">'+v+'</td><td style="color:var(--amarelo);font-weight:700">'+a+'</td><td style="color:var(--vermelho);font-weight:700">'+r+'</td><td style="text-align:right">'+tmed.toFixed(1)+'</td></tr>';});
   var fc=document.getElementById('dirFarol');if(fc)fc.innerHTML=fcards;var stb=document.getElementById('dirSlaTb');if(stb)stb.innerHTML=slrows;
