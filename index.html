@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-03h</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-03j</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -612,7 +612,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-03h</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-03j</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -758,7 +758,7 @@
         <div><label>Preço unitário bruto (R$)</label><input type="number" step="0.01" id="sbPrecoUnit"></div>
         <div style="grid-column:1/-1"><label>Observação da peça (detalhes)</label><input type="text" id="sbObs" placeholder="Ex.: detalhes, avaria, referência da peça..."></div>
         <div style="grid-column:1/-1;display:none" id="sbBrincoBox"><label>Serviços por unidade (só para brinco)</label><label style="font-weight:normal;margin-right:16px"><input type="checkbox" id="sbTarraxa"> Tarraxa</label><label style="font-weight:normal"><input type="checkbox" id="sbTarraxamento"> Tarraxamento</label> <span class="hint">cobrado por peça inspecionada na expedição</span></div>
-        <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><button type="button" class="btn-ghost" onclick="document.getElementById('sbFotoInput').click()" style="padding:8px 14px">Anexar foto</button> <button type="button" class="btn-ghost" onclick="document.getElementById('sbCamInput').click()" style="padding:8px 14px">Tirar foto (câmera)</button> <button type="button" class="btn-ghost" onclick="abrirOrfaPicker()" style="padding:8px 14px">Foto da nuvem</button><input type="file" id="sbFotoInput" accept="image/*" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
+        <div style="grid-column:1/-1"><label>Foto do sub-item (opcional)</label><label for="sbFotoInput" class="btn-ghost" style="padding:8px 14px;cursor:pointer;display:inline-block">Anexar foto</label> <label for="sbCamInput" class="btn-ghost" style="padding:8px 14px;cursor:pointer;display:inline-block">Tirar foto (câmera)</label> <button type="button" class="btn-ghost" onclick="abrirOrfaPicker()" style="padding:8px 14px">Foto da nuvem</button><input type="file" id="sbFotoInput" accept="image/*" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0"><input type="file" id="sbCamInput" accept="image/*" capture="environment" style="position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0"><img id="sbFotoPrev" style="display:none;max-height:70px;border-radius:6px;margin-left:10px;vertical-align:middle;cursor:pointer"></div>
       </div>
       <div class="hint" id="sbInfo" style="padding:2px"></div>
       <div class="actions" style="margin-top:4px"><button type="button" class="btn-azul" id="sbAddBtn" onclick="addSubitem()">+ Adicionar sub-item</button><button type="button" class="btn-ghost" onclick="salvarPecaBanco()">💾 Salvar no banco</button><span class="hint" id="sbPecaHint" style="margin-left:8px"></span></div>
@@ -1480,12 +1480,13 @@ function salvarItem(){
   let it=lerItemModal();
   if((parseFloat(it.peso)||0)<=0){alert('Informe o peso do lote.');return;}
   if(ehOuroBanho(it.banho)&&!(it.cor||'').trim()){alert('Para banho de Ouro, a Cor é obrigatória.');return;}
+  if(it.banho==='Ouro Camada'&&(''+(it.mo==null?'':it.mo)).trim()===''){alert('Para Ouro Camada, a Mão de obra (M.O.) é obrigatória. Informe um valor antes de salvar o lote.');var _mo=document.getElementById('itMO');if(_mo)_mo.focus();return;}
   const totalOS=g2kg(document.getElementById('peso').value);
   const usadoOutros=itensTmp.reduce(function(sm,x,i){return sm+((i===idx)?0:(parseFloat(x.peso)||0));},0);
   const novo=parseFloat(it.peso)||0;
   if(totalOS>0 && (usadoOutros+novo)>totalOS+0.000001){alert('O peso dos lotes ('+kg2g(usadoOutros+novo)+' g) ultrapassaria o peso total da OS ('+kg2g(totalOS)+' g).\nDisponível: '+kg2g(totalOS-usadoOutros)+' g.');return;}
   const pr=precoBanhoItem(it);it.precoPrincipal=pr.principal;it.precoCompl=pr.compl;it.precoBanho=pr.total;
-  if(idx>=0){it=Object.assign({},itensTmp[idx]||{},it);itensTmp[idx]=it;}else itensTmp.push(it);
+  it._ts=Date.now();if(idx>=0){it=Object.assign({},itensTmp[idx]||{},it);it._ts=Date.now();itensTmp[idx]=it;}else itensTmp.push(it);
   closeItemModal();renderItens();recalc();
 }
 function delItem(i){itensTmp.splice(i,1);renderItens();recalc();}
