@@ -181,7 +181,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-03t</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-03u</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -612,7 +612,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-03t</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-03u</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1181,7 +1181,7 @@ function statusEntrega(o){
 }
 function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.setor==='Amarração')return o.amRecebidoEm;if(o.setor==='Banho')return o.banhoRecebidoEm;if(o.setor==='Qualidade')return o.qualRecebidoEm;if(o.setor==='Expedição')return o.expRecebidoEm;return o.dataEntrada;}
 function farolSetor(recISO,o){if(o&&o.statusComercial==='Entregue')return {cls:'verde',cor:'var(--verde)',txt:'Entregue',dias:0};var d=diasUteisEntre(recISO);if(!recISO)return {cls:'verde',cor:'var(--verde)',txt:'—',dias:0};if(d<=0)return {cls:'verde',cor:'var(--verde)',txt:'No prazo',dias:d};if(d<=2)return {cls:'amarelo',cor:'var(--amarelo)',txt:d+'d no setor',dias:d};return {cls:'vermelho',cor:'var(--vermelho)',txt:'Atrasada '+d+'d',dias:d};}
-function osEmProducao(){return dados.filter(function(o){return o.setor&&['Expedido','Comercial','Verniz'].indexOf(o.setor)===-1;});}
+function osEmProducao(){return dados.filter(function(o){return (o.setor!=='Expedido')&&(o.statusComercial!=='Entregue');});}
 function renderGestao(){
   const SET=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição'];
   const emProd=osEmProducao();
@@ -1205,7 +1205,7 @@ function renderGestao(){
       tb.appendChild(tr);});
   }
   var tv=0,ta=0,trr=0;emProd.forEach(function(o){var f=farolSetor(setorRecebido(o),o);if(f.cls==='verde')tv++;else if(f.cls==='amarelo')ta++;else trr++;});
-  var cg=document.getElementById('cards-gv');if(cg)cg.innerHTML='<div class="card"><div class="n">'+emProd.length+'</div><div class="l">Em produção</div></div><div class="card verde"><div class="n">'+tv+'</div><div class="l">No prazo</div></div><div class="card amarelo"><div class="n">'+ta+'</div><div class="l">Em atenção</div></div><div class="card vermelho"><div class="n">'+trr+'</div><div class="l">Atrasadas</div></div>';
+  var cg=document.getElementById('cards-gv');if(cg)cg.innerHTML='<div class="card"><div class="n">'+emProd.length+'</div><div class="l">Em aberto</div></div><div class="card verde"><div class="n">'+tv+'</div><div class="l">No prazo</div></div><div class="card amarelo"><div class="n">'+ta+'</div><div class="l">Em atenção</div></div><div class="card vermelho"><div class="n">'+trr+'</div><div class="l">Atrasadas</div></div>';
   var cnt=document.getElementById('cnt-gestao');if(cnt)cnt.textContent=trr;
 }
 function _relatPDF(titulo,body){var css='body{font-family:Arial,sans-serif;margin:18px;color:#222}h1{color:#8a6d1f;font-size:18px;margin:0 0 2px}h2{font-size:14px;color:#123a6b;margin:16px 0 4px}table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}th{background:#333;color:#fff;padding:5px 7px;text-align:left}td{border:1px solid #eee;padding:5px 7px}.tot{font-weight:bold;margin-top:8px}.kpi{display:inline-block;border:1px solid #ddd;border-radius:8px;padding:8px 12px;margin:4px 8px 4px 0}.kpi b{font-size:16px;color:#123a6b;display:block}@media print{.noprint{display:none}}';var w=window.open('','_blank');if(!w){alert('Permita pop-ups para gerar o PDF.');return;}w.document.write('<html><head><meta charset="utf-8"><title>'+titulo+'</title><style>'+css+'</style></head><body><h1>Magri Folheados — '+titulo+'</h1><div style="font-size:11px;color:#555">Gerado em '+new Date().toLocaleString('pt-BR')+'</div><div class="noprint" style="margin:8px 0"><button onclick="window.print()" style="padding:8px 16px;cursor:pointer">Imprimir / Salvar PDF</button></div>'+body+'</body></html>');w.document.close();}
@@ -1230,7 +1230,7 @@ var css='body{font-family:Arial;margin:18px;color:#222}h1{color:#8a6d1f;font-siz
 var w=window.open('','_blank');if(!w){alert('Permita pop-ups para gerar o PDF.');return;}
 w.document.write('<html><head><meta charset="utf-8"><title>Relatorio de OS</title><style>'+css+'</style></head><body><h1>Magri Folheados — Relatorio de OS detalhado</h1><div class="m">'+arr.length+' O.S. · '+new Date().toLocaleString('pt-BR')+'</div><div class="noprint" style="margin:8px 0"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer">Imprimir / Salvar PDF</button></div>'+body+'</body></html>');w.document.close();}
 function exportGv(){
-  const emProd=osEmProducao();if(!emProd.length){alert('Nenhuma O.S. em produção.');return;}
+  const emProd=osEmProducao();if(!emProd.length){alert('Nenhuma O.S. em aberto.');return;}
   const cols=['Nº O.S.','Cliente','Setor','Recebido no setor','Dias úteis no setor','Situação'];
   const lin=emProd.map(function(o){var f=farolSetor(setorRecebido(o),o);return [o.numOS,o.cliente,o.setor,fmt(setorRecebido(o)),f.dias,f.txt];});
   baixarXls('GestaoVista_Magri',cols,lin);
@@ -2368,11 +2368,11 @@ function expAdicionais(o){var lotes=o.itens||[];var any=function(k){return lotes
 function catBanhoUN(it,sb){var pesoNet=pesoSubEfetivo(sb)*fracMetalItem(it);var p=precoBanhoItem({peso:pesoNet,banho:it.banho,cotacao:it.cotacao,camada:it.camada,mo:it.mo,especial:it.especial,especialKg:it.especialKg,compl:it.compl}).total;var q=parseFloat(sb.qtd)||0;return q>0?p/q:0;}
 function buildCatalogoHTML(o){
   var cards='';
-  var _cn=0;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){_cn++;
+  var _cn=0;(o.itens||[]).forEach(function(it,li){(it.subitens||[]).forEach(function(sb){_cn++;
     var qtd=parseFloat(sb.qtd)||0,pesoT=pesoSubEfetivo(sb),pesoU=qtd>0?pesoT/qtd:0;
     var brutoUN=parseFloat(sb.precoUnit)||0;var banhoUN=catBanhoUN(it,sb);var finalUN=brutoUN+banhoUN;
     var _fs=sb.foto?fotoSrc(sb.foto):'';var foto=_fs?'<img src="'+_fs+'">':'<div class="semfoto">sem foto</div>';
-    cards+='<div class="card"><div class="foto">'+foto+'</div><div class="dados">'+
+    cards+='<div class="card" data-lote="'+li+'"><div class="foto">'+foto+'</div><div class="dados">'+
       '<div class="l" style="font-weight:800;color:#123a6b">Item nº '+_cn+'</div>'+
       '<div class="l"><b>Forn.:</b> '+(sb.fornecedor||(o.fb&&o.fb.fornecedor)||'-')+' &nbsp; <b>Código:</b> '+((sb.codigo)||'-')+'</div>'+
       '<div class="l"><b>Tipo de Peça:</b> '+(sb.tipoPeca||'-')+'</div>'+
@@ -2385,12 +2385,17 @@ function buildCatalogoHTML(o){
     '</div></div>';
   });});
   if(!cards)cards='<div style="padding:20px">Esta O.S. não tem sub-itens cadastrados no Foto/Bruto.</div>';
+  var _lotesCat=[];(o.itens||[]).forEach(function(it,li){if((it.subitens||[]).length)_lotesCat.push({i:li,txt:'Lote '+(li+1)+(it.produto?(' — '+it.produto):'')});});
+  var _loteSel=(_lotesCat.length>1)?('<div class="lotefiltro" style="text-align:center;margin:0 0 12px"><label style="font-size:13px;font-weight:bold;color:#123a6b;margin-right:6px">Filtrar por lote:</label><select id="catLoteFilter" onchange="_catFiltraLote(this.value)" style="padding:6px 10px;border:1px solid #123a6b;border-radius:6px;font-size:13px"><option value="">Todos os lotes</option>'+_lotesCat.map(function(l){return '<option value="'+l.i+'">'+l.txt+'</option>';}).join('')+'</select></div>'):'';
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Catálogo O.S. '+(o.numOS||'')+'</title>'+
-    '<style>*{box-sizing:border-box;}body{font-family:Arial,sans-serif;margin:0;padding:16px;color:#1a1a1a;}h1{font-size:20px;margin:0;color:#123a6b;}.head{border-bottom:2px solid #123a6b;padding-bottom:10px;margin-bottom:14px;}.head .sub{font-size:13px;color:#555;margin-top:4px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}.card{border:1px solid #ccc;border-radius:8px;padding:10px;display:flex;gap:10px;page-break-inside:avoid;}.foto img{width:96px;height:96px;object-fit:contain;object-position:center;background:#fff;border-radius:6px;border:1px solid #ddd;}.foto .semfoto{width:96px;height:96px;border:1px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;text-align:center;}.dados{font-size:12px;flex:1;}.dados .l{margin:2px 0;}.dados .tot{margin-top:6px;font-weight:bold;color:#123a6b;font-size:13px;border-top:1px solid #eee;padding-top:5px;}.imprimir{margin:14px 0;text-align:center;}button{background:#123a6b;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;}@media print{.imprimir{display:none;}@page{size:A4;margin:12mm;}}</style>'+
+    '<style>*{box-sizing:border-box;}body{font-family:Arial,sans-serif;margin:0;padding:16px;color:#1a1a1a;}h1{font-size:20px;margin:0;color:#123a6b;}.head{border-bottom:2px solid #123a6b;padding-bottom:10px;margin-bottom:14px;}.head .sub{font-size:13px;color:#555;margin-top:4px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}.card{border:1px solid #ccc;border-radius:8px;padding:10px;display:flex;gap:10px;page-break-inside:avoid;}.foto img{width:96px;height:96px;object-fit:contain;object-position:center;background:#fff;border-radius:6px;border:1px solid #ddd;}.foto .semfoto{width:96px;height:96px;border:1px dashed #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:11px;text-align:center;}.dados{font-size:12px;flex:1;}.dados .l{margin:2px 0;}.dados .tot{margin-top:6px;font-weight:bold;color:#123a6b;font-size:13px;border-top:1px solid #eee;padding-top:5px;}.imprimir{margin:14px 0;text-align:center;}button{background:#123a6b;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:14px;}@media print{.imprimir,.lotefiltro{display:none;}@page{size:A4;margin:12mm;}}</style>'+
     '</head><body>'+
     '<div class="head">'+logoTag(50)+'<h1 style="display:inline-block;vertical-align:middle">MAGRI FOLHEADOS — Catálogo do Cliente</h1><div class="sub"><b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Data:</b> '+fmt(hojeISO())+'</div></div>'+
     '<div class="imprimir"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
-    '<div class="grid">'+cards+'</div></body></html>';
+    _loteSel+
+    '<div class="grid">'+cards+'</div>'+
+    '<scr'+'ipt>function _catFiltraLote(v){var cs=document.querySelectorAll(".card");for(var i=0;i<cs.length;i++){var m=(v===""||cs[i].getAttribute("data-lote")===v);cs[i].style.display=m?"":"none";}}<\/scr'+'ipt>'+
+    '</body></html>';
 }
 async function _ensureFotosOS(o){if(!window.__sb)return;window.__fotos=window.__fotos||{};var need={};(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){var v=sb.foto;if(v&&(''+v).indexOf('fid:')===0){var k=(''+v).slice(4);if(!window.__fotos[k])need[k]=1;}});});var ids=Object.keys(need);for(var i=0;i<ids.length;i+=20){try{var r=await window.__sb.from('fotos').select('id,b64').in('id',ids.slice(i,i+20));if(r&&r.data)r.data.forEach(function(row){window.__fotos[row.id]=row.b64;});}catch(e){console.warn('ensureFotos',e&&e.message);}}}
 async function gerarCatalogo(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o catálogo.');return;}try{w.document.write('<div style="font-family:Arial;padding:24px;color:#123a6b">Carregando catálogo e fotos…</div>');}catch(e){}try{await _ensureFotosOS(o);}catch(e){}try{w.document.open();w.document.write(buildCatalogoHTML(o));w.document.close();}catch(e){alert('Erro ao gerar catálogo: '+((e&&e.message)||e));}}
