@@ -182,7 +182,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16f</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16g</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -627,7 +627,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16f</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16g</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1609,6 +1609,8 @@ async function _checkSessao(){try{if(!window.__sb)return;var r=await window.__sb
 try{setTimeout(_checkSessao,8000);setInterval(_checkSessao,90000);}catch(_se){}
 document.getElementById('osForm').addEventListener('submit',async function(e){
   e.preventDefault();
+  if(window.__savingOS)return;window.__savingOS=true;var _sbtn=document.getElementById('submitBtn');if(_sbtn){_sbtn.disabled=true;}
+  try{
   if(itensTmp.length===0){alert('Adicione pelo menos um item do serviço antes de cadastrar a O.S.');return;}
   const g=id=>document.getElementById(id).value;
   if(!(''+g('cliente')).trim()){alert('Informe o Cliente para salvar a O.S.');var _c=document.getElementById('cliente');if(_c)_c.focus();return;}
@@ -1621,6 +1623,7 @@ document.getElementById('osForm').addEventListener('submit',async function(e){
   if(editId){const o=dados.find(x=>x.id===editId);if(o)Object.assign(o,header);}
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Comercial',fb:null}));}
   try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();alert(_wasEdit?('\u2714 Altera\u00e7\u00f5es da O.S. '+_nOS+' salvas.'):('\u2714 O.S. '+_nOS+' cadastrada.'));
+  }finally{window.__savingOS=false;if(_sbtn){_sbtn.disabled=false;}}
 });
 function comEnviarFoto(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.setor='Financeiro';o.finRecebidoEm=hojeISO();o.devolvido=false;salvar();render();alert('O.S. '+(o.numOS||'')+' enviada para o Financeiro.');}function marcarVistoCom(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.comercialVisto=true;salvar();render();}
 function renderFinanceiro(){
