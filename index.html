@@ -182,7 +182,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16g</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16i</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -627,7 +627,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16g</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16i</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1505,7 +1505,7 @@ function salvarItem(){
   const totalOS=g2kg(document.getElementById('peso').value);
   const usadoOutros=itensTmp.reduce(function(sm,x,i){return sm+((i===idx)?0:(parseFloat(x.peso)||0));},0);
   const novo=parseFloat(it.peso)||0;
-  if(totalOS>0 && (usadoOutros+novo)>totalOS+0.000001){alert('O peso dos lotes ('+kg2g(usadoOutros+novo)+' g) ultrapassaria o peso total da OS ('+kg2g(totalOS)+' g).\nDisponível: '+kg2g(totalOS-usadoOutros)+' g.');return;}
+  if(totalOS>0 && (usadoOutros+novo)>totalOS+0.000001){if(!confirm('⚠ O peso dos lotes ('+kg2g(usadoOutros+novo)+' g) passa do peso total da OS ('+kg2g(totalOS)+' g).\n\nSalvar assim mesmo? (ajuste o peso total da OS depois, se precisar)')){return;}}
   it._ts=Date.now();if(idx>=0){it=Object.assign({},itensTmp[idx]||{},it);it._ts=Date.now();itensTmp[idx]=it;}else itensTmp.push(it);recalcPrecoLote(it);
   closeItemModal();renderItens();recalc();
 }
@@ -1524,7 +1524,7 @@ function renderItens(){
   const vz=document.getElementById('itensVazio');if(vz)vz.style.display=itensTmp.length?'none':'block';
   itensTmp.forEach(function(it,i){const tr=document.createElement('tr');
     var comps=complResumo(it);var cat=(it.compl&&it.compl.cataforetico)?'Sim':'Não';
-    tr.innerHTML='<td><b>Lote '+(i+1)+'</b></td><td>'+(it.produto||'')+'</td><td>'+kg2g(it.peso)+'</td><td>'+(it.banho||'')+'</td><td>'+(it.cor||'')+'</td><td style="white-space:normal;max-width:220px">'+(comps.join(', ')||'—')+'</td><td>'+cat+'</td><td>'+brl(it.precoBanho||0)+'</td><td class="row-act"><button class="btn-edit" onclick="openItemModal('+i+')">Editar</button><button class="btn-del" onclick="delItem('+i+')">x</button></td>';
+    tr.innerHTML='<td><b>Lote '+(i+1)+'</b></td><td>'+(it.produto||'')+'</td><td>'+kg2g(it.peso)+'</td><td>'+(it.banho||'')+'</td><td>'+(it.cor||'')+'</td><td style="white-space:normal;max-width:220px">'+(comps.join(', ')||'—')+'</td><td>'+cat+'</td><td>'+brl(it.precoBanho||0)+'</td><td class="row-act"><button type="button" class="btn-edit" onclick="openItemModal('+i+')">Editar</button><button type="button" class="btn-del" onclick="delItem('+i+')">x</button></td>';
     tb.appendChild(tr);});
   updateSaldoPeso();updateTotalOS();
 }
@@ -1593,7 +1593,7 @@ function renderServicos(){
   servicosTmp.forEach(function(sv,i){const tr=document.createElement('tr');
     var _nt=sv.cortesia?' <span style="color:var(--verde);font-weight:700">(cortesia)</span>':(sv.desconto>0?(' <span class="hint">(-'+brl(sv.desconto)+')</span>'):'');
     var _qt=sv.aDefinir?'a definir':sv.qtd;var _vt=sv.aDefinir?('a definir · R$ '+g2(sv.precoUnit||0)+'/ponto'):(brl(sv.valor)+_nt);
-    tr.innerHTML='<td><b>'+sv.servico+'</b></td><td>'+(sv.cor||(ehRodio(sv.servico)?'':'unidade'))+'</td><td>'+_qt+'</td><td>'+_vt+'</td><td class="row-act"><button class="btn-del" onclick="delServico('+i+')">x</button></td>';
+    tr.innerHTML='<td><b>'+sv.servico+'</b></td><td>'+(sv.cor||(ehRodio(sv.servico)?'':'unidade'))+'</td><td>'+_qt+'</td><td>'+_vt+'</td><td class="row-act"><button type="button" class="btn-del" onclick="delServico('+i+')">x</button></td>';
     tb.appendChild(tr);});
   const tot=servicosTmp.reduce(function(sm,x){return sm+(x.valor||0);},0);
   const el=document.getElementById('servTotal');if(el)el.textContent=servicosTmp.length?('Total de serviços adicionais: '+brl(tot)):'';
@@ -1607,8 +1607,24 @@ async function reconectarSessao(){try{if(!window.__sb){alert('Sistema n\u00e3o c
 function _mostraSessaoBanner(mostrar){var el=document.getElementById('__sessaobanner');if(mostrar){if(!el){el=document.createElement('div');el.id='__sessaobanner';el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:100001;background:#b00020;color:#fff;font-family:Arial;font-size:14px;padding:12px 14px;text-align:center;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,.4)';el.innerHTML='\u26a0 SUA SESS\u00c3O CAIU \u2014 o que voc\u00ea digitar N\u00c3O vai salvar. N\u00c3O recarregue nem feche. <button onclick="reconectarSessao()" style="margin-left:10px;padding:6px 14px;font-weight:bold;background:#fff;color:#b00020;border:none;border-radius:6px;cursor:pointer">RECONECTAR</button>';document.body.appendChild(el);}el.style.display='';}else{if(el)el.style.display='none';}}
 async function _checkSessao(){try{if(!window.__sb)return;var r=await window.__sb.from('config').select('chave').limit(1);var caiu=!!(r&&r.error&&/permission denied|JWT|not authenticated|invalid|expired/i.test(r.error.message||''));_mostraSessaoBanner(caiu);}catch(e){}}
 try{setTimeout(_checkSessao,8000);setInterval(_checkSessao,90000);}catch(_se){}
+function resumoOSConfirm(h,itens,servicos){return new Promise(function(resolve){
+  var lin=(itens||[]).map(function(it,i){var comps=complResumo(it);return '<tr><td style="padding:4px 6px;border-top:1px solid #eee"><b>Lote '+(i+1)+'</b></td><td style="padding:4px 6px;border-top:1px solid #eee">'+(it.produto||'')+'</td><td style="padding:4px 6px;border-top:1px solid #eee">'+(it.banho||'')+(it.cor?' '+it.cor:'')+(camadaDoItem(it)>0?' · C'+camadaDoItem(it):'')+(comps.length?'<br><span style="font-size:11px;color:#777">+ '+comps.join(', ')+'</span>':'')+'</td><td style="padding:4px 6px;border-top:1px solid #eee;text-align:right;white-space:nowrap">'+kg2g(it.peso)+' g</td><td style="padding:4px 6px;border-top:1px solid #eee;text-align:right;white-space:nowrap">'+brl(it.precoBanho||0)+'</td></tr>';}).join('');
+  var serv=(servicos||[]).map(function(s){return '<tr><td colspan="4" style="padding:4px 6px;border-top:1px solid #eee;color:#555">Serviço: '+(s.servico||'')+(s.cor?' ('+s.cor+')':'')+(s.cortesia?' — cortesia':'')+'</td><td style="padding:4px 6px;border-top:1px solid #eee;text-align:right">'+brl(s.valor||0)+'</td></tr>';}).join('');
+  var tot=totalFormOS();var somaLotes=(itens||[]).reduce(function(s,it){return s+(parseFloat(it.peso)||0);},0);
+  var difPeso=(parseFloat(h.peso)||0)-somaLotes;var avisoPeso=(Math.abs(difPeso)>0.000001)?('<span style="color:'+(difPeso<0?'#b3343e':'#a9862f')+'"> ('+(difPeso<0?'passou ':'sobra ')+kg2g(Math.abs(difPeso))+' g)</span>'):'';
+  var html='<div class="modal-bg show" id="__resumoOS" style="z-index:100050"><div class="modal" style="max-width:660px"><div class="modal-head"><h3>Conferir antes de cadastrar a O.S.</h3></div><div class="modal-body">'+
+    '<div style="font-size:13px;line-height:1.7;margin-bottom:10px;background:#f8f9fb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px"><b>Cliente:</b> '+(h.cliente||'')+' &nbsp;|&nbsp; <b>Nº O.S.:</b> '+(h.numOS||'')+' &nbsp;|&nbsp; <b>Entrada:</b> '+fmt(h.dataEntrada)+'<br><b>Peso total OS:</b> '+kg2g(h.peso)+' g &nbsp;|&nbsp; <b>Soma dos lotes:</b> '+kg2g(somaLotes)+' g'+avisoPeso+'<br><b>Etiqueta:</b> '+(h.etiqueta||'—')+' &nbsp;|&nbsp; <b>Prev. entrega:</b> '+(h.prevEntregaISO?fmt(h.prevEntregaISO):'—')+' &nbsp;|&nbsp; <b>Catalogar:</b> '+(h.catalogar||'Sim')+'</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#123a6b;color:#fff"><th style="text-align:left;padding:5px 6px">Lote</th><th style="text-align:left;padding:5px 6px">Produto</th><th style="text-align:left;padding:5px 6px">Banho / Cor</th><th style="text-align:right;padding:5px 6px">Peso</th><th style="text-align:right;padding:5px 6px">Preço banho</th></tr></thead><tbody>'+(lin||'<tr><td colspan="5" style="padding:8px;color:#999">Sem lotes.</td></tr>')+serv+'</tbody></table>'+
+    '<div style="text-align:right;font-weight:800;margin-top:12px;font-size:16px;color:#123a6b">Total da O.S.: '+brl(tot)+'</div>'+
+    '</div><div class="actions" style="padding:12px 16px;display:flex;gap:8px;justify-content:flex-end"><button class="btn-ghost" id="__resNao" style="padding:9px 16px">← Voltar e ajustar</button><button class="btn-primary" id="__resSim" style="padding:9px 18px">✔ Confirmar cadastro</button></div></div></div>';
+  var wrap=document.createElement('div');wrap.innerHTML=html;document.body.appendChild(wrap);
+  var fim=function(v){try{document.body.removeChild(wrap);}catch(e){}resolve(v);};
+  var s=document.getElementById('__resSim'),n=document.getElementById('__resNao');
+  if(s)s.onclick=function(){fim(true);};if(n)n.onclick=function(){fim(false);};
+});}
 document.getElementById('osForm').addEventListener('submit',async function(e){
   e.preventDefault();
+  if(e.submitter&&e.submitter.id&&e.submitter.id!=='submitBtn')return;
   if(window.__savingOS)return;window.__savingOS=true;var _sbtn=document.getElementById('submitBtn');if(_sbtn){_sbtn.disabled=true;}
   try{
   if(itensTmp.length===0){alert('Adicione pelo menos um item do serviço antes de cadastrar a O.S.');return;}
@@ -1619,6 +1635,7 @@ document.getElementById('osForm').addEventListener('submit',async function(e){
   const header={dataEntrada:g('dataEntrada')||hojeISO(),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),catalogar:g('catalogar')||'Sim',peso:g2kg(g('peso')),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
   var _origOS=editId?dados.find(function(x){return String(x.id)===String(editId);}):null;var _numChanged=_origOS?(String(_origOS.numOS||'')!==String(header.numOS||'')):true;var _dupOS=_numChanged?dados.find(function(x){return x.id!==editId&&String(x.numOS||x.numos||'')===String(header.numOS||'');}):null;if(_dupOS){if(!editId&&confirm('Já existe a O.S. '+(header.numOS||'')+' ('+(_dupOS.cliente||'')+'). Abrir para editar em vez de criar outra?')){resetForm();editarCom(_dupOS.id);return;}alert('\u26d4 Já existe uma O.S. com o número '+(header.numOS||'')+'. Não é permitido repetir. Use outro número (ex.: '+(header.numOS||'')+'-1).');return;}
   if(!editId&&window.__sb){try{var _cq=await window.__sb.from('ordens').select('id').eq('num_os',String(header.numOS||''));if(_cq&&_cq.data&&_cq.data.length){alert('\u26d4 J\u00e1 existe uma O.S. com o n\u00famero '+(header.numOS||'')+' na nuvem (pode ter sido criada em outro aparelho). Use outro n\u00famero, por exemplo '+(header.numOS||'')+'-1.');return;}}catch(_ce){}}
+  if(!editId){var _okResumo=await resumoOSConfirm(header,itensTmp,servicosTmp);if(!_okResumo){return;}}
   var _wasEdit=!!editId;var _nOS=header.numOS||'';
   if(editId){const o=dados.find(x=>x.id===editId);if(o)Object.assign(o,header);}
   else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Comercial',fb:null}));}
