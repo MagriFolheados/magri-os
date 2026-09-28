@@ -137,6 +137,16 @@
     button{min-height:38px;}
     .row-act{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;}
   }
+  /* ===== Polimento visual v2026-09-16r (aditivo e reversível: complementa classes existentes, não redesenha) ===== */
+  .actions{align-items:center;row-gap:10px;}
+  .toolbar{row-gap:8px;align-items:center;}
+  .panel-head{row-gap:8px;}
+  .panel-head h2{letter-spacing:.2px;}
+  .row-act{display:inline-flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;align-items:center;}
+  .row-act button{margin-right:0;}
+  .info-os{gap:12px 22px;align-items:flex-start;}
+  .sec-title{margin-top:20px;}
+  button{letter-spacing:.2px;}
 </style>
 </head>
 <body>
@@ -182,7 +192,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16q</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16r</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -627,7 +637,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16q</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16r</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2309,6 +2319,7 @@ function renderExpConf(o){
         '<div><label style="font-size:11px;text-transform:none">Contagem do setor</label><input type="number" value="'+(sb.contagemExp||'')+'" onchange="expSetSub('+li+','+si+',\'contagemExp\',this.value)" style="width:100%;padding:6px"><div class="hint">'+stat+'</div></div>'+
         '<div><label style="font-size:11px;text-transform:none">Qtd com defeito</label><input type="number" min="0" value="'+(sb.defeito||'')+'" onchange="expSetSub('+li+','+si+',\'defeito\',this.value)" style="width:100%;padding:6px"><div class="hint">Vai para retrabalho por peça</div></div><div><label style="font-size:11px;text-transform:none">Tipo de defeito</label><input type="text" value="'+(sb.defeitoTipo||'')+'" onchange="expSetDefTipo('+li+','+si+',this.value)" style="width:100%;padding:6px" placeholder="Ex.: mancha, risco"></div>'+
         '<div><label style="font-size:11px;text-transform:none">Peso final (g)</label><input type="number" step="0.001" value="'+kg2g(sb.pesoFinalExp)+'" onchange="expSetSub('+li+','+si+',\'pesoFinalExp\',this.value)" style="width:100%;padding:6px"></div>'+'<div><label style="font-size:11px;text-transform:none">Perdidas no processo</label><input type="number" min="0" value="'+(sb.perdidas||'')+'" onchange="expSetSub('+li+','+si+',\'perdidas\',this.value)" style="width:100%;padding:6px"><div class="hint">Peças quebradas/perdidas</div></div>'+'<div><label style="font-size:11px;text-transform:none">Motivo da perda</label><input type="text" value="'+(sb.perdidaMotivo||'')+'" onchange="expSetSub('+li+','+si+',\'perdidaMotivo\',this.value)" style="width:100%;padding:6px" placeholder="Ex.: quebrou no banho"></div>'+
+        '<div style="grid-column:1/-1"><label style="font-size:11px;text-transform:none">📝 Observação do item (Expedição)</label><input type="text" value="'+((sb.obsExp||'').replace(/"/g,'&quot;'))+'" onchange="expSetSub('+li+','+si+',\'obsExp\',this.value)" style="width:100%;padding:6px" placeholder="Anote algo importante deste item (ex.: separar, conferir fecho, cliente pediu...)"></div>'+
       '</div>'+
     '</div>';
   });});
@@ -2472,6 +2483,7 @@ function buildConfExpHTML(o){
         '<div class="l"><b>Cor:</b> '+(catCorNome(it.cor)||'-')+' &nbsp;|&nbsp; <b>Verniz:</b> '+(catVernizNome(it)||'-')+'</div>'+
         (tratTxt?('<div class="l"><b>Tratamentos:</b> '+tratTxt+'</div>'):'')+
         (sb.obs?('<div class="obs">📝 '+sb.obs+'</div>'):'')+
+        (sb.obsExp?('<div class="obs" style="background:#eef4ff;border-color:#9db9e6">🚚 '+sb.obsExp+'</div>'):'')+
         '<div class="conf">Conferido: <span class="bx">☐</span> &nbsp; Qtd conferida: <span class="ln"></span> &nbsp; Peso: <span class="ln"></span> g</div>'+
       '</div></div>';
     });
