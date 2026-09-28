@@ -194,7 +194,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16u</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-16v</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -639,7 +639,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16u</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-16v</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2953,13 +2953,47 @@ function buildEtiquetasClienteTSPL(o){
   }
   return cmd;
 }
+function _lblLinhasEtq(o){
+  var out=[];
+  (o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){
+    var qtd=parseInt(sb.contagemExp)||parseInt(sb.qtd)||0;
+    var pesoKg=(sb.pesoFinalExp!==undefined&&sb.pesoFinalExp!=='')?(parseFloat(sb.pesoFinalExp)||0):(parseFloat(sb.peso)||0);
+    var pesoUN=qtd>0?pesoKg/qtd:0;
+    var brutoUN=parseFloat(sb.precoUnit)||0;
+    var banhoTot=banhoSub(it,sb);var banhoUN=qtd>0?banhoTot/qtd:0;
+    var banhadaUN=brutoUN+banhoUN;
+    var ehBrincoSb=/brinco/i.test(sb.tipoPeca||'');
+    var tarUN=(ehBrincoSb&&sb.tarraxa)?(PRECO_UNIDADE['Tarraxa']||0):0;
+    var traxUN=(ehBrincoSb&&sb.tarraxamento)?(PRECO_UNIDADE['Tarraxamento']||0):0;
+    var totalUN=banhadaUN+tarUN+traxUN;
+    var L=[];
+    L.push({t:_tsplClip(o.cliente||'',26),b:true,s:24});
+    L.push({t:_tsplClip((sb.tipoPeca||'')+'  Qtd '+qtd,36),b:false,s:19});
+    L.push({t:_tsplClip('PU '+g2(pesoUN*1000)+'g  PT '+g2(pesoKg*1000)+'g',36),b:false,s:19});
+    L.push({t:_tsplClip('Bruta R$'+g2(brutoUN)+'  Banho R$'+g2(banhoUN),38),b:false,s:19});
+    if(tarUN||traxUN){L.push({t:_tsplClip('Banhada R$'+g2(banhadaUN),34),b:false,s:18});L.push({t:_tsplClip('Total un R$'+g2(totalUN),34),b:true,s:21});}
+    else{L.push({t:_tsplClip('Banhada ~R$ '+g2(banhadaUN),34),b:true,s:21});}
+    L.push({t:_tsplClip('Forn: '+(sb.fornecedor||(o.fb&&o.fb.fornecedor)||'-'),38),b:false,s:17});
+    out.push(L);
+  });});
+  return out;
+}
 function imprimirEtiquetaClienteTablet(){
   var id=document.getElementById('expId').value;var o=dados.find(function(x){return x.id===id;});if(!o)return;
-  var temSub=(o.itens||[]).some(function(it){return it.subitens&&it.subitens.length;});
-  if(!temSub){alert('Esta OS não tem sub-itens para gerar etiquetas.');return;}
-  var tspl=buildEtiquetasClienteTSPL(o);
-  var b64;try{b64=btoa(tspl);}catch(e){alert('Erro ao preparar a etiqueta para o RawBT: '+((e&&e.message)||e));return;}
-  try{window.location.href='rawbt:base64,'+b64;}catch(e){alert('Não consegui abrir o RawBT. Confirme que ele está instalado. Detalhe: '+((e&&e.message)||e));}
+  var labels=_lblLinhasEtq(o);
+  if(!labels.length){alert('Esta OS não tem sub-itens para gerar etiquetas.');return;}
+  var W=848,H=200,colX=[20,452];
+  var rows=Math.ceil(labels.length/2);
+  var cv=document.createElement('canvas');cv.width=W;cv.height=H*rows;
+  var ctx=cv.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#000';ctx.textBaseline='top';
+  for(var i=0;i<labels.length;i++){
+    var col=i%2,ox=colX[col],oy=Math.floor(i/2)*H,L=labels[i],y=oy+10;
+    for(var k=0;k<L.length;k++){var ln=L[k];ctx.font=(ln.b?'bold ':'')+ln.s+'px Arial';ctx.fillText(ln.t,ox,y);y+=ln.s+6;}
+  }
+  var url;try{url=cv.toDataURL('image/png');}catch(e){alert('Erro ao gerar a imagem da etiqueta: '+((e&&e.message)||e));return;}
+  try{window.location.href='rawbt:'+url;}catch(e){alert('Não consegui abrir o RawBT. Confirme que ele está instalado. Detalhe: '+((e&&e.message)||e));}
 }
 function toggleMobPreco(btn){var sh=false;document.querySelectorAll('.mob-opt').forEach(function(el){el.classList.toggle('show');sh=el.classList.contains('show');});if(btn)btn.textContent=sh?'Ocultar preço e fornecedor':'Mostrar preço e fornecedor';}
 function desmDestRefresh(){var d=document.getElementById('desmDest').value;var mb=document.getElementById('desmMotivoBox');if(mb)mb.style.display=(d==='retrab')?'block':'none';}
