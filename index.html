@@ -194,7 +194,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-29c</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-29d</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -639,7 +639,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-29c</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-29d</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1433,9 +1433,12 @@ const PRECO_RODIO_BRANCO=4.00;
 const COMPL_LABEL={grafite:'Grafite',acetinado:'Acetinado',niquel:'Níquel',niquelfree:'Níquel Free',paladio:'Paládio',rodioNegro:'Ródio Negro',protetor:'Verniz Protetor',cataforetico:'Cataforético',antialergico:'Anti Alérgico',limpeza:'Limpeza',antialergicoCortesia:'Hipoalergênico (Cortesia)',niquelfreeCortesia:'Níquel Free (Cortesia)',niquelCortesia:'Níquel (Cortesia)',protetorCortesia:'Verniz Protetor (Cortesia)'};
 function ehOuroBanho(b){if((b||'').indexOf('Ouro')===0)return true;var d=customBanho(b);return !!(d&&d.modelo==='ouro');}
 function pesoLiqItem(it){var g=parseFloat(it.peso)||0;var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return g;var v=parseFloat(sp);if(isNaN(v))return g;return Math.max(0,Math.min(g,v));}
-function subTemCat(it,sb){if(sb&&sb.cataforetico!==undefined)return !!sb.cataforetico;return !!(it&&it.compl&&it.compl.cataforetico);}
+function subTemCompl(it,sb,key){if(sb&&sb[key]!==undefined)return !!sb[key];return !!(it&&it.compl&&it.compl[key]);}
+function subTemCat(it,sb){return subTemCompl(it,sb,'cataforetico');}
+function subTemProt(it,sb){return subTemCompl(it,sb,'protetor');}
 function loteTemCatAlgum(it){var subs=(it&&it.subitens)||[];if(!subs.length)return !!(it&&it.compl&&it.compl.cataforetico);return subs.some(function(sb){return subTemCat(it,sb);});}
-function pesoCatKg(it){var subs=(it&&it.subitens)||[];var full=pesoLiqItem(it);if(!subs.length)return (it&&it.compl&&it.compl.cataforetico)?full:0;var anyExplicit=subs.some(function(sb){return sb.cataforetico!==undefined;});if(!anyExplicit)return (it.compl&&it.compl.cataforetico)?full:0;var gAll=subs.reduce(function(s,sb){return s+(parseFloat(sb.peso)||0);},0);var gCat=subs.reduce(function(s,sb){return s+(subTemCat(it,sb)?(parseFloat(sb.peso)||0):0);},0);if(gAll<=0)return (it.compl&&it.compl.cataforetico)?full:0;return full*(gCat/gAll);}
+function pesoComplKg(it,key){var subs=(it&&it.subitens)||[];var full=pesoLiqItem(it);if(!subs.length)return (it&&it.compl&&it.compl[key])?full:0;var anyExplicit=subs.some(function(sb){return sb[key]!==undefined;});if(!anyExplicit)return (it.compl&&it.compl[key])?full:0;var gAll=subs.reduce(function(s,sb){return s+(parseFloat(sb.peso)||0);},0);var gKey=subs.reduce(function(s,sb){return s+(subTemCompl(it,sb,key)?(parseFloat(sb.peso)||0):0);},0);if(gAll<=0)return (it.compl&&it.compl[key])?full:0;return full*(gKey/gAll);}
+function pesoCatKg(it){return pesoComplKg(it,'cataforetico');}
 function pedraKgItem(it){var sp=it.pesoSemPedra;if(sp===undefined||sp===null||sp==='')return 0;var t=parseFloat(it.peso)||0,v=parseFloat(sp);if(isNaN(v))return 0;return Math.max(0,t-v);}
 function fracMetalBanho(it){var pedra=pedraKgItem(it);if(pedra<=0)return 1;var pb=parseFloat(it.pesoBanho)||0;if(pb>0)return Math.max(0,(pb-pedra)/pb);var g=parseFloat(it.peso)||0;return g>0?Math.max(0,(g-pedra)/g):1;}
 function ehEspecial(it){return !!it.especial&&(parseFloat(it.especialKg)||0)>0;}
@@ -1453,8 +1456,9 @@ function precoBanhoItem(it){
   else if(b==='Ródio Branco')principal=pesoG*PRECO_RODIO_BRANCO;
   else {var _d=customBanho(b);if(_d){if(_d.modelo==='grama')principal=pesoG*(parseFloat(_d.precoG)||0);else if(_d.modelo==='kg')principal=pesoKg*(parseFloat(_d.precoKg)||0);else if(_d.modelo==='ouro')principal=pesoKg*(parseFloat(it.cotacao)||0)*((parseFloat(_d.camadaFator)||0)+(parseFloat(_d.moFator)||0));}}
   let compl=0;const c=it.compl||{};
-  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico')return;if(c[k])compl+=pesoG*PRECO_COMPL[k];});
+  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico'||k==='protetor')return;if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   var _catG=pesoCatKg(it)*1000;if(_catG>0)compl+=_catG*PRECO_COMPL.cataforetico;
+  var _protG=pesoComplKg(it,'protetor')*1000;if(_protG>0)compl+=_protG*PRECO_COMPL.protetor;
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
   if(c.rodioNegro)compl+=pesoG*(parseFloat(c.rodioNegroPreco)||0);
   var _canP=canetaItem(it);return {principal:principal,compl:compl,caneta:_canP,total:principal+compl+_canP};
@@ -2524,8 +2528,9 @@ function decompOrc(it){
   else if(b==='Ródio Branco'){metal=pesoG*PRECO_RODIO_BRANCO;}
   else {var _d=customBanho(b);if(_d){if(_d.modelo==='grama'){if(_d.avista)metal=pesoG*(parseFloat(_d.precoG)||0);else mo=pesoG*(parseFloat(_d.precoG)||0);}else if(_d.modelo==='kg'){mo=pesoKg*(parseFloat(_d.precoKg)||0);}else if(_d.modelo==='ouro'){metal=pesoKg*cot*(parseFloat(_d.camadaFator)||0);mo=pesoKg*cot*(parseFloat(_d.moFator)||0);}}}
   var compl=0;var c=it.compl||{};
-  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico')return;if(c[k])compl+=pesoG*PRECO_COMPL[k];});
+  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico'||k==='protetor')return;if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   var _catG=pesoCatKg(it)*1000;if(_catG>0)compl+=_catG*PRECO_COMPL.cataforetico;
+  var _protG=pesoComplKg(it,'protetor')*1000;if(_protG>0)compl+=_protG*PRECO_COMPL.protetor;
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
   if(c.rodioNegro)compl+=pesoG*(parseFloat(c.rodioNegroPreco)||0);
   return {metal:metal,mo:mo,compl:compl,total:metal+mo+compl};
@@ -2540,8 +2545,9 @@ function linhasBanho(it,pesoKg){
   else if(PRECO_PRATA[b]!==undefined)lines.push({nome:'Banho '+b,valor:pesoG*PRECO_PRATA[b],cat:'servico'});
   else if(b==='Ródio Branco')lines.push({nome:'Banho Ródio Branco',valor:pesoG*PRECO_RODIO_BRANCO,cat:'servico'});
   var c=it.compl||{};
-  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico')return;if(c[k])lines.push({nome:COMPL_LABEL[k],valor:pesoG*PRECO_COMPL[k],cat:'servico'});});
+  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico'||k==='protetor')return;if(c[k])lines.push({nome:COMPL_LABEL[k],valor:pesoG*PRECO_COMPL[k],cat:'servico'});});
   var _catG=pesoCatKg(it)*1000;if(_catG>0)lines.push({nome:COMPL_LABEL.cataforetico+((_catG<pesoG-0.001)?' (peças selec.)':''),valor:_catG*PRECO_COMPL.cataforetico,cat:'servico'});
+  var _protG=pesoComplKg(it,'protetor')*1000;if(_protG>0)lines.push({nome:COMPL_LABEL.protetor+((_protG<pesoG-0.001)?' (peças selec.)':''),valor:_protG*PRECO_COMPL.protetor,cat:'servico'});
   if(c.acetinado)lines.push({nome:'Acetinado',valor:pesoG*PRECO_ACETINADO,cat:'servico'});
   if(c.rodioNegro)lines.push({nome:'Ródio Negro',valor:pesoG*(parseFloat(c.rodioNegroPreco)||0),cat:'servico'});
   return lines;
@@ -2663,37 +2669,38 @@ function abrirCatComercial(id){
   if(!sessao||(sessao.role!=='Comercial'&&sessao.role!=='Admin')){alert('Apenas Comercial ou Admin pode alterar o verniz cataforético.');return;}
   var o=dados.find(function(x){return x.id===id;});if(!o)return;
   if(!(o.itens||[]).length){alert('Esta O.S. não tem lotes cadastrados.');return;}
+  function _vzOpts(v){return ['<option value="cat"'+(v==='cat'?' selected':'')+'>Cataforético</option>','<option value="prot"'+(v==='prot'?' selected':'')+'>Protetor 300</option>','<option value="none"'+(v==='none'?' selected':'')+'>Nenhum</option>'].join('');}
   var blocks=(o.itens||[]).map(function(it,li){
     var subs=it.subitens||[];
     var head='<div style="font-weight:800;color:#123a6b;margin:12px 0 6px">Lote '+(li+1)+(it.produto?(' — '+it.produto):'')+' <span class="hint" style="text-transform:none;letter-spacing:0;font-weight:400">'+(it.banho||'')+(it.cor?(' · '+it.cor):'')+'</span>';
-    if(subs.length){head+=' <a href="#" onclick="_catAll('+li+',1);return false" style="font-size:12px;margin-left:8px">marcar todas</a> · <a href="#" onclick="_catAll('+li+',0);return false" style="font-size:12px">limpar</a>';}
+    if(subs.length){head+='<div class="hint" style="text-transform:none;letter-spacing:0;margin-top:2px">Todas as peças: <a href="#" onclick="_vzAll('+li+',\'cat\');return false">Cataforético</a> · <a href="#" onclick="_vzAll('+li+',\'prot\');return false">Protetor 300</a> · <a href="#" onclick="_vzAll('+li+',\'none\');return false">Nenhum</a></div>';}
     head+='</div>';
     var body;
-    if(!subs.length){var on=!!(it.compl&&it.compl.cataforetico);body='<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--cinza2);border-radius:8px"><input type="checkbox" id="__catlote_'+li+'" '+(on?'checked':'')+' style="width:auto;margin:0"><span>Lote inteiro recebe cataforético <span class="hint" style="text-transform:none;letter-spacing:0">(sem peças cadastradas ainda — quando forem, dá pra escolher peça a peça)</span></span></label>';}
-    else{body=subs.map(function(sb,si){var on=subTemCat(it,sb);return '<label style="display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--cinza2);border-radius:8px;margin-bottom:5px;cursor:pointer"><input type="checkbox" class="__catchk_'+li+'" id="__catchk_'+li+'_'+si+'" '+(on?'checked':'')+' style="width:auto;margin:0"><span><b>'+(sb.tipoPeca||'peça')+'</b>'+(sb.codigo?(' · '+sb.codigo):'')+'</span><span class="hint" style="margin-left:auto;text-transform:none;letter-spacing:0">Qtd '+(sb.qtd||'?')+' · '+kg2g(sb.peso)+' g</span></label>';}).join('');}
+    if(!subs.length){var lv=(it.compl&&it.compl.cataforetico)?'cat':((it.compl&&it.compl.protetor)?'prot':'none');body='<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--cinza2);border-radius:8px"><span>Verniz do lote inteiro <span class="hint" style="text-transform:none;letter-spacing:0">(sem peças cadastradas ainda)</span></span><select id="__vzlote_'+li+'" style="width:auto;margin-left:auto;padding:5px">'+_vzOpts(lv)+'</select></label>';}
+    else{body=subs.map(function(sb,si){var v=subTemCat(it,sb)?'cat':(subTemProt(it,sb)?'prot':'none');return '<label style="display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--cinza2);border-radius:8px;margin-bottom:5px"><span><b>'+(sb.tipoPeca||'peça')+'</b>'+(sb.codigo?(' · '+sb.codigo):'')+'</span><span class="hint" style="text-transform:none;letter-spacing:0">Qtd '+(sb.qtd||'?')+' · '+kg2g(sb.peso)+' g</span><select class="__vzsel_'+li+'" id="__vzsel_'+li+'_'+si+'" style="width:auto;margin-left:auto;padding:5px">'+_vzOpts(v)+'</select></label>';}).join('');}
     return head+body;
   }).join('');
   var setorTxt=(o.setor&&o.setor!=='Comercial')?(' <span class="tag tag-prioridade">em '+o.setor+'</span>'):'';
-  var html='<div class="modal-bg show" id="__catModal" style="z-index:100060"><div class="modal" style="max-width:560px"><div class="modal-head"><h3>Verniz Cataforético por peça — O.S. '+(o.numOS||'')+setorTxt+'</h3><button class="x" onclick="document.getElementById(\'__catModal\').remove()">×</button></div><div class="modal-body" style="max-height:72vh;overflow:auto"><div class="hint" style="margin-bottom:4px;text-transform:none;letter-spacing:0">Marque as <b>peças</b> que terão cataforético; desmarque as que não terão. Só as marcadas são cobradas (0,42/g) e enviadas ao Verniz. Vale mesmo com a O.S. em outro setor; o preço é recalculado.</div>'+blocks+'<div class="actions"><button class="btn-primary" onclick="salvarCatComercial(\''+id+'\')">Salvar</button><button class="btn-ghost" onclick="document.getElementById(\'__catModal\').remove()">Cancelar</button></div></div></div></div>';
+  var html='<div class="modal-bg show" id="__catModal" style="z-index:100060"><div class="modal" style="max-width:580px"><div class="modal-head"><h3>Verniz por peça — O.S. '+(o.numOS||'')+setorTxt+'</h3><button class="x" onclick="document.getElementById(\'__catModal\').remove()">×</button></div><div class="modal-body" style="max-height:72vh;overflow:auto"><div class="hint" style="margin-bottom:4px;text-transform:none;letter-spacing:0">Escolha o verniz de cada <b>peça</b>: <b>Cataforético</b> (0,42/g, vai ao Verniz terceiro), <b>Protetor 300</b> (0,21/g) ou <b>Nenhum</b>. Só as peças com cataforético são enviadas ao Verniz. Cada verniz é cobrado só nas peças que o recebem. Vale mesmo com a O.S. em outro setor; o preço é recalculado.</div>'+blocks+'<div class="actions"><button class="btn-primary" onclick="salvarCatComercial(\''+id+'\')">Salvar</button><button class="btn-ghost" onclick="document.getElementById(\'__catModal\').remove()">Cancelar</button></div></div></div></div>';
   var wrap=document.createElement('div');wrap.innerHTML=html;document.body.appendChild(wrap.firstChild);
 }
-function _catAll(li,val){var els=document.querySelectorAll('.__catchk_'+li);for(var i=0;i<els.length;i++){els[i].checked=!!val;}}
+function _vzAll(li,val){var els=document.querySelectorAll('.__vzsel_'+li);for(var i=0;i<els.length;i++){els[i].value=val;}}
 function salvarCatComercial(id){
   if(!sessao||(sessao.role!=='Comercial'&&sessao.role!=='Admin')){alert('Sem permissão.');return;}
   var o=dados.find(function(x){return x.id===id;});if(!o)return;
   var mud=0;
   (o.itens||[]).forEach(function(it,li){
     var subs=it.subitens||[];
-    if(!subs.length){var chk=document.getElementById('__catlote_'+li);if(chk){it.compl=it.compl||{};var nv=!!chk.checked;if(!!it.compl.cataforetico!==nv){it.compl.cataforetico=nv;it._ts=Date.now();try{recalcPrecoLote(it);}catch(e){}mud++;}}return;}
+    if(!subs.length){var sel=document.getElementById('__vzlote_'+li);if(sel){it.compl=it.compl||{};var nc=(sel.value==='cat'),np=(sel.value==='prot');if(!!it.compl.cataforetico!==nc||!!it.compl.protetor!==np){it.compl.cataforetico=nc;it.compl.protetor=np;it._ts=Date.now();try{recalcPrecoLote(it);}catch(e){}mud++;}}return;}
     var changed=false;
-    subs.forEach(function(sb,si){var chk=document.getElementById('__catchk_'+li+'_'+si);if(!chk)return;var nv=!!chk.checked;var old=subTemCat(it,sb);if(sb.cataforetico===undefined||old!==nv){sb.cataforetico=nv;sb._ts=Date.now();if(old!==nv){changed=true;mud++;}}});
-    it.compl=it.compl||{};it.compl.cataforetico=subs.some(function(sb){return subTemCat(it,sb);});
+    subs.forEach(function(sb,si){var sel=document.getElementById('__vzsel_'+li+'_'+si);if(!sel)return;var nc=(sel.value==='cat'),np=(sel.value==='prot');var oc=subTemCat(it,sb),op=subTemProt(it,sb);if(sb.cataforetico===undefined||sb.protetor===undefined||oc!==nc||op!==np){sb.cataforetico=nc;sb.protetor=np;sb._ts=Date.now();if(oc!==nc||op!==np){changed=true;mud++;}}});
+    it.compl=it.compl||{};it.compl.cataforetico=subs.some(function(sb){return subTemCat(it,sb);});it.compl.protetor=subs.some(function(sb){return subTemProt(it,sb);});
     if(changed){it._ts=Date.now();try{recalcPrecoLote(it);}catch(e){}}
   });
   o._ts=Date.now();salvar();
   var m=document.getElementById('__catModal');if(m)m.remove();
   render();
-  alert('Cataforético por peça atualizado na O.S. '+(o.numOS||'')+(mud?(' ('+mud+' alteraç'+(mud>1?'ões':'ão')+'). Preços recalculados.'):' (nenhuma mudança).'));
+  alert('Verniz por peça atualizado na O.S. '+(o.numOS||'')+(mud?(' ('+mud+' alteraç'+(mud>1?'ões':'ão')+'). Preços recalculados.'):' (nenhuma mudança).'));
 }
 function renderCatalogo(){
   var q=(document.getElementById('buscaCat').value||'').toLowerCase();
@@ -2721,8 +2728,9 @@ function decompBanho(it){
   else if(b==='Ródio Branco'){metal=pesoG*PRECO_RODIO_BRANCO;}
   else {var _d=customBanho(b);if(_d){if(_d.modelo==='grama'){if(_d.avista)metal=pesoG*(parseFloat(_d.precoG)||0);else mo=pesoG*(parseFloat(_d.precoG)||0);}else if(_d.modelo==='kg'){mo=pesoKg*(parseFloat(_d.precoKg)||0);}else if(_d.modelo==='ouro'){metal=pesoKg*cot*(parseFloat(_d.camadaFator)||0);mo=pesoKg*cot*(parseFloat(_d.moFator)||0);}}}
   var compl=0;var c=it.compl||{};
-  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico')return;if(c[k])compl+=pesoG*PRECO_COMPL[k];});
+  Object.keys(PRECO_COMPL).forEach(function(k){if(k==='cataforetico'||k==='protetor')return;if(c[k])compl+=pesoG*PRECO_COMPL[k];});
   var _catG=pesoCatKg(it)*1000;if(_catG>0)compl+=_catG*PRECO_COMPL.cataforetico;
+  var _protG=pesoComplKg(it,'protetor')*1000;if(_protG>0)compl+=_protG*PRECO_COMPL.protetor;
   if(c.acetinado)compl+=pesoG*PRECO_ACETINADO;
   if(c.rodioNegro)compl+=pesoG*(parseFloat(c.rodioNegroPreco)||0);
   return {metal:metal,mo:mo,compl:compl,total:metal+mo+compl};
@@ -3117,7 +3125,7 @@ function render(){
   const _cs=(document.getElementById('comSetor')||{}).value||'todos';const _cst=(document.getElementById('comStatus')||{}).value||'todos';const listaC=dados.filter(o=>(!qC||JSON.stringify(o).toLowerCase().includes(qC))&&(_cs==='todos'||(o.setor||'Comercial')===_cs)&&(_cst==='todos'||(o.statusComercial||'')===_cst));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
   ordenarOS(listaC).forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+''+etqNum(o)+''+((o.liberadaProducaoEm&&!o.comercialVisto)?' <span class="tag tag-prioridade" style="background:#1f6f43;color:#fff">Liberada p/ produção</span>':'')+'</td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+kg2g(o.peso)+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-edit" onclick="editarCom(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Editar</button><select class="acsel" title="Mais ações" onchange="acaoCom(this,\''+o.id+'\')"><option value="">Mais ▾</option>'+((sessao&&sessao.role==='Admin')?'<option value="admin">🛠 Admin</option>':'')+'<option value="osprod">O.S. Produção</option>'+'<option value="cat">Verniz cataforético (peças)</option>'+(o.setor==='Comercial'?'<option value="envfin">Enviar p/ Financeiro</option>':'')+'<option value="caneta">'+(o.pendCaneta?'⚠ Caneta (pendente)':'Caneta')+'</option>'+((o.liberadaProducaoEm&&!o.comercialVisto)?'<option value="ciente">Ciente (liberação)</option>':'')+'<option value="cancelar">Cancelar O.S.</option><option value="excluir">Excluir O.S.</option></select></td>';
+    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+''+etqNum(o)+''+((o.liberadaProducaoEm&&!o.comercialVisto)?' <span class="tag tag-prioridade" style="background:#1f6f43;color:#fff">Liberada p/ produção</span>':'')+'</td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+kg2g(o.peso)+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><button class="btn-azul" onclick="gerarOrcamento(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Orçamento</button><button class="btn-edit" onclick="editarCom(\''+o.id+'\')" style="padding:5px 9px;font-size:12px">Editar</button><select class="acsel" title="Mais ações" onchange="acaoCom(this,\''+o.id+'\')"><option value="">Mais ▾</option>'+((sessao&&sessao.role==='Admin')?'<option value="admin">🛠 Admin</option>':'')+'<option value="osprod">O.S. Produção</option>'+'<option value="cat">Verniz por peça (Cat / Protetor)</option>'+(o.setor==='Comercial'?'<option value="envfin">Enviar p/ Financeiro</option>':'')+'<option value="caneta">'+(o.pendCaneta?'⚠ Caneta (pendente)':'Caneta')+'</option>'+((o.liberadaProducaoEm&&!o.comercialVisto)?'<option value="ciente">Ciente (liberação)</option>':'')+'<option value="cancelar">Cancelar O.S.</option><option value="excluir">Excluir O.S.</option></select></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
   let atras=0,hoje=0;dados.forEach(function(o){const s=statusEntrega(o);if(s.txt.indexOf('Atrasada')===0)atras++;if(s.txt==='Vence hoje')hoje++;});
