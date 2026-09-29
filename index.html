@@ -194,7 +194,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-29d</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-29e</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -639,7 +639,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-29d</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-29e</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1699,7 +1699,7 @@ async function pollFinanceiro(){
     var all=await window.__sb.from('ordens').select('id,setor');
     if(all.error)return;
     var setorById={};(all.data||[]).forEach(function(r){setorById[String(r.id)]=r.setor;});
-    dados.forEach(function(o){var s=setorById[String(o.id)];if(s&&s!==o.setor)o.setor=s;});
+    /* Correção: pollFinanceiro NÃO sobrescreve mais o setor local. Isso causava O.S. em uso (ex.: Qualidade) voltar sozinha para Amarração, pois roda em timer sem trava de UI/edição. Quem sincroniza o setor é o _autoRefresh, que pausa com modal aberto e respeita edições recentes. */
     var finIds=Object.keys(setorById).filter(function(id){return setorById[id]==='Financeiro';});
     var missing=finIds.filter(function(id){return !dados.some(function(o){return String(o.id)===id;});});
     if(missing.length){var rows=await window.__sb.from('ordens').select('id,dados').in('id',missing);if(rows&&rows.data){rows.data.forEach(function(r){if(!dados.some(function(o){return String(o.id)===String(r.id);}))dados.unshift(r.dados);});}}
@@ -1707,7 +1707,7 @@ async function pollFinanceiro(){
     var novos=finIds.filter(function(id){return finKnownIds.size&&!finKnownIds.has(id);});
     var saiu=prev.filter(function(id){return finIds.indexOf(id)===-1;});
     finKnownIds=new Set(finIds);
-    try{var _exp=await window.__sb.from('ordens').select('id,dados').eq('setor','Expedição');if(_exp&&_exp.data){_exp.data.forEach(function(r){var i=dados.findIndex(function(o){return String(o.id)===String(r.id);});if(i>=0)dados[i]=r.dados;else dados.unshift(r.dados);});}}catch(_e2){}
+    try{var _exp=await window.__sb.from('ordens').select('id,dados').eq('setor','Expedição');if(_exp&&_exp.data){_exp.data.forEach(function(r){var _rid=String(r.id);var i=dados.findIndex(function(o){return String(o.id)===_rid;});if(i>=0){var _pend=(window.__pendOrd&&window.__pendOrd[_rid]&&(Date.now()-window.__pendOrd[_rid]<60000));if(_uiBusy()||_pend)return;dados[i]=r.dados;}else dados.unshift(r.dados);});}}catch(_e2){}
     var envioIds=dados.filter(function(o){return o.envioFinPendente;}).map(function(o){return String(o.id);});
     var novosEnvio=envioIds.filter(function(id){return finEnvioKnown.size&&!finEnvioKnown.has(id);});
     finEnvioKnown=new Set(envioIds);
