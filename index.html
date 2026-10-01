@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-09-29m</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-01a</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -457,7 +457,7 @@
             <div class="toolbar"><select id="tqMes" onchange="render()" style="padding:6px 8px;border-radius:8px"></select><span id="tqFiltroInfo" class="hint"></span><button class="btn-excel" onclick="exportTanque()">Exportar Tanque</button></div>
           </div>
           <div class="table-scroll"><table>
-            <thead><tr><th>Tanque/Cor</th><th>Saldo Inicial</th><th>Reforço (+)</th><th>Consumo (&minus;)</th><th>Base</th><th>Saldo</th><th>Condição</th></tr></thead>
+            <thead><tr><th>Tanque/Cor</th><th>Saldo Inicial</th><th>Controle desde</th><th>Reforço (+)</th><th>Consumo (&minus;)</th><th>Base</th><th>Saldo</th><th>Condição</th></tr></thead>
             <tbody id="tbodyTq"></tbody>
           </table></div>
           <div class="hint" style="padding:12px 20px">O Saldo Inicial é editável — digite a posição atual de cada tanque. O reforço vem dos lançamentos; o consumo vem do apontamento do Banho (Peso para todos os tanques; Metal apenas para Folheação).</div>
@@ -665,7 +665,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-09-29m</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-01a</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1175,13 +1175,20 @@ const TANQUES=['Precor','Folheação','Anti Alérgico','Paládio','Protetor 300'
 const KEY_TQ='magri_tanque_v1';
 let tanqueSaldos=JSON.parse(localStorage.getItem(KEY_TQ)||'{}');
 function salvarTanque(){localStorage.setItem(KEY_TQ,JSON.stringify(tanqueSaldos));}
+let tanqueSaldoData=JSON.parse(localStorage.getItem('magri_tanque_data_v1')||'{}');
+function salvarTanqueData(){localStorage.setItem('magri_tanque_data_v1',JSON.stringify(tanqueSaldoData));}
 const TANQUES_SALDO=['Precor','Folheação','Prata','Flash','18','24','Champagne','Verde','Mont','Rosé','Paládio','Protetor 300','Anti Alérgico','Free Gold','Grafite','Rotativo','Ródio Branco'];
 const COR_TANQUE={'AU 18':'18','AU 24':'24','CHAMPANHE':'Champagne','VERDE':'Verde','MONT':'Mont','ROSE':'Rosé'};
 function corParaTanque(cor){return COR_TANQUE[cor]||'';}
 function tanquesDoItem(it){var set={};if(!it)return [];var corT=corParaTanque(it.cor);var b=it.banho;if(b==='Ouro Flash'){if(corT)set[corT]=1;}else if(b==='Ouro 1 Milésimo'){set['Precor']=1;if(corT)set[corT]=1;}else if(b==='Ouro Camada'){set['Precor']=1;set['Folheação']=1;if(corT)set[corT]=1;}else if(b&&b.indexOf('Prata')===0){set['Prata']=1;}var c=it.compl||{};if(c.paladio)set['Paládio']=1;if(c.protetor)set['Protetor 300']=1;if(c.antialergico)set['Anti Alérgico']=1;if(c.grafite)set['Grafite']=1;if(c.rodioBranco)set['Ródio Branco']=1;return Object.keys(set);}
 function reforcoTanque(t){return reforcos.filter(x=>x.tanque===t).reduce((s,x)=>s+(x.dose||0),0);}
 function consumoTanque(t){return apont.filter(function(a){var tks=a.tanques||(a.tanque?[a.tanque]:[]);return tks.indexOf(t)>-1;}).reduce(function(sm,a){return sm+((t==='Folheação')?(a.metal||0):(a.peso||0));},0);}
-function setSaldoInicial(t,v){tanqueSaldos[t]=parseFloat(v)||0;salvarTanque();render();}
+function setSaldoInicial(t,v){tanqueSaldos[t]=parseFloat(v)||0;if(!tanqueSaldoData[t])tanqueSaldoData[t]=hojeISO();salvarTanqueData();salvarTanque();render();}
+function setTanqueData(t,v){if(v){tanqueSaldoData[t]=(''+v).slice(0,10);}else{delete tanqueSaldoData[t];}salvarTanqueData();render();}
+function _tqInicio(t){return tanqueSaldoData[t]||'';}
+function consumoTanqueDesde(t){var d=_tqInicio(t);return d?volumeBanhadoPeriodo(t,d,hojeISO()):consumoTanque(t);}
+function reforcoTanqueDesde(t){var d=_tqInicio(t);return d?volumeReforcadoPeriodo(t,d,hojeISO()):reforcoTanque(t);}
+function saldoTanque(t){return (tanqueSaldos[t]||0)+reforcoTanqueDesde(t)-consumoTanqueDesde(t);}
 const KEY_RF='magri_reforco_v1';
 let reforcos=JSON.parse(localStorage.getItem(KEY_RF)||'[]');
 function salvarReforco(){localStorage.setItem(KEY_RF,JSON.stringify(reforcos));}
@@ -2311,8 +2318,8 @@ function exportReforco(){
   baixarXls('Reforco_Magri',cols,lin);
 }
 function exportTanque(){
-  const cols=['Tanque/Cor','Saldo Inicial','Reforço (+)','Consumo (-)','Base','Saldo','Condição'];
-  const lin=TANQUES_SALDO.map(function(t){const ini=tanqueSaldos[t]||0,ref=reforcoTanque(t),cons=consumoTanque(t),saldo=ini+ref-cons;return [t,ini,ref.toFixed(3),cons.toFixed(3),(t==='Folheação'?'Metal':'Peso'),saldo.toFixed(3),saldo<=2?'REFORÇAR':'NORMAL'];});
+  const cols=['Tanque/Cor','Saldo Inicial','Controle desde','Reforço (+)','Consumo (-)','Base','Saldo','Condição'];
+  const lin=TANQUES_SALDO.map(function(t){const ini=tanqueSaldos[t]||0,ref=reforcoTanqueDesde(t),cons=consumoTanqueDesde(t),saldo=saldoTanque(t);return [t,ini,fmt(_tqInicio(t)),ref.toFixed(3),cons.toFixed(3),(t==='Folheação'?'Metal':'Peso'),saldo.toFixed(3),saldo<=2?'REFORÇAR':'NORMAL'];});
   baixarXls('Tanque_Magri',cols,lin);
 }
 const KEY_RT='magri_retrab_v1';
@@ -3309,15 +3316,15 @@ function render(){
   const tbTq=document.getElementById('tbodyTq');
   var _tqSel=document.getElementById('tqMes');
   if(_tqSel){var _ms={};apont.forEach(function(a){var y=(''+a.data).slice(0,7);if(y.length===7)_ms[y]=1;});reforcos.forEach(function(x){var y=(''+x.data).slice(0,7);if(y.length===7)_ms[y]=1;});var _meses=Object.keys(_ms).sort().reverse();var _cur=_tqSel.value;_tqSel.innerHTML='<option value="">Consolidado (todos)</option>'+_meses.map(function(y){var p=y.split('-');return '<option value="'+y+'"'+(y===_cur?' selected':'')+'>'+(MESES[parseInt(p[1])]||'')+'/'+p[0]+'</option>';}).join('');}
-  var _tqF=_tqSel?_tqSel.value:'';var _fi=document.getElementById('tqFiltroInfo');if(_fi)_fi.textContent=_tqF?'Reforço/Consumo do mês · Saldo sempre acumulado':'Consolidado (todos os meses)';
+  var _tqF=_tqSel?_tqSel.value:'';var _fi=document.getElementById('tqFiltroInfo');if(_fi)_fi.textContent=_tqF?'Reforço/Consumo do mês selecionado':'Reforço, Consumo e Saldo contam a partir da data "Controle desde" de cada tanque';
   if(tbTq){
     tbTq.innerHTML='';let nRef=0;
     TANQUES_SALDO.forEach(function(t){
-      const ini=tanqueSaldos[t]||0;var ref,cons;if(_tqF){ref=volumeReforcadoPeriodo(t,_tqF+'-01',_tqF+'-31');cons=volumeBanhadoPeriodo(t,_tqF+'-01',_tqF+'-31');}else{ref=reforcoTanque(t);cons=consumoTanque(t);}var saldo=ini+reforcoTanque(t)-consumoTanque(t);
+      const ini=tanqueSaldos[t]||0;var ref,cons;if(_tqF){ref=volumeReforcadoPeriodo(t,_tqF+'-01',_tqF+'-31');cons=volumeBanhadoPeriodo(t,_tqF+'-01',_tqF+'-31');}else{ref=reforcoTanqueDesde(t);cons=consumoTanqueDesde(t);}var saldo=saldoTanque(t);
       const base=(t==='Folheação')?'Metal':'Peso';const reforcar=saldo<=2;if(reforcar)nRef++;
       const cond=reforcar?'<span class="st" style="background:var(--vermelho-bg);color:var(--vermelho)">REFORÇAR</span>':'<span class="st st-entregue">NORMAL</span>';
       const tr=document.createElement('tr');
-      tr.innerHTML='<td><b>'+t+'</b></td><td><input type="number" step="0.001" value="'+ini+'" style="width:110px;padding:5px" onchange="setSaldoInicial(\''+t+'\',this.value)"></td><td>'+ref.toFixed(3)+'</td><td>'+cons.toFixed(3)+'</td><td>'+base+'</td><td class="prazo '+(reforcar?'prazo-atraso':'prazo-ok')+'">'+saldo.toFixed(3)+'</td><td>'+cond+'</td>';
+      tr.innerHTML='<td><b>'+t+'</b></td><td><input type="number" step="0.001" value="'+ini+'" style="width:100px;padding:5px" onchange="setSaldoInicial(\''+t+'\',this.value)"></td><td><input type="date" value="'+(_tqInicio(t)||'')+'" style="width:140px;padding:5px" onchange="setTanqueData(\''+t+'\',this.value)"></td><td>'+ref.toFixed(3)+'</td><td>'+cons.toFixed(3)+'</td><td>'+base+'</td><td class="prazo '+(reforcar?'prazo-atraso':'prazo-ok')+'">'+saldo.toFixed(3)+'</td><td>'+cond+'</td>';
       tbTq.appendChild(tr);
     });
     document.getElementById('cards-tq').innerHTML='<div class="card"><div class="n">'+TANQUES_SALDO.length+'</div><div class="l">Tanques</div></div><div class="card vermelho"><div class="n">'+nRef+'</div><div class="l">Para reforçar</div></div><div class="card verde"><div class="n">'+(TANQUES_SALDO.length-nRef)+'</div><div class="l">Normais</div></div>';
@@ -3351,7 +3358,7 @@ function render(){
   document.getElementById('cnt-expedicao').textContent=dados.filter(o=>o.setor==='Expedição'||osExpParcial(o)).length;
   renderGestao();renderResumo();renderDiretoria();try{renderRelatorios();}catch(_re){}renderClientes();renderTroca();renderVerniz();renderVernizRelatorio();renderCatalogo();renderCobranca();renderUsuarios();renderPrecos();
   document.getElementById('cnt-reforco').textContent=reforcos.length;
-  document.getElementById('cnt-tanque').textContent=TANQUES_SALDO.filter(function(t){return ((tanqueSaldos[t]||0)+reforcoTanque(t)-consumoTanque(t))<=2;}).length;
+  document.getElementById('cnt-tanque').textContent=TANQUES_SALDO.filter(function(t){return saldoTanque(t)<=2;}).length;
 }
 
 function renderClientes(){var tb=document.getElementById('tbodyCli');if(!tb)return;
@@ -3411,7 +3418,7 @@ aplicarLogoHeader();try{_comFiltroRestore();}catch(e){}render();if(sessao){aplic
 (function(){
   const SUPA_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
   const SUPA_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
-  const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo','magri_estoque_v1','magri_pecas_v1'];
+  const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo','magri_estoque_v1','magri_pecas_v1','magri_tanque_data_v1'];
   const _set=localStorage.setItem.bind(localStorage);
   const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
   window.__sb=sb;
