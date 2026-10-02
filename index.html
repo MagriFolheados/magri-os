@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-02d</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-02e</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-02d</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-02e</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1203,7 +1203,7 @@ const KEY_CLI='magri_clientes_v1';
 let clientesReg=JSON.parse(localStorage.getItem(KEY_CLI)||'null');
 if(!clientesReg){clientesReg=CLIENTES.map(function(n){return {nome:n,cnpj:'',telefone:''};});localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
 function salvarClientes(){localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
-function clientesNomes(){return clientesReg.map(function(c){return c.nome;}).filter(function(v,i,a){return a.indexOf(v)===i;});}
+function clientesNomes(){var seen={},out=[];for(var i=0;i<clientesReg.length;i++){var n=clientesReg[i]&&clientesReg[i].nome;if(n&&!seen[n]){seen[n]=1;out.push(n);}}return out;}
 function salvar(){localStorage.setItem(KEY,JSON.stringify(dados));}
 
 const feriadosFixos=['01-01','04-21','05-01','09-07','10-12','11-02','11-15','12-25'];
@@ -3274,7 +3274,7 @@ function relExportPDF(){var w=window.open('','_blank');if(!w){alert('Permita pop
 function render(){
   renderFinanceiro();
   renderEstoque();
-  document.getElementById('clientes').innerHTML=clientesNomes().map(function(c){return '<option value="'+c+'">';}).join('');
+  var _cliN=clientesReg.length,_cliSig=_cliN+'|'+((clientesReg[0]||{}).nome||'')+'|'+((clientesReg[_cliN-1]||{}).nome||'');if(window.__cliDlSig!==_cliSig){window.__cliDlSig=_cliSig;var _dl=document.getElementById('clientes');if(_dl)_dl.innerHTML=clientesNomes().map(function(c){return '<option value="'+(''+c).replace(/"/g,'&quot;')+'">';}).join('');}
 
   const qC=(document.getElementById('buscaCom').value||'').toLowerCase();
   const tbC=document.getElementById('tbodyCom');tbC.innerHTML='';
@@ -3429,13 +3429,16 @@ function render(){
 }
 
 function renderClientes(){var tb=document.getElementById('tbodyCli');if(!tb)return;
-  var q=(document.getElementById('buscaCli')?document.getElementById('buscaCli').value:'').toLowerCase();
-  var lista=clientesReg.map(function(c,i){return {c:c,i:i};}).filter(function(x){return !q||JSON.stringify(x.c).toLowerCase().includes(q);});
-  lista.sort(function(a,b){return (''+a.c.nome).localeCompare(''+b.c.nome);});
-  tb.innerHTML='';var ev=document.getElementById('emptyCli');if(ev)ev.style.display=lista.length?'none':'block';
-  lista.forEach(function(x){var tr=document.createElement('tr');tr.innerHTML='<td>'+(x.c.nome||'')+'</td><td>'+(x.c.cnpj||'')+'</td><td>'+(x.c.telefone||'')+'</td><td style="font-size:11px;max-width:260px;white-space:normal">'+(x.c.endereco||'')+'</td><td class="row-act"><button class="btn-edit" onclick="editCliente('+x.i+')">Editar</button><button class="btn-del" onclick="delCliente('+x.i+')">x</button></td>';tb.appendChild(tr);});
   var cc=document.getElementById('cards-cli');if(cc)cc.innerHTML='<div class="card"><div class="n">'+clientesReg.length+'</div><div class="l">Clientes cadastrados</div></div>';
-  var cnt=document.getElementById('cnt-clientes');if(cnt)cnt.textContent=clientesReg.length;}
+  var cnt=document.getElementById('cnt-clientes');if(cnt)cnt.textContent=clientesReg.length;
+  var vw=document.getElementById('view-clientes');if(vw&&!vw.classList.contains('active'))return;
+  var q=(document.getElementById('buscaCli')?document.getElementById('buscaCli').value:'').toLowerCase();
+  var lista=[];for(var i=0;i<clientesReg.length;i++){var c=clientesReg[i];if(!q||JSON.stringify(c).toLowerCase().indexOf(q)>-1)lista.push({c:c,i:i});}
+  lista.sort(function(a,b){return (''+a.c.nome).localeCompare(''+b.c.nome);});
+  var CAP=400;var shown=lista.slice(0,CAP);
+  var html=shown.map(function(x){return '<tr><td>'+(x.c.nome||'')+'</td><td>'+(x.c.cnpj||'')+'</td><td>'+(x.c.telefone||'')+'</td><td style="font-size:11px;max-width:260px;white-space:normal">'+(x.c.endereco||'')+'</td><td class="row-act"><button class="btn-edit" onclick="editCliente('+x.i+')">Editar</button><button class="btn-del" onclick="delCliente('+x.i+')">x</button></td></tr>';}).join('');
+  if(lista.length>CAP)html+='<tr><td colspan="5" class="hint" style="text-align:center;padding:10px">Mostrando '+CAP+' de '+lista.length+' clientes. Use a busca para encontrar um específico.</td></tr>';
+  tb.innerHTML=html;var ev=document.getElementById('emptyCli');if(ev)ev.style.display=lista.length?'none':'block';}
 function addCliente(){var nome=document.getElementById('cliNome').value.trim();if(!nome){alert('Informe o nome do cliente.');return;}var cnpj=document.getElementById('cliCnpj').value.trim();var tel=document.getElementById('cliTel').value.trim();var end=((document.getElementById('cliEnd')||{}).value||'').trim();var idx=parseInt(document.getElementById('cliEditIdx').value);var obj={nome:nome,cnpj:cnpj,telefone:tel,endereco:end};
   if(idx>=0){clientesReg[idx]=obj;}else{var ex=clientesReg.findIndex(function(c){return (''+c.nome).toLowerCase()===nome.toLowerCase();});if(ex>=0)clientesReg[ex]=obj;else clientesReg.push(obj);}
   salvarClientes();limparCliForm();render();}
