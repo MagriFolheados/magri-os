@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-07o</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-07q</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-07o</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-07q</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1050,9 +1050,9 @@
         <button class="btn-primary" onclick="salvarExp()">Salvar</button>
         <button class="btn-azul" onclick="gerarEtiquetaCliente()">Etiqueta do cliente</button>
         <button class="btn-azul" style="background:#1c6b3a" onclick="imprimirEtiquetaClienteTablet()">📲 Imprimir no tablet (RawBT)</button>
-        <button id="btnVerParcial" class="btn-azul" style="display:none" onclick="enviarLoteVerniz()">Enviar lote(s) ao Verniz</button><button id="btnConcluirExp" class="btn-excel" onclick="concluirExp()">Concluir inspeção</button>
-        <button id="btnFecharCaixa" class="btn-ghost" style="background:var(--amarelo-bg);color:#8a6d1f" onclick="fecharCaixaExp()">📦 Fechar caixa (enviar p/ Financeiro)</button>
-        <div class="hint" style="flex-basis:100%;margin-top:6px;text-transform:none;letter-spacing:0;line-height:1.4">Peças marcadas <b>Não</b> = retrabalho. Há dois caminhos: <b>📦 Fechar caixa</b> envia as aprovadas e deixa as reprovadas <b>pendentes aqui</b> (a O.S. continua na Expedição até o retrabalho voltar); <b>Concluir inspeção</b> manda as reprovadas para uma <b>O.S. "-R"</b> na Amarração. Quando o retrabalho voltar, reabra, marque <b>Sim</b> e feche a caixa de novo.</div>
+        <button id="btnVerParcial" class="btn-azul" style="display:none" onclick="enviarLoteVerniz()">Enviar lote(s) ao Verniz</button><button id="btnFecharCaixa" class="btn-excel" style="background:#1f6f43;color:#fff;font-weight:800;padding:11px 20px;font-size:15px" onclick="fecharCaixaExp()">📦 Fechar caixa → enviar p/ Financeiro</button>
+        <button id="btnConcluirExp" class="btn-ghost" style="background:#eee;color:#888;font-size:11px;padding:5px 9px" title="Expede a O.S. SEM passar pelo Financeiro — use só em exceções" onclick="concluirExp()">⇲ Expedir direto (sem Financeiro)</button>
+        <div class="hint" style="flex-basis:100%;margin-top:6px;text-transform:none;letter-spacing:0;line-height:1.4"><b>Fluxo normal:</b> confira as peças (Sim/Não) e clique em <b style="color:#1f6f43">📦 Fechar caixa → enviar p/ Financeiro</b> — a O.S. vai para o Financeiro liberar o envio. Peças marcadas <b>Não</b> = retrabalho: ficam pendentes aqui até voltarem (reabra, marque <b>Sim</b> e feche a caixa de novo). O botão cinza <b>"Expedir direto"</b> é exceção: expede SEM passar pelo Financeiro e manda reprovadas para O.S. "-R" na Amarração.</div>
       </div>
       <div class="sec-title">Retrabalho (qualidade fora do padrão)</div>
       <div class="grid">
@@ -2457,6 +2457,7 @@ function pendRetrabBadge(o){var n=pendRetrabCount(o);if(n>0&&o.caixas&&o.caixas.
 function salvarExp(){const id=document.getElementById('expId').value;const o=dados.find(x=>x.id===id);if(!o)return;o.exp=Object.assign(o.exp||{},coletaExp());salvar();render();alert('Dados da expedição salvos.');}
 function concluirExp(){
   const id=document.getElementById('expId').value;const o=dados.find(x=>x.id===id);if(!o)return;
+  if(!confirm('⚠ ATENÇÃO: "Expedir direto" encerra a O.S. SEM passar pelo Financeiro (marca como Entregue).\n\nO normal é usar "📦 Fechar caixa → enviar p/ Financeiro".\n\nTem certeza que quer expedir direto, sem o Financeiro?'))return;
   if(osExpParcial(o)){alert('Esta O.S. ainda tem lotes na Qualidade (envio parcial). Só dá pra concluir/fechar quando todos os lotes chegarem.');return;}
   const e=coletaExp();
   var _subs=[];(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){_subs.push(sb);});});
@@ -3511,8 +3512,8 @@ aplicarLogoHeader();try{_comFiltroRestore();}catch(e){}render();if(sessao){aplic
   const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo','magri_estoque_v1','magri_pecas_v1','magri_tanque_data_v1'];
   const _origSet=localStorage.setItem.bind(localStorage);
   const _origGet=localStorage.getItem.bind(localStorage);
-  function _pack(k,v){try{if(typeof v==='string'&&v.length>20000&&window.LZString){var c=LZString.compressToUTF16(v);if(c&&('LZ1:'+c).length<v.length)return 'LZ1:'+c;}}catch(e){}return v;}
-  function _unpack(v){if(v==null)return v;if(typeof v==='string'&&v.indexOf('LZ1:')===0){try{if(window.LZString){var d=LZString.decompressFromUTF16(v.slice(4));return (d==null)?null:d;}}catch(e){}return null;}return v;}
+  function _pack(k,v){try{if(typeof v==='string'&&v.length>20000&&window.LZString){var c=LZString.compressToBase64(v);if(c&&('LZB:'+c).length<v.length)return 'LZB:'+c;}}catch(e){}return v;}
+  function _unpack(v){if(v==null||typeof v!=='string')return v;var pfx=v.slice(0,4);if(pfx==='LZB:'||pfx==='LZ1:'){try{if(window.LZString){var d=(pfx==='LZB:')?LZString.decompressFromBase64(v.slice(4)):LZString.decompressFromUTF16(v.slice(4));return (d==null)?null:d;}}catch(e){}return null;}return v;}
   try{localStorage.getItem=function(k){return _unpack(_origGet(k));};}catch(_ge){}
   const _set=function(k,v){return _origSet(k,_pack(k,v));};
   function _setS(k,v){try{_set(k,v);return true;}catch(e){console.warn('Armazenamento cheio — pulando',k,e&&e.name);window.__lsCheio=true;return false;}}
