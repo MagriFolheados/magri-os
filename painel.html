@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magri — Painel de Produção (Gestão à Vista)</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0e141b;--card:#18212c;--card2:#1f2a37;--linha:#2a3542;--txt:#e8eef5;--sub:#9fb0c2;--ouro:#e5c15c;--verde:#2ecc71;--amarelo:#f1c40f;--vermelho:#ff5a5a;--azul:#4aa3ff;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',Roboto,Arial,sans-serif;overflow:hidden}
+#gate{position:fixed;inset:0;z-index:50;background:linear-gradient(135deg,#0e141b,#1a2531);display:flex;align-items:center;justify-content:center}
+#gate .box{background:#1f2a37;padding:34px 38px;border-radius:16px;width:420px;max-width:92%;text-align:center}
+#gate h1{color:var(--ouro);font-size:26px;margin-bottom:4px}
+#gate p{color:var(--sub);font-size:14px;margin-bottom:18px}
+#gate input{width:100%;padding:14px;margin-bottom:10px;border-radius:10px;border:1px solid #3a4756;background:#111922;color:#fff;font-size:17px}
+#gate button{width:100%;padding:14px;border:none;border-radius:10px;background:var(--ouro);color:#1c1c1c;font-weight:800;font-size:17px;cursor:pointer}
+#gate .err{color:var(--vermelho);font-size:13px;min-height:18px;margin-top:8px}
+#app{display:none;height:100vh;padding:18px 22px;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;justify-content:space-between}
+.top .ttl{font-size:26px;font-weight:800;color:var(--ouro);letter-spacing:.5px}
+.top .ttl small{display:block;color:var(--sub);font-size:13px;font-weight:600;letter-spacing:2px}
+.top .rel{text-align:right}
+.top .rel .hora{font-size:34px;font-weight:800;line-height:1}
+.top .rel .data{color:var(--sub);font-size:14px}
+.top .rel .upd{color:var(--sub);font-size:12px;margin-top:2px}
+.sec-h{font-size:14px;color:var(--sub);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-weight:700}
+.setores{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.setcard{background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:14px 10px;text-align:center}
+.setcard .n{font-size:44px;font-weight:800;line-height:1}
+.setcard .l{color:var(--sub);font-size:14px;margin-top:6px;font-weight:600}
+.mid{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;flex:0 0 auto}
+.panel{background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:16px 18px}
+.farois{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
+.farol{border-radius:12px;padding:16px;text-align:center;background:var(--card2)}
+.farol .n{font-size:52px;font-weight:800;line-height:1}
+.farol .l{font-size:15px;margin-top:6px;font-weight:700}
+.prod{display:flex;gap:22px;align-items:stretch;flex-wrap:wrap}
+.prod .big{text-align:center;flex:1;min-width:130px}
+.prod .big .n{font-size:46px;font-weight:800;color:var(--azul);line-height:1}
+.prod .big .n.ok{color:var(--verde)}
+.prod .big .l{color:var(--sub);font-size:14px;margin-top:6px;font-weight:600}
+.resp{margin-top:10px;font-size:14px;color:var(--sub)}
+.resp b{color:var(--txt)}
+.urg{flex:1 1 auto;overflow:hidden}
+.urg table{width:100%;border-collapse:collapse;font-size:18px}
+.urg th{text-align:left;color:var(--sub);font-size:13px;text-transform:uppercase;letter-spacing:1px;padding:4px 8px;border-bottom:1px solid var(--linha)}
+.urg td{padding:9px 8px;border-bottom:1px solid var(--linha)}
+.tag{display:inline-block;padding:2px 9px;border-radius:7px;font-size:12px;font-weight:800;color:#fff}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.muted{color:var(--sub)}
+#erro{position:fixed;bottom:0;left:0;right:0;background:var(--vermelho);color:#fff;text-align:center;padding:8px;font-weight:700;display:none;z-index:40}
+</style>
+</head>
+<body>
+<div id="gate"><div class="box">
+  <h1>Magri — Painel de Produção</h1>
+  <p>Entre uma vez (ex.: <b>painel</b>) — depois a TV fica sozinha.</p>
+  <input id="em" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Usuário">
+  <input id="pw" type="password" placeholder="Senha">
+  <button id="go">Entrar</button>
+  <div class="err" id="gerr"></div>
+</div></div>
+
+<div id="app">
+  <div class="top">
+    <div class="ttl">GESTÃO À VISTA <small>MAGRI FOLHEADOS · PRODUÇÃO</small></div>
+    <div class="rel">
+      <div class="hora" id="hora">--:--</div>
+      <div class="data" id="data">—</div>
+      <div class="upd" id="upd">—</div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sec-h">Fluxo por setor (O.S. em andamento)</div>
+    <div class="setores" id="setores"></div>
+  </div>
+
+  <div class="mid">
+    <div class="panel">
+      <div class="sec-h">Farol de prazo no setor (máx. 2 dias úteis)</div>
+      <div class="farois">
+        <div class="farol"><div class="n" style="color:var(--verde)" id="fVerde">0</div><div class="l" style="color:var(--verde)">No prazo</div></div>
+        <div class="farol"><div class="n" style="color:var(--amarelo)" id="fAmarelo">0</div><div class="l" style="color:var(--amarelo)">Em atenção</div></div>
+        <div class="farol"><div class="n" style="color:var(--vermelho)" id="fVermelho">0</div><div class="l" style="color:var(--vermelho)">Atrasadas</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="sec-h">Produção de hoje (banho)</div>
+      <div class="prod">
+        <div class="big"><div class="n ok" id="pPeso">0,00</div><div class="l">kg banhado hoje</div></div>
+        <div class="big"><div class="n" id="pApont">0</div><div class="l">apontamentos</div></div>
+        <div class="big"><div class="n" id="pAtivas">0</div><div class="l">O.S. ativas</div></div>
+      </div>
+      <div class="resp" id="pResp"></div>
+    </div>
+  </div>
+
+  <div class="panel urg">
+    <div class="sec-h">O.S. que precisam de atenção (urgentes / atrasadas / vencendo)</div>
+    <table>
+      <thead><tr><th style="width:40px"></th><th style="width:110px">Nº O.S.</th><th>Cliente</th><th style="width:150px">Setor</th><th style="width:130px">Etiqueta</th><th style="width:170px">Situação</th></tr></thead>
+      <tbody id="urgBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="erro"></div>
+
+<script>
+(function(){
+var SB_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
+var SB_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
+var sb=supabase.createClient(SB_URL,SB_KEY);
+var SETORES=['Financeiro','Foto/Bruto','Amarração','Banho','Qualidade','Expedição','Verniz'];
+var LBL={'Financeiro':'Aguard. (Fin.)','Foto/Bruto':'Foto','Amarração':'Amarração','Banho':'Banho','Qualidade':'Qualidade','Expedição':'Expedição','Verniz':'Verniz'};
+var ETQ_COR={'Urgente':'#d32f2f','Prioridade':'#1565c0','Vitrine':'#2e7d32','Crítico':'#e91e63','Retrabalho':'#f9a825','Ret Presencial':'#000'};
+
+var feriados=['01-01','04-21','05-01','09-07','10-12','11-02','11-15','12-25'];
+function ehFeriado(d){var m=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');return feriados.indexOf(m)>-1;}
+function ehDiaUtil(d){var g=d.getDay();return g!==0&&g!==6&&!ehFeriado(d);}
+function diasUteisEntre(iniISO){if(!iniISO)return 0;var d=new Date((''+iniISO).slice(0,10)+'T00:00:00');d.setHours(0,0,0,0);var hoje=new Date();hoje.setHours(0,0,0,0);var c=0;var t=new Date(d);while(t<hoje){t.setDate(t.getDate()+1);if(ehDiaUtil(t))c++;}return c;}
+function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.setor==='Amarração')return o.amRecebidoEm;if(o.setor==='Banho')return o.banhoRecebidoEm;if(o.setor==='Qualidade')return o.qualRecebidoEm;if(o.setor==='Expedição')return o.expRecebidoEm;return o.dataEntrada;}
+function farol(o){if(o.statusComercial==='Entregue')return {cls:'verde',dias:0};var rec=setorRecebido(o);if(!rec)return {cls:'verde',dias:0};var d=diasUteisEntre(rec);if(d<=0)return {cls:'verde',dias:d};if(d<=2)return {cls:'amarelo',dias:d};return {cls:'vermelho',dias:d};}
+function hojeISO(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');}
+function fmtData(iso){if(!iso)return '—';var p=(''+iso).slice(0,10).split('-');return p.length===3?(p[2]+'/'+p[1]):iso;}
+
+function relogio(){var n=new Date();document.getElementById('hora').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');var dias=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];document.getElementById('data').textContent=dias[n.getDay()]+', '+String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear();}
+setInterval(relogio,1000);relogio();
+
+function erro(msg){var e=document.getElementById('erro');if(msg){e.textContent='⚠ '+msg;e.style.display='';}else{e.style.display='none';}}
+
+async function carregar(){
+  try{
+    var ro=await sb.from('ordens').select('setor,num_os,cliente,dados').neq('setor','Expedido').limit(1000);
+    if(ro.error){erro('Sem acesso aos dados — verifique o login. ('+ro.error.message+')');return;}
+    var ativos=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&d.setor!=='Expedido';});
+    // fluxo por setor
+    var cont={};SETORES.forEach(function(s){cont[s]=0;});ativos.forEach(function(d){if(cont[d.setor]!==undefined)cont[d.setor]++;else cont[d.setor]=(cont[d.setor]||0)+1;});
+    var hs='';SETORES.forEach(function(s){var lbl=LBL[s]||s;hs+='<div class="setcard"><div class="n">'+(cont[s]||0)+'</div><div class="l">'+lbl+'</div></div>';});
+    document.getElementById('setores').innerHTML=hs;
+    // farol
+    var fv=0,fa=0,fr=0;ativos.forEach(function(d){var f=farol(d);if(f.cls==='verde')fv++;else if(f.cls==='amarelo')fa++;else fr++;});
+    document.getElementById('fVerde').textContent=fv;document.getElementById('fAmarelo').textContent=fa;document.getElementById('fVermelho').textContent=fr;
+    document.getElementById('pAtivas').textContent=ativos.length;
+    // urgentes
+    var urg=ativos.map(function(d){var f=farol(d);var venc=d.prevEntregaISO?diasUteisEntre(d.prevEntregaISO):999;var prioridade=0;if(f.cls==='vermelho')prioridade+=100+f.dias;if(d.etiqueta==='Urgente'||d.etiqueta==='Crítico')prioridade+=80;if(d.etiqueta==='Prioridade'||d.etiqueta==='Ret Presencial')prioridade+=50;if(d.prevEntregaISO&&(''+d.prevEntregaISO).slice(0,10)<=hojeISO())prioridade+=60;return {d:d,f:f,p:prioridade};}).filter(function(x){return x.p>0;}).sort(function(a,b){return b.p-a.p;}).slice(0,10);
+    var ub='';urg.forEach(function(x){var d=x.d,f=x.f;var cor=f.cls==='vermelho'?'var(--vermelho)':(f.cls==='amarelo'?'var(--amarelo)':'var(--verde)');var sit=f.cls==='vermelho'?('Atrasada '+f.dias+'d'):(f.cls==='amarelo'?(f.dias+'d no setor'):'No prazo');var etq=d.etiqueta&&ETQ_COR[d.etiqueta]?'<span class="tag" style="background:'+ETQ_COR[d.etiqueta]+'">'+d.etiqueta+'</span>':'<span class="muted">—</span>';ub+='<tr><td><span class="dot" style="background:'+cor+'"></span></td><td><b>'+(d.__num||'')+'</b></td><td>'+((d.__cli||'')+'').slice(0,34)+'</td><td>'+(d.setor||'')+'</td><td>'+etq+'</td><td style="color:'+cor+';font-weight:700">'+sit+'</td></tr>';});
+    document.getElementById('urgBody').innerHTML=ub||'<tr><td colspan="6" class="muted" style="text-align:center;padding:16px">Nada crítico agora 👍</td></tr>';
+    // produção de hoje
+    var ra=await sb.from('apontamentos').select('dados').eq('data',hojeISO()).limit(2000);
+    if(!ra.error){var aps=(ra.data||[]).map(function(x){return x.dados||{};});var peso=0,porResp={};aps.forEach(function(a){var p=parseFloat(a.peso)||0;peso+=p;var r=a.responsavel||'—';porResp[r]=(porResp[r]||0)+p;});
+      document.getElementById('pPeso').textContent=peso.toFixed(2).replace('.',',');
+      document.getElementById('pApont').textContent=aps.length;
+      var tops=Object.keys(porResp).map(function(k){return [k,porResp[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,4);
+      document.getElementById('pResp').innerHTML=tops.length?('Por pessoa: '+tops.map(function(t){return '<b>'+t[0]+'</b> '+t[1].toFixed(2).replace('.',',')+'kg';}).join(' · ')):'';
+    }
+    erro('');
+    var n=new Date();document.getElementById('upd').textContent='Atualizado '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+  }catch(e){erro('Erro ao atualizar: '+((e&&e.message)||e));}
+}
+
+function iniciarPainel(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='flex';carregar();setInterval(carregar,30000);setTimeout(function(){location.reload();},25*60*1000);}
+
+function mostrarLogin(msg){document.getElementById('gate').style.display='flex';document.getElementById('app').style.display='none';if(msg)document.getElementById('gerr').textContent=msg;}
+async function entrar(){var raw=document.getElementById('em').value.trim();var pw=document.getElementById('pw').value;if(!raw||!pw){document.getElementById('gerr').textContent='Informe usuário e senha.';return;}var email=raw.indexOf('@')>-1?raw.toLowerCase():(raw.toLowerCase().replace(/\s+/g,'')+'@magrifolheados.com.br');document.getElementById('gerr').textContent='Entrando...';var r=await sb.auth.signInWithPassword({email:email,password:pw});if(r.error){document.getElementById('gerr').textContent='Usuário ou senha inválidos.';return;}iniciarPainel();}
+document.getElementById('go').onclick=entrar;
+document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')entrar();});
+
+sb.auth.getSession().then(function(res){if(res.data.session)iniciarPainel();else mostrarLogin('');}).catch(function(){mostrarLogin('');});
+})();
+</script>
+</body>
+</html>
