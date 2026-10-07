@@ -37,16 +37,16 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
 .quad{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex:1 1 auto;min-height:0}
 .qc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;justify-content:center}
 .qc .top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
-.qc .set{font-size:17px;font-weight:800}
-.qc .tot{font-size:12px;color:var(--sub)}
-.qc .row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
-.qc .mini .n{font-size:26px;font-weight:800;line-height:1}
-.qc .mini .ml{font-size:10px;color:var(--sub);margin-top:2px;font-weight:600}
+.qc .set{font-size:23px;font-weight:800}
+.qc .tot{font-size:14px;color:var(--sub)}
+.qc .row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.qc .mini .n{font-size:42px;font-weight:800;line-height:1}
+.qc .mini .ml{font-size:12px;color:var(--sub);margin-top:3px;font-weight:600}
 .qc.alert{border-color:rgba(255,93,93,.5);box-shadow:0 0 0 1px rgba(255,93,93,.25) inset}
-.lista{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 16px;flex:1 1 auto;min-height:0;overflow:hidden}
-.lista table{width:100%;border-collapse:collapse;font-size:16px}
-.lista th{text-align:left;color:var(--sub);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:3px 8px}
-.lista td{padding:6px 8px;border-top:1px solid var(--line)}
+.lista{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 16px;flex:0 0 auto;overflow:hidden}
+.lista table{width:100%;border-collapse:collapse;font-size:14px}
+.lista th{text-align:left;color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:2px 8px}
+.lista td{padding:4px 8px;border-top:1px solid var(--line)}
 .lista tr:nth-child(even) td{background:rgba(255,255,255,.02)}
 .pill{display:inline-block;padding:2px 10px;border-radius:20px;font-weight:800;font-size:14px}
 .pill.r{background:rgba(255,93,93,.18);color:var(--vermelho)}
@@ -73,7 +73,7 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
   </div>
 
   <div style="flex:0 0 auto">
-    <div class="sech">Consolidado — farol de prazo no setor (todas em produção)</div>
+    <div class="sech">Consolidado — prazo de ENTREGA ao cliente</div>
     <div class="cons">
       <div class="c v"><div class="l" style="color:var(--verde)">✓ No prazo</div><div class="n" style="color:var(--verde)" id="cV">0</div></div>
       <div class="c a"><div class="l" style="color:var(--amarelo)">● Em atenção</div><div class="n" style="color:var(--amarelo)" id="cA">0</div></div>
@@ -82,12 +82,12 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
   </div>
 
   <div style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0">
-    <div class="sech">Farol por setor</div>
+    <div class="sech">Farol por setor — prazo DENTRO do setor</div>
     <div class="quad" id="quad"></div>
   </div>
 
   <div class="lista">
-    <div class="sech">O.S. por prazo — vencidas (há mais tempo primeiro) e a vencer</div>
+    <div class="sech">5 O.S. mais atrasadas — prazo de entrega ao cliente</div>
     <table>
       <thead><tr><th style="width:90px">Nº O.S.</th><th>Cliente</th><th style="width:130px">Setor</th><th style="width:110px">Entrega</th><th style="width:160px">Situação</th></tr></thead>
       <tbody id="lb"></tbody>
@@ -122,14 +122,14 @@ async function carregar(){
     if(ro.error){erro('Sem acesso aos dados — verifique o login. ('+ro.error.message+')');return;}
     var at=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&d.setor!=='Expedido';});
     var porSetor={};SETORES.forEach(function(s){porSetor[s]={v:0,a:0,r:0,tot:0};});
-    var CV=0,CA=0,CR=0;
-    at.forEach(function(d){var cls=farolCls(d);if(porSetor[d.setor]){porSetor[d.setor].tot++;porSetor[d.setor][cls==='verde'?'v':(cls==='amarelo'?'a':'r')]++;if(cls==='verde')CV++;else if(cls==='amarelo')CA++;else CR++;}});
+    at.forEach(function(d){var cls=farolCls(d);if(porSetor[d.setor]){porSetor[d.setor].tot++;porSetor[d.setor][cls==='verde'?'v':(cls==='amarelo'?'a':'r')]++;}});
+    var CV=0,CA=0,CR=0;at.forEach(function(d){var dd=diasAteData(d.prevEntregaISO);if(dd===null){CV++;}else if(dd<0){CR++;}else if(dd<=2){CA++;}else{CV++;}});
     document.getElementById('cV').textContent=CV;document.getElementById('cA').textContent=CA;document.getElementById('cR').textContent=CR;
     var vis=SETORES.filter(function(s){return porSetor[s].tot>0;});if(!vis.length)vis=['Foto/Bruto'];
     var qh='';vis.forEach(function(s){var q=porSetor[s];var alert=q.r>0?' alert':'';qh+='<div class="qc'+alert+'"><div class="top"><div class="set">'+(LBL[s]||s)+'</div><div class="tot">'+q.tot+' O.S.</div></div><div class="row"><div class="mini"><div class="n" style="color:var(--verde)">'+q.v+'</div><div class="ml">no prazo</div></div><div class="mini"><div class="n" style="color:var(--amarelo)">'+q.a+'</div><div class="ml">atenção</div></div><div class="mini"><div class="n" style="color:var(--vermelho)">'+q.r+'</div><div class="ml">atrasada</div></div></div></div>';});
     var qd=document.getElementById('quad');qd.style.gridTemplateColumns='repeat('+vis.length+',1fr)';qd.innerHTML=qh;
     // lista por prazo (prevEntregaISO)
-    var comPrazo=at.filter(function(d){return d.prevEntregaISO;}).map(function(d){return {d:d,dd:diasAteData(d.prevEntregaISO)};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,12);
+    var comPrazo=at.filter(function(d){return d.prevEntregaISO;}).map(function(d){return {d:d,dd:diasAteData(d.prevEntregaISO)};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,5);
     var lh='';comPrazo.forEach(function(x){var d=x.d,dd=x.dd;var cls,sit;if(dd<0){cls='r';sit='Atrasada '+Math.abs(dd)+(Math.abs(dd)===1?' dia':' dias');}else if(dd===0){cls='h';sit='Vence hoje';}else if(dd<=2){cls='h';sit='Vence em '+dd+(dd===1?' dia':' dias');}else{cls='g';sit='Vence em '+dd+' dias';}lh+='<tr><td><b>'+(d.__num||'')+'</b></td><td>'+((d.__cli||'')+'').slice(0,40)+'</td><td>'+(d.setor||'')+'</td><td>'+fmtDM(d.prevEntregaISO)+'</td><td><span class="pill '+cls+'">'+sit+'</span></td></tr>';});
     document.getElementById('lb').innerHTML=lh||'<tr><td colspan="5" class="muted" style="text-align:center;padding:16px">Nenhuma O.S. com prazo definido 👍</td></tr>';
     erro('');
