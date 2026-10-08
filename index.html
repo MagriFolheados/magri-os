@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-08r</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-08s</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-08r</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-08s</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -3514,6 +3514,28 @@ aplicarLogoHeader();try{_comFiltroRestore();}catch(e){}render();if(sessao){aplic
   const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo','magri_estoque_v1','magri_pecas_v1','magri_tanque_data_v1'];
   const _set=localStorage.setItem.bind(localStorage);
   function _setS(k,v){try{_set(k,v);return true;}catch(e){console.warn('Armazenamento cheio — pulando',k,e&&e.name);window.__lsCheio=true;return false;}}
+  /* Guarda o que cabe: mantém todas as O.S. ativas + as expedidas mais recentes que couberem,
+     deixando folga para clientes/peças/backup. As antigas ficam só na nuvem (busca sob demanda).
+     Evita travar o aparelho em somente-leitura. BUDGET em caracteres UTF-16 (~2 bytes cada). */
+  function _storeOrdFit(arr){
+    var BUDGET=1900000; /* ~3,8MB; deixa folga p/ clientes, peças, backups, sessão */
+    var full=JSON.stringify(arr);
+    if(full.length<=BUDGET&&_setS('magri_os_v2',full))return {ok:true,arr:arr,cut:0};
+    var ativos=arr.filter(function(o){return !(o&&o.setor==='Expedido');});
+    var fin=arr.filter(function(o){return o&&o.setor==='Expedido';});
+    fin.sort(function(a,b){var ta=Date.parse((a&&(a.dataSaida||a.dataEntrada))||'')||0;var tb=Date.parse((b&&(b.dataSaida||b.dataEntrada))||'')||0;return tb-ta;});
+    var baseStr=JSON.stringify(ativos);
+    if(baseStr.length>BUDGET){ /* nem as ativas cabem no orçamento — tenta mesmo assim (dados críticos) */
+      if(_setS('magri_os_v2',baseStr))return {ok:true,arr:ativos,cut:arr.length-ativos.length};
+      return {ok:false,arr:ativos,cut:arr.length-ativos.length};
+    }
+    var lo=0,hi=fin.length,keep=0;
+    while(lo<=hi){var mid=(lo+hi)>>1;if(JSON.stringify(ativos.concat(fin.slice(0,mid))).length<=BUDGET){keep=mid;lo=mid+1;}else{hi=mid-1;}}
+    var out=ativos.concat(fin.slice(0,keep));
+    if(_setS('magri_os_v2',JSON.stringify(out)))return {ok:true,arr:out,cut:arr.length-out.length};
+    if(_setS('magri_os_v2',baseStr))return {ok:true,arr:ativos,cut:arr.length-ativos.length};
+    return {ok:false,arr:ativos,cut:arr.length-ativos.length};
+  }
   const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{lock:function(_n,_t,fn){return fn();}}});
   window.__sb=sb;
   window.__DOMINIO_LOGIN='@magrifolheados.com.br';
@@ -3541,11 +3563,13 @@ aplicarLogoHeader();try{_comFiltroRestore();}catch(e){}render();if(sessao){aplic
     var ordRes=await sb.from('ordens').select('id,dados');var snapOrd={};var arrOrd=(ordRes.data||[]).map(function(r){snapOrd[r.id]=JSON.stringify(r.dados);return r.dados;});try{var _localOrd=JSON.parse(localStorage.getItem('magri_os_v2')||'[]');if(Array.isArray(_localOrd)&&_localOrd.length>arrOrd.length){_set('magri_os_v2__bkp_'+new Date().toISOString().slice(0,19).replace(/[:T-]/g,''),JSON.stringify(_localOrd));var _cloudIds={};arrOrd.forEach(function(o){if(o&&o.id!=null)_cloudIds[String(o.id)]=1;});_localOrd.forEach(function(o){if(o&&o.id!=null&&!_cloudIds[String(o.id)]){arrOrd.push(o);snapOrd[String(o.id)]='__RESTAURAR__';}});_bootMergeWarn(_localOrd.length,arrOrd.length);}}catch(_me){console.warn('merge guard',_me);}arrOrd=arrOrd.filter(function(o){return !(o&&(o._del||o.cancelada));});
     var __rlo=(''+(role||'')).toLowerCase();var __fullHist=(__rlo==='admin'||__rlo==='comercial'||__rlo==='financeiro');window.__osFiltrado=!__fullHist?'ativas':'recentes';
     if(!__fullHist){arrOrd=arrOrd.filter(function(o){return o&&o.setor!=='Expedido';});}
-    else{var __cutOS=Date.now()-180*864e5;arrOrd=arrOrd.filter(function(o){if(!o)return false;if(o.setor!=='Expedido')return true;var _d=o.dataSaida||o.dataEntrada||'';var _t=_d?Date.parse(_d):0;return !_t||_t>=__cutOS;});}
+    else{var __cutOS=Date.now()-90*864e5;arrOrd=arrOrd.filter(function(o){if(!o)return false;if(o.setor!=='Expedido')return true;var _d=o.dataSaida||o.dataEntrada||'';var _t=_d?Date.parse(_d):0;return !_t||_t>=__cutOS;});}
     var __keepIds={};arrOrd.forEach(function(o){if(o&&o.id!=null)__keepIds[String(o.id)]=1;});Object.keys(snapOrd).forEach(function(id){if(!__keepIds[id])delete snapOrd[id];});
-    var __okOrd=_setS('magri_os_v2',JSON.stringify(arrOrd));
+    var __fit=_storeOrdFit(arrOrd);var __okOrd=__fit.ok;
+    if(__fit.ok&&__fit.cut>0){var __keep2={};__fit.arr.forEach(function(o){if(o&&o.id!=null)__keep2[String(o.id)]=1;});Object.keys(snapOrd).forEach(function(id){if(!__keep2[id])delete snapOrd[id];});arrOrd=__fit.arr;window.__osParcial=__fit.cut;console.warn('BOOT: cache local reduzido — '+__fit.cut+' O.S. antigas ficaram só na nuvem (busca sob demanda).');}
     var apRes=await sb.from('apontamentos').select('id,dados');var snapAp={};var arrAp=(apRes.data||[]).map(function(r){snapAp[r.id]=JSON.stringify(r.dados);return r.dados;});var __okAp=_setS('magri_apont_v1',JSON.stringify(arrAp));
-    if(!__okOrd||!__okAp){window.__ordStale=true;console.warn('BOOT: não coube O.S./apontamentos — aparelho em modo somente-leitura para não corromper a nuvem.');}
+    if(!__okAp){_setS('magri_apont_v1','[]');snapAp={};arrAp.length=0;console.warn('BOOT: apontamentos não couberam — mantidos só na nuvem.');}
+    if(!__okOrd){window.__ordStale=true;console.warn('BOOT: nem as O.S. ativas couberam — modo somente-leitura para não corromper a nuvem.');}
     /* carga leve: cada função só guarda os blobs grandes que usa (clientes/peças) — o resto do chão de fábrica fica mais leve */
     var __rl=(''+(role||'')).toLowerCase();var __precisaCli=(__rl==='admin'||__rl==='comercial'||__rl==='financeiro');var __precisaPec=(__rl==='admin'||__rl==='comercial'||__rl.indexOf('foto')>-1);
     window.__blobReadOnly=window.__blobReadOnly||{};
