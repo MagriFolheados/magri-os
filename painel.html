@@ -17,7 +17,7 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
 #gate input{width:100%;padding:14px;margin-bottom:10px;border-radius:10px;border:1px solid #3a4756;background:#111922;color:#fff;font-size:17px}
 #gate button{width:100%;padding:14px;border:none;border-radius:10px;background:var(--ouro);color:#1c1c1c;font-weight:800;font-size:17px;cursor:pointer}
 #gate .err{color:var(--vermelho);font-size:13px;min-height:18px;margin-top:8px}
-#app{display:none;height:100vh;padding:14px 20px;flex-direction:column;gap:12px}
+#app{display:none;height:100vh;padding:12px 18px;flex-direction:column;gap:9px}
 .hd{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,#132033,#101823);border:1px solid var(--line);border-radius:14px;padding:8px 18px;flex:0 0 auto}
 .hd .lf{display:flex;align-items:center;gap:16px}
 .hd img{height:46px;border-radius:6px}
@@ -27,26 +27,34 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
 .hd .rt .d{color:var(--sub);font-size:14px}
 .hd .rt .u{color:#6b7f93;font-size:11px}
 .sech{font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;font-weight:700;margin:0 2px 6px}
-.cons{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.c{border-radius:12px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+.part{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.secrow{flex:0 0 auto}
+.part.g1{flex:1.05 1 0}
+.part.g2{flex:1 1 0}
+.secrow{display:flex;align-items:center;gap:10px;margin:0 2px 5px}
+.secrow .sech{margin:0}
+.secrow .leg{margin-left:auto;font-size:11px;color:var(--sub);font-weight:600}
+.secrow .leg b{font-weight:800}
+.cons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;flex:0 0 auto}
+.c{border-radius:11px;padding:6px 14px;display:flex;align-items:center;justify-content:space-between}
 .c.v{background:linear-gradient(180deg,rgba(40,209,124,.14),rgba(40,209,124,.03));border:1px solid rgba(40,209,124,.35)}
 .c.a{background:linear-gradient(180deg,rgba(255,207,51,.14),rgba(255,207,51,.03));border:1px solid rgba(255,207,51,.35)}
 .c.r{background:linear-gradient(180deg,rgba(255,93,93,.16),rgba(255,93,93,.04));border:1px solid rgba(255,93,93,.4)}
-.c .l{font-size:16px;font-weight:700}
-.c .n{font-size:40px;font-weight:800;line-height:1}
-.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex:1 1 auto;min-height:0}
-.qc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;display:flex;flex-direction:column;justify-content:center}
-.qc .top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
-.qc .set{font-size:23px;font-weight:800}
-.qc .tot{font-size:14px;color:var(--sub)}
-.qc .row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
-.qc .mini .n{font-size:42px;font-weight:800;line-height:1}
-.qc .mini .ml{font-size:12px;color:var(--sub);margin-top:3px;font-weight:600}
+.c .l{font-size:14px;font-weight:700}
+.c .n{font-size:30px;font-weight:800;line-height:1}
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;flex:1 1 0;min-height:0;overflow:hidden}
+.qc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 11px;display:flex;flex-direction:column;justify-content:center}
+.qc .top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.qc .set{font-size:17px;font-weight:800}
+.qc .tot{font-size:12px;color:var(--sub)}
+.qc .row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+.qc .mini .n{font-size:30px;font-weight:800;line-height:1}
+.qc .mini .ml{font-size:10px;color:var(--sub);margin-top:2px;font-weight:600}
 .qc.alert{border-color:rgba(255,93,93,.5);box-shadow:0 0 0 1px rgba(255,93,93,.25) inset}
 .lista{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 16px;flex:0 0 auto;overflow:hidden}
-.lista table{width:100%;border-collapse:collapse;font-size:14px}
+.lista table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
 .lista th{text-align:left;color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:2px 8px}
-.lista td{padding:4px 8px;border-top:1px solid var(--line)}
+.lista td{padding:4px 8px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lista tr:nth-child(even) td{background:rgba(255,255,255,.02)}
 .pill{display:inline-block;padding:2px 10px;border-radius:20px;font-weight:800;font-size:14px}
 .pill.r{background:rgba(255,93,93,.18);color:var(--vermelho)}
@@ -72,18 +80,19 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
     <div class="rt"><div class="h" id="hora">--:--</div><div><div class="d" id="data">—</div><div class="u" id="upd">—</div></div></div>
   </div>
 
-  <div style="flex:0 0 auto">
-    <div class="sech">Consolidado — prazo de ENTREGA ao cliente</div>
+  <div class="part g1">
+    <div class="secrow"><div class="sech">1 · Atraso de entrega ao cliente</div><div class="leg">soma dos setores = consolidado</div></div>
     <div class="cons">
       <div class="c v"><div class="l" style="color:var(--verde)">✓ No prazo</div><div class="n" style="color:var(--verde)" id="cV">0</div></div>
       <div class="c a"><div class="l" style="color:var(--amarelo)">● Em atenção</div><div class="n" style="color:var(--amarelo)" id="cA">0</div></div>
       <div class="c r"><div class="l" style="color:var(--vermelho)">▲ Atrasadas</div><div class="n" style="color:var(--vermelho)" id="cR">0</div></div>
     </div>
+    <div class="quad" id="quadEnt"></div>
   </div>
 
-  <div style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0">
-    <div class="sech">Farol por setor — prazo DENTRO do setor</div>
-    <div class="quad" id="quad"></div>
+  <div class="part g2">
+    <div class="secrow"><div class="sech">2 · Tempo dentro do setor</div><div class="leg"><b style="color:var(--verde)">1 dia ✓</b> · <b style="color:var(--amarelo)">2 dias atenção</b> · <b style="color:var(--vermelho)">3+ atraso</b></div></div>
+    <div class="quad" id="quadTmp"></div>
   </div>
 
   <div class="lista">
@@ -120,14 +129,23 @@ async function carregar(){
   try{
     var ro=await sb.from('ordens').select('setor,num_os,cliente,dados').neq('setor','Expedido').limit(1000);
     if(ro.error){erro('Sem acesso aos dados — verifique o login. ('+ro.error.message+')');return;}
-    var at=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&d.setor!=='Expedido';});
-    var porSetor={};SETORES.forEach(function(s){porSetor[s]={v:0,a:0,r:0,tot:0};});
-    at.forEach(function(d){var cls=farolCls(d);if(porSetor[d.setor]){porSetor[d.setor].tot++;porSetor[d.setor][cls==='verde'?'v':(cls==='amarelo'?'a':'r')]++;}});
-    var CV=0,CA=0,CR=0;at.forEach(function(d){var dd=diasAteData(d.prevEntregaISO);if(dd===null){CV++;}else if(dd<0){CR++;}else if(dd<=2){CA++;}else{CV++;}});
+    var at=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&!d.standby&&SETORES.indexOf(d.setor)>-1;});
+    // dois tallies por setor: ENT = atraso de entrega ao cliente / TMP = tempo dentro do setor
+    var ent={},tmp={};SETORES.forEach(function(s){ent[s]={v:0,a:0,r:0,tot:0};tmp[s]={v:0,a:0,r:0,tot:0};});
+    function recSetor(o){if(o.setor==='Verniz')return (o.verniz&&o.verniz.enviadoEm)||o.dataEntrada;return setorRecebido(o);}
+    at.forEach(function(d){var s=d.setor;
+      // entrega ao cliente (mesmo critério do consolidado)
+      var dd=diasAteData(d.prevEntregaISO);var ec=(dd===null)?'v':(dd<0?'r':(dd<=2?'a':'v'));ent[s].tot++;ent[s][ec]++;
+      // tempo no setor: 1 dia verde, 2 dias amarelo, 3+ vermelho
+      var tc;if(d.statusComercial==='Entregue'){tc='v';}else{var ds=diasUteisEntre(recSetor(d));tc=(ds<=1)?'v':(ds===2?'a':'r');}tmp[s].tot++;tmp[s][tc]++;
+    });
+    // consolidado = soma dos setores (bate com os quadrantes da 1ª parte)
+    var CV=0,CA=0,CR=0;SETORES.forEach(function(s){CV+=ent[s].v;CA+=ent[s].a;CR+=ent[s].r;});
     document.getElementById('cV').textContent=CV;document.getElementById('cA').textContent=CA;document.getElementById('cR').textContent=CR;
-    var vis=SETORES.filter(function(s){return porSetor[s].tot>0;});if(!vis.length)vis=['Foto/Bruto'];
-    var qh='';vis.forEach(function(s){var q=porSetor[s];var alert=q.r>0?' alert':'';qh+='<div class="qc'+alert+'"><div class="top"><div class="set">'+(LBL[s]||s)+'</div><div class="tot">'+q.tot+' O.S.</div></div><div class="row"><div class="mini"><div class="n" style="color:var(--verde)">'+q.v+'</div><div class="ml">no prazo</div></div><div class="mini"><div class="n" style="color:var(--amarelo)">'+q.a+'</div><div class="ml">atenção</div></div><div class="mini"><div class="n" style="color:var(--vermelho)">'+q.r+'</div><div class="ml">atrasada</div></div></div></div>';});
-    var qd=document.getElementById('quad');qd.style.gridTemplateColumns='repeat('+vis.length+',1fr)';qd.innerHTML=qh;
+    var vis=SETORES.filter(function(s){return ent[s].tot>0;});if(!vis.length)vis=['Foto/Bruto'];
+    function renderQuad(elId,tally,labels){var qh='';vis.forEach(function(s){var q=tally[s];var alert=q.r>0?' alert':'';qh+='<div class="qc'+alert+'"><div class="top"><div class="set">'+(LBL[s]||s)+'</div><div class="tot">'+q.tot+' O.S.</div></div><div class="row"><div class="mini"><div class="n" style="color:var(--verde)">'+q.v+'</div><div class="ml">'+labels[0]+'</div></div><div class="mini"><div class="n" style="color:var(--amarelo)">'+q.a+'</div><div class="ml">'+labels[1]+'</div></div><div class="mini"><div class="n" style="color:var(--vermelho)">'+q.r+'</div><div class="ml">'+labels[2]+'</div></div></div></div>';});var qd=document.getElementById(elId);qd.style.gridTemplateColumns='repeat('+vis.length+',1fr)';qd.innerHTML=qh;}
+    renderQuad('quadEnt',ent,['no prazo','atenção','atrasada']);
+    renderQuad('quadTmp',tmp,['≤1 dia','2 dias','3+ dias']);
     // lista por prazo (prevEntregaISO)
     var comPrazo=at.filter(function(d){return d.prevEntregaISO;}).map(function(d){return {d:d,dd:diasAteData(d.prevEntregaISO)};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,5);
     var lh='';comPrazo.forEach(function(x){var d=x.d,dd=x.dd;var cls,sit;if(dd<0){cls='r';sit='Atrasada '+Math.abs(dd)+(Math.abs(dd)===1?' dia':' dias');}else if(dd===0){cls='h';sit='Vence hoje';}else if(dd<=2){cls='h';sit='Vence em '+dd+(dd===1?' dia':' dias');}else{cls='g';sit='Vence em '+dd+' dias';}lh+='<tr><td><b>'+(d.__num||'')+'</b></td><td>'+((d.__cli||'')+'').slice(0,40)+'</td><td>'+(d.setor||'')+'</td><td>'+fmtDM(d.prevEntregaISO)+'</td><td><span class="pill '+cls+'">'+sit+'</span></td></tr>';});
