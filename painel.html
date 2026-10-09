@@ -116,6 +116,8 @@ function ehFeriado(d){var m=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.
 function ehDiaUtil(d){var g=d.getDay();return g!==0&&g!==6&&!ehFeriado(d);}
 function diasUteisEntre(iniISO){if(!iniISO)return 0;var d=new Date((''+iniISO).slice(0,10)+'T00:00:00');d.setHours(0,0,0,0);var hoje=new Date();hoje.setHours(0,0,0,0);var c=0,t=new Date(d);while(t<hoje){t.setDate(t.getDate()+1);if(ehDiaUtil(t))c++;}return c;}
 function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.setor==='Amarração')return o.amRecebidoEm;if(o.setor==='Banho')return o.banhoRecebidoEm;if(o.setor==='Qualidade')return o.qualRecebidoEm;if(o.setor==='Expedição')return o.expRecebidoEm;return o.dataEntrada;}
+/* caixa fechada total aguardando Financeiro liberar envio: sai do painel (continua Expedição por baixo) */
+function aguardandoEnvio(o){if(!o||!o.envioFinPendente)return false;if((o.setor||'')!=='Expedição')return false;var pend=false;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.confExp!=='Sim')pend=true;});});return !pend;}
 function farolCls(o){if(o.statusComercial==='Entregue')return 'verde';var rec=setorRecebido(o);if(!rec)return 'verde';var d=diasUteisEntre(rec);if(d<=0)return 'verde';if(d<=2)return 'amarelo';return 'vermelho';}
 function diasAteData(iso){if(!iso)return null;var d=new Date((''+iso).slice(0,10)+'T00:00:00');var h=new Date();h.setHours(0,0,0,0);return Math.round((d-h)/86400000);}
 function fmtDM(iso){if(!iso)return '—';var p=(''+iso).slice(0,10).split('-');return p.length===3?(p[2]+'/'+p[1]):iso;}
@@ -128,7 +130,7 @@ async function carregar(){
   try{
     var ro=await sb.from('ordens').select('setor,num_os,cliente,dados').neq('setor','Expedido').limit(1000);
     if(ro.error){erro('Sem acesso aos dados — verifique o login. ('+ro.error.message+')');return;}
-    var at=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&!d.standby&&SETORES.indexOf(d.setor)>-1;});
+    var at=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&!d.standby&&!aguardandoEnvio(d)&&SETORES.indexOf(d.setor)>-1;});
     // dois tallies por setor: ENT = atraso de entrega ao cliente / TMP = tempo dentro do setor
     var ent={},tmp={};SETORES.forEach(function(s){ent[s]={v:0,a:0,r:0,tot:0};tmp[s]={v:0,a:0,r:0,tot:0};});
     function recSetor(o){if(o.setor==='Verniz')return (o.verniz&&o.verniz.enviadoEm)||o.dataEntrada;return setorRecebido(o);}
@@ -136,7 +138,7 @@ async function carregar(){
       // entrega ao cliente (mesmo critério do consolidado)
       var dd=diasAteData(d.prevEntregaISO);var ec=(dd===null)?'v':(dd<0?'r':(dd<=2?'a':'v'));ent[s].tot++;ent[s][ec]++;
       // tempo no setor: 1 dia verde, 2 dias amarelo, 3+ vermelho
-      var tc;if(d.statusComercial==='Entregue'){tc='v';}else{var ds=diasUteisEntre(recSetor(d));tc=(ds<=1)?'v':(ds===2?'a':'r');}tmp[s].tot++;tmp[s][tc]++;
+      var tc;if(d.statusComercial==='Entregue'||(d.setor==='Expedição'&&d.expStatus==='Concluído')){tc='v';}else{var ds=diasUteisEntre(recSetor(d));tc=(ds<=1)?'v':(ds===2?'a':'r');}tmp[s].tot++;tmp[s][tc]++;
     });
     // consolidado = soma dos setores (bate com os quadrantes da 1ª parte)
     var CV=0,CA=0,CR=0;SETORES.forEach(function(s){CV+=ent[s].v;CA+=ent[s].a;CR+=ent[s].r;});
