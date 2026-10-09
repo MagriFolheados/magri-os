@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-08s</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-08t</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-08s</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-08t</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1268,13 +1268,13 @@ function farolSetor(recISO,o){if(o&&o.standby)return {cls:'standby',cor:'#4aa3ff
 /* ===== #4 Popups de prazo por setor ===== */
 var _SETOR2VIEW={'Foto/Bruto':'fotobruto','Amarração':'amarracao','Banho':'banho','Qualidade':'qualidade','Expedição':'expedicao','Verniz':'verniz'};
 function _setoresUsuario(){var todos=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição','Verniz'];if(!sessao||sessao.role==='Admin'||sessao.role==='Produção')return todos;var views=viewsDoRole(sessao.role)||[];var s=[];todos.forEach(function(sec){var v=_SETOR2VIEW[sec];if(v&&views.indexOf(v)>-1)s.push(sec);});return s.length?s:todos;}
-function _prazoScan(){var setores=_setoresUsuario();var atras=[],venc=[];(dados||[]).forEach(function(o){if(o._del||o.cancelada||o.setor==='Expedido')return;if(setores.indexOf(o.setor)<0)return;var f;if(o.setor==='Verniz'){f=farolVerniz(o.verniz&&o.verniz.enviadoEm);if(f.cls==='vermelho')atras.push({o:o,f:f});else if(f.cls==='amarelo')venc.push({o:o,f:f});}else{f=farolSetor(setorRecebido(o),o);if(f.cls==='vermelho')atras.push({o:o,f:f});else if(f.cls==='amarelo'&&(f.dias||0)>=2)venc.push({o:o,f:f});}});atras.sort(function(a,b){return (b.f.dias||0)-(a.f.dias||0);});return {atras:atras,venc:venc};}
+function _prazoScan(){var setores=_setoresUsuario();var atras=[],venc=[];(dados||[]).forEach(function(o){if(o._del||o.cancelada||o.setor==='Expedido')return;if(osAguardandoEnvio(o))return;if(setores.indexOf(o.setor)<0)return;var f;if(o.setor==='Verniz'){f=farolVerniz(o.verniz&&o.verniz.enviadoEm);if(f.cls==='vermelho')atras.push({o:o,f:f});else if(f.cls==='amarelo')venc.push({o:o,f:f});}else{f=farolSetor(setorRecebido(o),o);if(f.cls==='vermelho')atras.push({o:o,f:f});else if(f.cls==='amarelo'&&(f.dias||0)>=2)venc.push({o:o,f:f});}});atras.sort(function(a,b){return (b.f.dias||0)-(a.f.dias||0);});return {atras:atras,venc:venc};}
 function _updateBadgePrazo(){try{if(!sessao){var ex0=document.getElementById('__prazoBadge');if(ex0)ex0.style.display='none';return;}var sc=_prazoScan();var n=sc.atras.length+sc.venc.length;var b=document.getElementById('__prazoBadge');if(!b){b=document.createElement('div');b.id='__prazoBadge';b.title='Prazos por setor';b.onclick=function(){alertaPrazos(false);};b.style.cssText='position:fixed;right:16px;bottom:16px;z-index:9990;color:#fff;border-radius:24px;padding:9px 14px;font-family:Arial;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.3);cursor:pointer';document.body.appendChild(b);}if(n===0){b.innerHTML='⏰ Prazos OK';b.style.background='#1e8e5a';}else{b.innerHTML='⏰ '+(sc.atras.length?('<span style="background:#c0392b;padding:1px 7px;border-radius:10px">'+sc.atras.length+' atrasada'+(sc.atras.length>1?'s':'')+'</span>'):'')+(sc.venc.length?(' <span style="background:#b8860b;padding:1px 7px;border-radius:10px">'+sc.venc.length+' vencendo</span>'):'');b.style.background='#1c1c1c';}b.style.display='';}catch(e){}}
 function alertaPrazos(auto){if(!sessao)return;var sc=_prazoScan();if(auto&&!sc.atras.length&&!sc.venc.length)return;var ex=document.getElementById('__prazoModal');if(ex)ex.remove();function _linha(x,cor){var o=x.o;var view=_SETOR2VIEW[o.setor]||'';return '<div onclick="_prazoGo(\''+String(o.id)+'\',\''+view+'\')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-left:4px solid '+cor+';background:#fafafa;border-radius:6px;margin-bottom:5px;cursor:pointer"><b style="min-width:66px">'+(o.numOS||'')+'</b><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(o.cliente||'')+'</span><span class="tag" style="background:#eee;color:#333">'+(o.setor||'')+'</span><span style="color:'+cor+';font-weight:700;white-space:nowrap">'+(x.f.txt||'')+'</span></div>';}var body='';if(sc.atras.length){body+='<div style="font-weight:800;color:#c0392b;margin:6px 0 6px">⚠ Atrasadas ('+sc.atras.length+')</div>'+sc.atras.map(function(x){return _linha(x,'#c0392b');}).join('');}if(sc.venc.length){body+='<div style="font-weight:800;color:#b8860b;margin:12px 0 6px">⏳ Vencendo hoje ('+sc.venc.length+')</div>'+sc.venc.map(function(x){return _linha(x,'#b8860b');}).join('');}if(!body)body='<div style="padding:16px;text-align:center;color:#1e8e5a;font-weight:700">✔ Nenhuma O.S. vencendo ou atrasada nos seus setores.</div>';var html='<div class="modal-bg show" id="__prazoModal" style="z-index:100070"><div class="modal" style="max-width:560px"><div class="modal-head"><h3>⏰ Prazos por setor</h3><button class="x" onclick="document.getElementById(\'__prazoModal\').remove()">×</button></div><div class="modal-body" style="max-height:74vh;overflow:auto"><div class="hint" style="text-transform:none;letter-spacing:0;margin-bottom:8px">O.S. atrasadas ou no último dia do prazo (2 dias úteis por setor). Toque numa O.S. para abrir o setor.</div>'+body+'<div class="actions"><button class="btn-ghost" onclick="document.getElementById(\'__prazoModal\').remove()">Fechar</button></div></div></div></div>';var w=document.createElement('div');w.innerHTML=html;document.body.appendChild(w.firstChild);}
 function _prazoGo(id,view){var m=document.getElementById('__prazoModal');if(m)m.remove();if(view&&typeof irParaView==='function'){try{irParaView(view);}catch(e){}}}
 function _autoPrazo(){if(window.__prazoShown)return;window.__prazoShown=true;setTimeout(function(){try{alertaPrazos(true);_updateBadgePrazo();}catch(e){}},1500);}
 try{setInterval(_updateBadgePrazo,20000);}catch(_pe){}
-function osEmProducao(){return dados.filter(function(o){return o.setor!=='Expedido';});}
+function osEmProducao(){return dados.filter(function(o){return o.setor!=='Expedido'&&!osAguardandoEnvio(o);});}
 function renderGestao(){
   const SET=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição'];
   const emProd=osEmProducao();
@@ -1791,6 +1791,9 @@ function iniciarAvisosFin(){
 var finEnvioKnown=new Set();
 function temLoteParcial(o,st){return (o.itens||[]).some(function(it){return it.setorLote===st;});}
 function osExpParcial(o){return o.setor==='Qualidade'&&temLoteParcial(o,'Expedição');}
+/* O.S. com caixa fechada TOTAL (sem itens pendentes) aguardando o Financeiro liberar o envio:
+   sai da lista de trabalho da Expedição e do painel, mas continua setor=Expedição por baixo. */
+function osAguardandoEnvio(o){if(!o||!o.envioFinPendente)return false;if((o.setor||'')!=='Expedição')return false;var pend=false;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.confExp!=='Sim')pend=true;});});return !pend;}
 function loteVisExp(o,it){if(o.setor==='Qualidade')return it.setorLote==='Expedição';return true;}
 function fecharCaixaExp(){
   var id=document.getElementById('expId').value;var o=dados.find(function(x){return x.id===id;});if(!o)return;
@@ -3421,7 +3424,7 @@ function render(){
   }
 
   // EXPEDIÇÃO
-  const naEx=dados.filter(o=>o.setor==='Expedição'||osExpParcial(o));
+  const naEx=dados.filter(o=>(o.setor==='Expedição'||osExpParcial(o))&&!osAguardandoEnvio(o));
   const qEx=(document.getElementById('buscaEx').value||'').toLowerCase();
   const listaEx=naEx.filter(o=>!qEx||JSON.stringify(o).toLowerCase().includes(qEx));
   const tbEx=document.getElementById('tbodyEx');tbEx.innerHTML='';
@@ -3445,7 +3448,7 @@ function render(){
   document.getElementById('cnt-amarracao').textContent=naAm.length;
   document.getElementById('cnt-banho').textContent=dados.filter(o=>o.setor==='Banho').length;
   document.getElementById('cnt-qualidade').textContent=dados.filter(o=>o.setor==='Qualidade').length;
-  document.getElementById('cnt-expedicao').textContent=dados.filter(o=>o.setor==='Expedição'||osExpParcial(o)).length;
+  document.getElementById('cnt-expedicao').textContent=dados.filter(o=>(o.setor==='Expedição'||osExpParcial(o))&&!osAguardandoEnvio(o)).length;
   renderGestao();renderResumo();renderDiretoria();try{renderRelatorios();}catch(_re){}renderClientes();renderTroca();renderVerniz();renderVernizRelatorio();renderCatalogo();renderCobranca();renderUsuarios();renderPrecos();
   document.getElementById('cnt-reforco').textContent=reforcos.length;
   document.getElementById('cnt-tanque').textContent=TANQUES_SALDO.filter(function(t){return saldoTanque(t)<=2;}).length;
