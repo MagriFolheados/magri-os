@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-09v</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-13x</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-09v</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-13x</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1219,7 +1219,7 @@ let clientesReg=JSON.parse(localStorage.getItem(KEY_CLI)||'null');
 if(!clientesReg){clientesReg=CLIENTES.map(function(n){return {nome:n,cnpj:'',telefone:''};});localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
 function salvarClientes(){localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
 function clientesNomes(){var seen={},out=[];for(var i=0;i<clientesReg.length;i++){var n=clientesReg[i]&&clientesReg[i].nome;if(n&&!seen[n]){seen[n]=1;out.push(n);}}return out;}
-function salvar(){localStorage.setItem(KEY,JSON.stringify(dados));}
+function salvar(){try{_logMovs();}catch(e){}localStorage.setItem(KEY,JSON.stringify(dados));}
 async function buscarOSNuvem(){var inp=document.getElementById('buscaNuvemNum');var num=inp?(''+inp.value).trim():'';if(!num){alert('Digite o nº da O.S. que quer buscar.');return;}if(!window.__sb){alert('Busca na nuvem disponível só na versão online.');return;}var btn=document.getElementById('buscaNuvemBtn');var _t=btn?btn.textContent:'';if(btn){btn.disabled=true;btn.textContent='Buscando...';}try{var r=await window.__sb.from('ordens').select('dados').eq('num_os',num);if(r.error){alert('Erro na busca: '+r.error.message);return;}var found=(r.data||[]).map(function(x){return x.dados;}).filter(function(o){return o&&!o._del&&!o.cancelada;});if(!found.length){alert('O.S. '+num+' não encontrada na nuvem. Confira o número.');return;}var add=0;found.forEach(function(o){if(!dados.some(function(x){return String(x.id)===String(o.id);})){dados.push(o);add++;}});if(add){try{localStorage.setItem(KEY,JSON.stringify(dados));}catch(e){}}if(inp)inp.value='';render();alert('O.S. '+num+' carregada da nuvem. Ela já aparece na lista (fica visível até você recarregar a página).');}catch(e){alert('Erro na busca: '+((e&&e.message)||e));}finally{if(btn){btn.disabled=false;btn.textContent=_t||'🔎 Buscar na nuvem';}}}
 
 const feriadosFixos=['01-01','04-21','05-01','09-07','10-12','11-02','11-15','12-25'];
@@ -1481,6 +1481,70 @@ function prazoSetor(recISO,concl){
   if(rest<0)return {cls:'prazo-atraso',txt:'Atrasado '+Math.abs(rest)+'d út.'};
   if(rest===0)return {cls:'prazo-hoje',txt:'Vence hoje'};
   return {cls:'prazo-ok',txt:rest+'d út. restantes'};
+}
+
+/* ===== Registro de movimentação por setor (histórico) ===== */
+function _seedMov(o){
+  if(!o||o.__movSeed)return;
+  var ev=[['Comercial',o.dataEntrada],['Foto/Bruto',o.fbRecebidoEm],['Amarração',o.amRecebidoEm],['Banho',o.banhoRecebidoEm],['Qualidade',o.qualRecebidoEm],['Expedição',o.expRecebidoEm]];
+  if(o.verniz&&o.verniz.enviadoEm)ev.push(['Verniz',o.verniz.enviadoEm]);
+  if(o.verniz&&o.verniz.retornadoEm)ev.push(['Expedição',o.verniz.retornadoEm]);
+  if(o.finRecebidoEm)ev.push(['Financeiro',o.finRecebidoEm]);
+  if(o.dataSaida)ev.push(['Expedido',o.dataSaida]);
+  ev=ev.filter(function(e){return e[1];}).sort(function(a,b){return (''+a[1]).localeCompare(''+b[1]);});
+  if(!o.mov||!o.mov.length){o.mov=[];var prev='';ev.forEach(function(e){o.mov.push({data:e[1],de:prev,para:e[0],user:'',seed:true});prev=e[0];});}
+  o.__movSeed=true;
+}
+function _logMovs(){
+  try{(dados||[]).forEach(function(o){
+    if(!o||o.id==null||o._del)return;
+    _seedMov(o);
+    var s=o.setor||'';if(!s)return;
+    var last=(o.mov&&o.mov.length)?o.mov[o.mov.length-1]:null;
+    if(!last||last.para!==s){o.mov=o.mov||[];o.mov.push({ts:Date.now(),data:(typeof hojeISO==='function'?hojeISO():''),de:(last?last.para:''),para:s,user:(sessao&&sessao.user)||''});}
+  });}catch(e){console.warn('logMov',e);}
+}
+function _movStages(o){
+  _seedMov(o);
+  var hoje=(typeof hojeISO==='function')?hojeISO():new Date().toISOString().slice(0,10);
+  var aberto=(o.setor!=='Expedido'&&!o.dataSaida);
+  var mov=(o.mov||[]).slice().filter(function(m){return m&&m.data&&m.para;});
+  mov.sort(function(a,b){return (''+a.data).localeCompare(''+b.data);});
+  var out=[];
+  for(var i=0;i<mov.length;i++){
+    var isLast=(i===mov.length-1),fim;
+    if(isLast){if(mov[i].para==='Expedido')continue;fim=aberto?hoje:(o.dataSaida||hoje);}
+    else fim=mov[i+1].data;
+    out.push({setor:mov[i].para,de:mov[i].data,ate:fim,user:mov[i].user||'',atual:(isLast&&aberto)});
+  }
+  return out;
+}
+function relatorioMovOS(id){
+  var o=dados.find(function(x){return String(x.id)===String(id);});if(!o){alert('O.S. não encontrada.');return;}
+  function dco(a,b){var x=new Date(a+'T00:00:00'),y=new Date(b+'T00:00:00');return Math.round((y-x)/864e5);}
+  function dut(a,b){var x=new Date(a+'T00:00:00'),y=new Date(b+'T00:00:00'),c=0;while(x<y){x.setDate(x.getDate()+1);var g=x.getDay();if(g!==0&&g!==6)c++;}return c;}
+  var stages=_movStages(o);
+  if(!stages.length){alert('Ainda não há movimentações registradas para esta O.S.');return;}
+  var hoje=(typeof hojeISO==='function')?hojeISO():new Date().toISOString().slice(0,10);
+  var agg={};stages.forEach(function(s){var c=dco(s.de,s.ate),u=dut(s.de,s.ate);if(!agg[s.setor])agg[s.setor]={setor:s.setor,vis:0,corr:0,uteis:0};agg[s.setor].vis++;agg[s.setor].corr+=c;agg[s.setor].uteis+=u;});
+  var aggArr=Object.keys(agg).map(function(k){return agg[k];});
+  var maxC=Math.max.apply(null,aggArr.map(function(a){return a.corr;}));
+  var totC=aggArr.reduce(function(s,a){return s+a.corr;},0),totU=aggArr.reduce(function(s,a){return s+a.uteis;},0);
+  var prazo=o.prevEntregaISO||'',fimRef=o.dataSaida||hoje,atraso=prazo?dco(prazo,fimRef):null;
+  function f(x){return (typeof fmt==='function')?fmt(x):x;}
+  var aggRows=aggArr.slice().sort(function(a,b){return b.corr-a.corr;}).map(function(a){var g=(a.corr===maxC&&maxC>0);return '<tr'+(g?' class="gg"':'')+'><td>'+a.setor+(g?' <span class="tag">GARGALO</span>':'')+'</td><td class="n">'+a.vis+'</td><td class="n">'+a.corr+'</td><td class="n">'+a.uteis+'</td></tr>';}).join('');
+  var seqRows=stages.map(function(s,i){return '<tr><td class="n">'+(i+1)+'</td><td>'+s.setor+(s.atual?' <span class="now">(ainda aqui)</span>':'')+'</td><td>'+f(s.de)+'</td><td>'+f(s.ate)+'</td><td class="n">'+dco(s.de,s.ate)+'</td><td class="n">'+dut(s.de,s.ate)+'</td><td>'+(s.user||'')+'</td></tr>';}).join('');
+  var logo=(typeof logoTag==='function')?logoTag(44):'';
+  var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o relatório.');return;}
+  w.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Movimentação — O.S. '+(o.numOS||'')+'</title><style>*{box-sizing:border-box}body{font-family:Arial;margin:0;padding:18px;color:#1a1a1a}.h{border-bottom:2px solid #123a6b;padding-bottom:10px;margin-bottom:12px}h1{font-size:18px;color:#123a6b;display:inline-block;vertical-align:middle;margin:0 0 0 8px}h3{color:#123a6b;font-size:14px;margin:16px 0 4px}.s{font-size:13px;color:#555;margin-top:5px}.cards{display:flex;gap:10px;margin:10px 0;flex-wrap:wrap}.card{border:1px solid #ddd;border-radius:8px;padding:8px 14px;min-width:120px}.card .l{font-size:11px;color:#777}.card .v{font-size:19px;font-weight:800;color:#123a6b}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}th,td{border:1px solid #ccc;padding:5px 8px}th{background:#123a6b;color:#fff;font-size:11px}.n{text-align:right;font-variant-numeric:tabular-nums}tr.gg td{background:#fff3f3}.tag{background:#d32f2f;color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:9px;margin-left:6px}.now{color:#1f6f43;font-size:11px;font-weight:700}.p{margin:10px 0;text-align:center}button{background:#123a6b;color:#fff;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer}.obs{font-size:11px;color:#888;margin-top:8px}@media print{.p{display:none}}@page{size:A4;margin:12mm}</style></head><body>'+
+    '<div class="h">'+logo+'<h1>MAGRI FOLHEADOS — Movimentação da O.S.</h1><div class="s"><b>O.S.:</b> '+(o.numOS||'')+' &nbsp;|&nbsp; <b>Cliente:</b> '+(o.cliente||'')+' &nbsp;|&nbsp; <b>Setor atual:</b> '+((o.setor||'')+((o.setor!=='Expedido'&&!o.dataSaida)?'':' (concluída)'))+'</div></div>'+
+    '<div class="cards"><div class="card"><div class="l">Tempo total (corridos)</div><div class="v">'+totC+' dias</div></div><div class="card"><div class="l">Tempo total (úteis)</div><div class="v">'+totU+' dias</div></div><div class="card"><div class="l">Prazo de entrega</div><div class="v" style="font-size:15px">'+(prazo?f(prazo):'—')+'</div></div>'+(atraso!==null?('<div class="card"><div class="l">'+(atraso>0?'Atraso na entrega':'Folga')+'</div><div class="v" style="color:'+(atraso>0?'#c0392b':'#1f6f43')+'">'+(atraso>0?('+'+atraso):atraso)+' dias</div></div>'):'')+'</div>'+
+    '<div class="p"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'+
+    '<h3>Tempo por setor (somando idas e voltas)</h3><table><thead><tr><th>Setor</th><th class="n">Visitas</th><th class="n">Dias corridos</th><th class="n">Dias úteis</th></tr></thead><tbody>'+aggRows+'</tbody></table>'+
+    '<h3>Linha do tempo (sequência de movimentações)</h3><table><thead><tr><th class="n">#</th><th>Setor</th><th>Entrou em</th><th>Saiu em</th><th class="n">Dias corr.</th><th class="n">Dias úteis</th><th>Movido por</th></tr></thead><tbody>'+seqRows+'</tbody></table>'+
+    '<p class="obs">Movimentações registradas automaticamente a partir desta versão. Para O.S. anteriores, o histórico foi reconstruído a partir dos marcos de entrada em cada setor que o sistema já guardava.</p>'+
+    '</body></html>');
+  w.document.close();
 }
 
 function recalc(){const de=document.getElementById('dataEntrada').value;const hasCat=itensTmp.some(function(it){return it.compl&&it.compl.cataforetico;});var etq=document.getElementById('etiqueta').value;var man=document.getElementById('prevEntregaManual');if(man&&man.value){document.getElementById('prevEntrega').dataset.iso=man.value;document.getElementById('prevEntrega').value=fmt(man.value);}else{const pe=addDiasCorridos(de,7);document.getElementById('prevEntrega').value=pe?fmt(pe):'';document.getElementById('prevEntrega').dataset.iso=pe||'';}const pc=document.getElementById('prevCat');var pcm=document.getElementById('prevCatManual');if(pc){if(etq&&pcm&&pcm.value){pc.value=pcm.value;}else{pc.value=hasCat?addDiasUteis(de,10):'';}}}
@@ -2572,8 +2636,9 @@ function g3(v){return (v||0).toLocaleString('pt-BR',{minimumFractionDigits:3,max
 function catCorNome(cor){return cor||'';}
 function catBaseNome(it){var c=it.compl||{};var b=[];if(c.antialergico)b.push('Anti Alérgico');if(c.paladio)b.push('Paládio');if(c.niquel)b.push('Níquel');if(c.niquelfree)b.push('Níquel Free');if(c.antialergicoCortesia)b.push('Hipoalergênico (cortesia)');if(c.niquelCortesia)b.push('Níquel (cortesia)');if(c.niquelfreeCortesia)b.push('Níquel Free (cortesia)');return b.join(', ');}
 function catVernizNome(it){var c=it.compl||{};var v=[];if(c.cataforetico)v.push('Verniz Cataforético');if(c.protetor)v.push('Verniz Protetor');if(c.protetorCortesia)v.push('Verniz Protetor (cortesia)');return v.join(', ');}
+function catVernizNomeSub(it,sb){var v=[];if(subTemCat(it,sb))v.push('Verniz Cataforético');if(subTemProt(it,sb))v.push('Verniz Protetor');if(subTemCompl(it,sb,'protetorCortesia'))v.push('Verniz Protetor (cortesia)');return v.join(', ');}
 function expAdicionais(o){var lotes=o.itens||[];var any=function(k){return lotes.some(function(it){return it.compl&&it.compl[k];});};var chip=function(lbl,on){return '<span style="display:inline-block;margin:2px 4px;padding:3px 9px;border-radius:12px;font-size:12px;font-weight:700;background:'+(on?'#123a6b':'#e5e7eb')+';color:'+(on?'#fff':'#777')+'">'+lbl+': '+(on?'SIM':'nao')+'</span>';};var perLote=lotes.map(function(it,li){var vv=catVernizNome(it),bb=catBaseNome(it);var extra=[vv,bb].filter(Boolean).join(' \u00b7 ');return '<div style="font-size:12px"><b>Lote '+(li+1)+'</b> ('+(it.banho||'\u2014')+(camadaDoItem(it)>0?' \u00b7 Camada '+camadaDoItem(it):'')+')'+(extra?': '+extra:': \u2014')+'</div>';}).join('');var servs=(o.servicos||[]).map(function(x){return (x.servico||'')+(x.cortesia?' (cortesia)':'');}).filter(Boolean);var servHTML=servs.length?('<div style="font-size:12px;margin-top:4px"><b>Servi\u00e7os adicionais:</b> '+servs.join(', ')+'</div>'):'';return '<div style="grid-column:1/-1;background:#fff8e1;border:1px solid #f0d98a;border-radius:8px;padding:8px 10px;margin-top:6px"><div style="font-weight:800;color:#123a6b;margin-bottom:4px">Adicionais (confer\u00eancia)</div>'+chip('Catafor\u00e9tico',any('cataforetico'))+chip('Verniz Protetor',any('protetor'))+chip('Antial\u00e9rgico',any('antialergico'))+chip('N\u00edquel Free',any('niquelfree'))+'<div style="margin-top:6px">'+perLote+'</div>'+servHTML+'</div>';}
-function catBanhoUN(it,sb){var pesoNet=pesoSubEfetivo(sb)*fracMetalItem(it);var p=precoBanhoItem({peso:pesoNet,banho:it.banho,cotacao:it.cotacao,camada:it.camada,mo:it.mo,especial:it.especial,especialKg:it.especialKg,compl:it.compl}).total;var q=parseFloat(sb.qtd)||0;return q>0?p/q:0;}
+function catBanhoUN(it,sb){var pesoNet=pesoSubEfetivo(sb)*fracMetalItem(it);var _compl=Object.assign({},it.compl||{},{cataforetico:subTemCat(it,sb),protetor:subTemProt(it,sb),protetorCortesia:subTemCompl(it,sb,'protetorCortesia')});var p=precoBanhoItem({peso:pesoNet,banho:it.banho,cotacao:it.cotacao,camada:it.camada,mo:it.mo,especial:it.especial,especialKg:it.especialKg,compl:_compl}).total;var q=parseFloat(sb.qtd)||0;return q>0?p/q:0;}
 function buildCatalogoHTML(o){
   var cards='';
   var _cn=0;(o.itens||[]).forEach(function(it,li){(it.subitens||[]).forEach(function(sb){_cn++;
@@ -2588,7 +2653,7 @@ function buildCatalogoHTML(o){
       '<div class="l"><b>Preço do Bruto UN:</b> R$ '+g2(brutoUN)+' &nbsp;|&nbsp; <b>Preço do banho UN:</b> R$ '+g2(banhoUN)+'</div>'+
       '<div class="l"><b>Qtd. de Peças:</b> '+qtd+'</div>'+
       '<div class="l"><b>Serviço:</b> '+(it.banho||'-')+(it.banho==='Ouro Camada'?(' &middot; <b>'+(it.camada||'-')+' milésimos</b>'+((it.mo!==''&&it.mo!=null)?(' (M.O. '+it.mo+')'):'')):'')+'</div>'+
-      '<div class="l"><b>Base:</b> '+(catBaseNome(it)||'-')+', <b>Cor:</b> '+(catCorNome(it.cor)||'-')+', <b>Verniz:</b> '+(catVernizNome(it)||'-')+'</div>'+
+      '<div class="l"><b>Base:</b> '+(catBaseNome(it)||'-')+', <b>Cor:</b> '+(catCorNome(it.cor)||'-')+', <b>Verniz:</b> '+(catVernizNomeSub(it,sb)||'-')+'</div>'+
       '<div class="tot">Valor Aprox. Bruto + Banho: R$ '+g2(finalUN)+'</div>'+
     '</div></div>';
   });});
@@ -2622,7 +2687,7 @@ function buildConfExpHTML(o){
         '<div class="l"><b>Código:</b> '+((sb.codigo)||'-')+' &nbsp;|&nbsp; <b>Peça:</b> '+(sb.tipoPeca||'-')+(extra.length?(' <span style="color:#a9862f">('+extra.join(', ')+')</span>'):'')+'</div>'+
         '<div class="l"><b>Qtd:</b> '+qtd+(sb.unidade&&sb.unidade!=='Peça'?(' '+sb.unidade):' pç')+' &nbsp;|&nbsp; <b>Peso UN:</b> '+g2(pesoU*1000)+' g &nbsp;|&nbsp; <b>Total:</b> '+g2(pesoT*1000)+' g</div>'+
         '<div class="l"><b>Serviço:</b> '+servTxt+'</div>'+
-        '<div class="l"><b>Cor:</b> '+(catCorNome(it.cor)||'-')+' &nbsp;|&nbsp; <b>Verniz:</b> '+(catVernizNome(it)||'-')+'</div>'+
+        '<div class="l"><b>Cor:</b> '+(catCorNome(it.cor)||'-')+' &nbsp;|&nbsp; <b>Verniz:</b> '+(catVernizNomeSub(it,sb)||'-')+'</div>'+
         (tratTxt?('<div class="l"><b>Tratamentos:</b> '+tratTxt+'</div>'):'')+
         (sb.obs?('<div class="obs">📝 '+sb.obs+'</div>'):'')+
         (sb.obsExp?('<div class="obs" style="background:#eef4ff;border-color:#9db9e6">🚚 '+sb.obsExp+'</div>'):'')+
@@ -2795,7 +2860,7 @@ function buildOrcamentoHTML(o){
   '</body></html>';
 }
 function gerarOrcamento(id){var o=dados.find(function(x){return x.id===id;});if(!o)return;if(!(o.itens||[]).length){alert('Cadastre ao menos um item na OS para gerar o orçamento.');return;}var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir o orçamento.');return;}w.document.write(buildOrcamentoHTML(o));w.document.close();}
-function acaoCom(sel,id){var v=sel.value;try{sel.selectedIndex=0;}catch(e){}if(!v)return;switch(v){case 'orcamento':gerarOrcamento(id);break;case 'editar':editarCom(id);break;case 'admin':abrirFotosAdmin(id);break;case 'osprod':gerarFormularioOS(id);break;case 'cat':abrirCatComercial(id);break;case 'envfin':comEnviarFoto(id);break;case 'caneta':abrirCaneta(id);break;case 'ciente':marcarVistoCom(id);break;case 'standby':marcarStandby(id);break;case 'standbyoff':tirarStandby(id);break;case 'cancelar':cancelarOS(id);break;case 'excluir':excluirCom(id);break;}}
+function acaoCom(sel,id){var v=sel.value;try{sel.selectedIndex=0;}catch(e){}if(!v)return;switch(v){case 'orcamento':gerarOrcamento(id);break;case 'editar':editarCom(id);break;case 'admin':abrirFotosAdmin(id);break;case 'osprod':gerarFormularioOS(id);break;case 'cat':abrirCatComercial(id);break;case 'envfin':comEnviarFoto(id);break;case 'caneta':abrirCaneta(id);break;case 'ciente':marcarVistoCom(id);break;case 'movos':relatorioMovOS(id);break;case 'standby':marcarStandby(id);break;case 'standbyoff':tirarStandby(id);break;case 'cancelar':cancelarOS(id);break;case 'excluir':excluirCom(id);break;}}
 function marcarStandby(id){if(!sessao||(sessao.role!=='Comercial'&&sessao.role!=='Financeiro'&&sessao.role!=='Admin')){alert('Apenas Comercial, Financeiro ou Admin pode colocar em Standby.');return;}var o=dados.find(function(x){return String(x.id)===String(id);});if(!o)return;var m=prompt('Motivo do Standby (aguardando cliente):','');if(m===null)return;o.standby=true;o.standbyMotivo=(''+m).trim();o.standbyDesde=hojeISO();o.standbyPor=(sessao&&sessao.user)||'';o._ts=Date.now();try{salvar();}catch(e){}try{render();}catch(e){}alert('O.S. '+(o.numOS||'')+' marcada como STANDBY.\nEla continua visível, mas sai das estatísticas de atraso (farol e painel).');}
 function tirarStandby(id){if(!sessao||(sessao.role!=='Comercial'&&sessao.role!=='Financeiro'&&sessao.role!=='Admin')){alert('Apenas Comercial, Financeiro ou Admin pode tirar do Standby.');return;}var o=dados.find(function(x){return String(x.id)===String(id);});if(!o)return;if(!confirm('Tirar a O.S. '+(o.numOS||'')+' do Standby e retornar ao processo?\n\nO prazo do setor atual será reiniciado (recomeça a contar a partir de hoje). A data de entrega ao cliente não muda.'))return;o.standby=false;o.standbyRetornoEm=hojeISO();var campo={'Foto/Bruto':'fbRecebidoEm','Amarração':'amRecebidoEm','Banho':'banhoRecebidoEm','Qualidade':'qualRecebidoEm','Expedição':'expRecebidoEm'}[o.setor];if(campo)o[campo]=hojeISO();if(o.setor==='Verniz'&&o.verniz)o.verniz.enviadoEm=hojeISO();o._ts=Date.now();try{salvar();}catch(e){}try{render();}catch(e){}alert('O.S. '+(o.numOS||'')+' voltou ao processo. Prazo do setor reiniciado.');}
 async function abrirCatComercial(id){
@@ -3321,7 +3386,7 @@ function render(){
   const listaC=dados.filter(o=>(!qC||JSON.stringify(o).toLowerCase().includes(qC))&&(_cs==='todos'||(o.setor||'Comercial')===_cs)&&(_cst==='todos'||(o.statusComercial||'')===_cst)&&(_cet==='todos'||(_cet==='__sem'?!(o.etiqueta):((o.etiqueta||'')===_cet)))&&_prazoMatch(o));
   document.getElementById('emptyCom').style.display=listaC.length?'none':'block';
   ordenarOS(listaC).forEach(function(o){const sp=statusEntrega(o);const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+''+etqNum(o)+''+((o.liberadaProducaoEm&&!o.comercialVisto)?' <span class="tag tag-prioridade" style="background:#1f6f43;color:#fff">Liberada p/ produção</span>':'')+'</td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+kg2g(o.peso)+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><select class="acsel" title="Ações da O.S." style="min-width:104px" onchange="acaoCom(this,\''+o.id+'\')"><option value="">Ações ▾</option><option value="orcamento">Orçamento</option><option value="editar">Editar</option>'+((sessao&&sessao.role==='Admin')?'<option value="admin">🛠 Admin</option>':'')+'<option value="osprod">O.S. Produção</option>'+'<option value="cat">Verniz por peça (Cat / Protetor)</option>'+(o.setor==='Comercial'?'<option value="envfin">Enviar p/ Financeiro</option>':'')+'<option value="caneta">'+(o.pendCaneta?'⚠ Caneta (pendente)':'Caneta')+'</option>'+((o.liberadaProducaoEm&&!o.comercialVisto)?'<option value="ciente">Ciente (liberação)</option>':'')+((sessao&&(sessao.role==='Comercial'||sessao.role==='Financeiro'||sessao.role==='Admin'))?(o.standby?'<option value="standbyoff">▶ Tirar do Standby (volta ao processo)</option>':'<option value="standby">⏸ Standby (aguardando cliente)</option>'):'')+'<option value="cancelar">Cancelar O.S.</option><option value="excluir">Excluir O.S.</option></select></td>';
+    tr.innerHTML='<td>'+fmt(o.dataEntrada)+'</td><td>'+retrabTag(o)+''+etqNum(o)+''+((o.liberadaProducaoEm&&!o.comercialVisto)?' <span class="tag tag-prioridade" style="background:#1f6f43;color:#fff">Liberada p/ produção</span>':'')+'</td><td>'+tagHtml(o.etiqueta)+'</td><td>'+(o.cliente||'')+'</td><td>'+kg2g(o.peso)+'</td><td><span class="st '+stCls(o.statusComercial)+'">'+(o.statusComercial||'')+'</span></td><td>'+catResumo(o)+'</td><td>'+fmt(o.prevEntregaISO)+'</td><td><span class="prazo '+sp.cls+'">'+sp.txt+'</span></td><td><b>'+brl(totalOS(o))+'</b></td><td>'+(o.setor||'Comercial')+'</td><td class="row-act"><select class="acsel" title="Ações da O.S." style="min-width:104px" onchange="acaoCom(this,\''+o.id+'\')"><option value="">Ações ▾</option><option value="orcamento">Orçamento</option><option value="editar">Editar</option>'+((sessao&&sessao.role==='Admin')?'<option value="admin">🛠 Admin</option>':'')+'<option value="osprod">O.S. Produção</option>'+'<option value="cat">Verniz por peça (Cat / Protetor)</option>'+'<option value="movos">⏱ Movimentação / tempo por setor</option>'+(o.setor==='Comercial'?'<option value="envfin">Enviar p/ Financeiro</option>':'')+'<option value="caneta">'+(o.pendCaneta?'⚠ Caneta (pendente)':'Caneta')+'</option>'+((o.liberadaProducaoEm&&!o.comercialVisto)?'<option value="ciente">Ciente (liberação)</option>':'')+((sessao&&(sessao.role==='Comercial'||sessao.role==='Financeiro'||sessao.role==='Admin'))?(o.standby?'<option value="standbyoff">▶ Tirar do Standby (volta ao processo)</option>':'<option value="standby">⏸ Standby (aguardando cliente)</option>'):'')+'<option value="cancelar">Cancelar O.S.</option><option value="excluir">Excluir O.S.</option></select></td>';
     tbC.appendChild(tr);});
   const total=dados.length,entreg=dados.filter(o=>o.statusComercial==='Entregue').length,receb=dados.filter(o=>o.statusComercial==='Recebido').length;
   let atras=0,hoje=0;dados.forEach(function(o){const s=statusEntrega(o);if(s.txt.indexOf('Atrasada')===0)atras++;if(s.txt==='Vence hoje')hoje++;});
