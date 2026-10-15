@@ -298,8 +298,10 @@ function saldoAtual(){ return saldoDisponivel(); }
 const FORMAS_PGTO=['Dinheiro','PIX','Transferência','Cartão de Débito','Cartão de Crédito','Cheque','Boleto','Outro'];
 function baixasDe(l){return l.baixas||[];}
 function recebidoTitulo(l){return baixasDe(l).reduce((s,b)=>s+(Number(b.valor)||0),0);}
-function saldoTitulo(l){return Math.max(0,(Number(l.valor)||0)-recebidoTitulo(l));}
-function atualizarStatusTitulo(l){const rec=recebidoTitulo(l);const tot=Number(l.valor)||0;if(rec<=0.0001){l.status='pendente';l.pagamento=null;}else if(rec>=tot-0.005){l.status='pago';const bs=baixasDe(l);l.pagamento=bs.length?bs[bs.length-1].data:hoje();}else{l.status='parcial';l.pagamento=null;}}
+function descontoTitulo(l){return baixasDe(l).reduce((s,b)=>s+(Number(b.desconto)||0),0);}
+function abatidoTitulo(l){return recebidoTitulo(l)+descontoTitulo(l);}
+function saldoTitulo(l){return Math.max(0,(Number(l.valor)||0)-abatidoTitulo(l));}
+function atualizarStatusTitulo(l){const ab=abatidoTitulo(l);const tot=Number(l.valor)||0;if(ab<=0.0001){l.status='pendente';l.pagamento=null;}else if(ab>=tot-0.005){l.status='pago';const bs=baixasDe(l);l.pagamento=bs.length?bs[bs.length-1].data:hoje();}else{l.status='parcial';l.pagamento=null;}}
 function totalReceber(){ return DB.lancamentos.filter(l=>l.tipo==='receita'&&l.status!=='pago').reduce((s,l)=>s+saldoTitulo(l),0); }
 function totalPagar(){ return DB.lancamentos.filter(l=>l.tipo==='despesa'&&l.status!=='pago').reduce((s,l)=>s+saldoTitulo(l),0); }
 function vencidosReceber(){ return DB.lancamentos.filter(l=>l.tipo==='receita'&&estaVencido(l)).reduce((s,l)=>s+saldoTitulo(l),0); }
@@ -322,7 +324,7 @@ function dreDados(ini, fim){
   const addItem=(gid,nome,val)=>{ acc[gid].total+=val; acc[gid].itens[nome]=(acc[gid].itens[nome]||0)+val; };
   DB.lancamentos.forEach(l=>{
     if(l.data<ini || l.data>fim) return;
-    const j=Number(l.juros)||0, dc=Number(l.desconto)||0;
+    const j=Number(l.juros)||0, dc=(Number(l.desconto)||0)+descontoTitulo(l);
     if(l.tipo==='receita'){ if(j) addItem('receita_financeira','Juros/multa recebidos',j); if(dc) addItem('desp_financeira','Descontos concedidos',dc); }
     else { if(j) addItem('desp_financeira','Juros/multa pagos',j); if(dc) addItem('receita_financeira','Descontos obtidos',dc); }
   });
@@ -389,25 +391,28 @@ function modalBaixa(id){
   if(!contas.length){ toast('Cadastre ao menos uma conta (banco/caixa) no Fluxo de Caixa.', true); go('caixa'); return; }
   const isRec=l.tipo==='receita';
   const rec=recebidoTitulo(l), saldo=saldoTitulo(l), bs=baixasDe(l);
-  const linhasBx = bs.length? bs.map(b=>`<tr><td>${dataBR(b.data)}</td><td>${esc(b.forma||'')}${b.obs?`<div class="hint" style="font-size:11px">📝 ${esc(b.obs)}</div>`:''}</td><td>${esc(nomeConta(b.contaId)||'')}</td><td class="num"><b>${fmt(b.valor)}</b></td><td class="num"><button class="icon-btn" title="Excluir" onclick="delBaixa(${id},'${b.id}')">🗑</button></td></tr>`).join('') : `<tr><td colspan="5" class="hint">Nenhum ${isRec?'recebimento':'pagamento'} lançado.</td></tr>`;
+  const linhasBx = bs.length? bs.map(b=>`<tr><td>${dataBR(b.data)}</td><td>${esc(b.forma||'')}${b.obs?`<div class="hint" style="font-size:11px">📝 ${esc(b.obs)}</div>`:''}${b.desconto>0?`<div class="hint" style="font-size:11px">💸 desconto ${fmt(b.desconto)}</div>`:''}</td><td>${esc(nomeConta(b.contaId)||'')}</td><td class="num"><b>${fmt(b.valor)}</b></td><td class="num"><button class="icon-btn" title="Excluir" onclick="delBaixa(${id},'${b.id}')">🗑</button></td></tr>`).join('') : `<tr><td colspan="5" class="hint">Nenhum ${isRec?'recebimento':'pagamento'} lançado.</td></tr>`;
   abrirModal(`
     <div class="modal-head"><h3>${isRec?'Receber título':'Pagar título'}</h3><button class="close-x" onclick="fecharModal()">×</button></div>
     <div class="modal-body">
       <p class="hint" style="margin-bottom:10px">${esc(l.descricao)}${l.documento?' · doc '+esc(l.documento):''}</p>
-      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
         <div class="card" style="padding:10px"><div class="hint">Valor do título</div><b>${fmt(l.valor)}</b></div>
         <div class="card" style="padding:10px"><div class="hint">${isRec?'Recebido':'Pago'}</div><b>${fmt(rec)}</b></div>
+        <div class="card" style="padding:10px"><div class="hint">Desconto</div><b>${fmt(descontoTitulo(l))}</b></div>
         <div class="card" style="padding:10px"><div class="hint">Saldo</div><b style="color:${saldo>0.005?'var(--amber)':'var(--green)'}">${fmt(saldo)}</b></div>
       </div>
       <table style="margin-bottom:12px"><thead><tr><th>Data</th><th>Forma</th><th>Conta</th><th class="num">Valor</th><th></th></tr></thead><tbody>${linhasBx}</tbody></table>
       ${saldo>0.005?`
       <div class="form-grid">
         <div class="field"><label>Valor (R$) *</label><input id="bxValor" type="number" step="0.01" value="${saldo.toFixed(2)}"></div>
+        <div class="field"><label>Desconto (R$)</label><input id="bxDescB" type="number" step="0.01" value="0"></div>
         <div class="field"><label>Forma de pagamento *</label><select id="bxForma">${FORMAS_PGTO.map(fo=>`<option>${fo}</option>`).join('')}</select></div>
         <div class="field"><label>${isRec?'Conta que recebeu':'Conta que pagou'} *</label><select id="bxConta">${contas.map(c=>`<option value="${c.id}">${esc(c.nome)}</option>`).join('')}</select></div>
         <div class="field"><label>Data</label><input id="bxData" type="date" value="${hoje()}"></div>
         <div class="field" style="grid-column:1/-1"><label>Observação</label><input id="bxObs" type="text" placeholder="Ex.: entrada à vista / 1ª parcela"></div>
       </div>
+      <div class="hint" style="margin-top:8px">💡 Com desconto: informe em <b>Valor</b> o que foi realmente ${isRec?'recebido':'pago'} e em <b>Desconto</b> o abatimento. Juntos (valor + desconto) quitam o saldo.</div>
       <div style="text-align:right;margin-top:10px"><button class="btn primary" onclick="addBaixa(${id})">+ Adicionar ${isRec?'recebimento':'pagamento'}</button></div>
       `:`<div class="help-box" style="text-align:center">✓ Título quitado.</div>`}
     </div>
@@ -417,23 +422,23 @@ function modalBaixa(id){
 function addBaixa(id){
   const l=DB.lancamentos.find(x=>x.id===id); if(!l) return;
   const valor=parseFloat(document.getElementById('bxValor').value)||0;
-  if(valor<=0){ toast('Informe o valor.', true); return; }
+  const descEl=document.getElementById('bxDescB'); const desconto=descEl?(parseFloat(descEl.value)||0):0;
+  if(valor<=0 && desconto<=0){ toast('Informe o valor recebido ou o desconto.', true); return; }
   const saldo=saldoTitulo(l);
-  if(valor>saldo+0.005){ toast('Valor maior que o saldo ('+fmt(saldo)+').', true); return; }
+  if(valor+desconto>saldo+0.005){ toast('Valor + desconto ('+fmt(valor+desconto)+') maior que o saldo ('+fmt(saldo)+').', true); return; }
   const forma=document.getElementById('bxForma').value;
   const contaId=parseInt(document.getElementById('bxConta').value);
   const data=document.getElementById('bxData').value||hoje();
   const obs=document.getElementById('bxObs').value||'';
   const bid=uid('bx');
   const desc=l.descricao+' — '+forma+(obs?(' ('+obs+')'):'');
-  let mov;
-  if(l.tipo==='receita') mov=movEntrada(contaId,valor,desc,data,{origem:'lancamento',origemId:id,categoria:l.categoria,forma:forma});
-  else mov=movSaida(contaId,valor,desc,data,{origem:'lancamento',origemId:id,categoria:l.categoria,forma:forma});
+  let mov=null;
+  if(valor>0){ if(l.tipo==='receita') mov=movEntrada(contaId,valor,desc,data,{origem:'lancamento',origemId:id,categoria:l.categoria,forma:forma}); else mov=movSaida(contaId,valor,desc,data,{origem:'lancamento',origemId:id,categoria:l.categoria,forma:forma}); }
   if(!l.baixas) l.baixas=[];
-  l.baixas.push({id:bid,valor:valor,data:data,forma:forma,contaId:contaId,obs:obs,movId:mov.id});
+  l.baixas.push({id:bid,valor:valor,desconto:desconto,data:data,forma:forma,contaId:contaId,obs:obs,movId:mov?mov.id:null});
   atualizarStatusTitulo(l);
   salvar(); render(); modalBaixa(id);
-  toast((l.tipo==='receita'?'Recebimento':'Pagamento')+' de '+fmt(valor)+' lançado.');
+  toast((l.tipo==='receita'?'Recebimento':'Pagamento')+' de '+fmt(valor)+(desconto>0?(' (+ desconto '+fmt(desconto)+')'):'')+' lançado.');
 }
 function delBaixa(id,bid){
   const l=DB.lancamentos.find(x=>x.id===id); if(!l||!l.baixas) return;
