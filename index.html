@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-15ab</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-15ac</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-15ab</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-15ac</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2048,7 +2048,7 @@ function buildEtiquetaBrutoHTML(o,opt){
   +'.etq{width:42.5mm;height:26.5mm;box-sizing:border-box;font-family:Arial,sans-serif;color:#000;overflow:hidden;border:0.4mm solid #000;display:flex;flex-direction:column;margin:2.6mm 2mm 0 0.5mm}'
   +'.hd{display:flex;justify-content:flex-start;align-items:baseline;gap:3mm;font-weight:bold;font-style:italic;font-size:10.5pt;padding:0.3mm 1.2mm;border-bottom:0.4mm solid #000}'
   +'.hd .num{font-style:italic}'
-  +'.dt{font-weight:bold;font-style:italic;font-size:7pt;padding:0.3mm 1.2mm;border-bottom:0.4mm solid #000}'
+  +'.dt{font-weight:bold;font-style:italic;font-size:7pt;padding:0.3mm 1.2mm;border-bottom:0.4mm solid #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
   +'table.t{width:100%;border-collapse:collapse;flex:1}'
   +'table.t td{'+cell+'}table.t td.v{text-align:right;font-weight:bold}'
   +'.sub{font-size:6pt;padding:0.2mm 1.2mm;border-top:0.3mm solid #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
@@ -2057,14 +2057,13 @@ function buildEtiquetaBrutoHTML(o,opt){
   +'</style></head><body>'
   +'<div class="etq">'
   +'<div class="hd"><span>O.S.</span><span class="num">'+num+'</span></div>'
-  +'<div class="dt">'+dtstr+'</div>'
+  +'<div class="dt">'+dtstr+(opt.sub?(' · '+opt.sub):'')+'</div>'
   +'<table class="t">'
   +'<tr><td>Cor</td><td class="v">'+(opt.cor||'')+'</td></tr>'
   +'<tr><td>Camada</td><td class="v">'+(opt.cam||'')+'</td></tr>'
   +'<tr><td>Ant</td><td class="v">'+(opt.anti||'')+'</td></tr>'
   +'<tr><td>Verniz</td><td class="v">'+(opt.vern||'')+'</td></tr>'
   +'</table>'
-  +(opt.sub?('<div class="sub">'+opt.sub+'</div>'):'')
   +'</div>'
   +'<div class="no-print"><button onclick="window.print()">Imprimir</button><div style="margin-top:10px;color:#555;line-height:1.6"><b>Impressora Elgin L42 Pro Full — etiqueta 45 × 30 mm:</b><br>1. No driver da Elgin, defina o tamanho da etiqueta <b>45 mm (largura) × 30 mm (altura)</b> e o gap da sua etiqueta.<br>2. Na impressão do Chrome: <b>Margens = Nenhuma</b>, <b>Escala = 100</b>, desmarque <b>Cabeçalhos e rodapés</b> e selecione a <b>Elgin L42</b>.</div></div>'
   +'</body></html>';
@@ -2072,12 +2071,14 @@ function buildEtiquetaBrutoHTML(o,opt){
 function abrirEtiquetaBruto(o,opt){var w=window.open('','_blank');if(!w){alert('Permita pop-ups para abrir a etiqueta.');return;}w.document.write(buildEtiquetaBrutoHTML(o,opt));w.document.close();}
 function gerarEtiqueta(){
   const o=dados.find(x=>x.id===document.getElementById('fbId').value)||{};
+  var _flt=document.getElementById('sbFiltroLote');var _sel=_flt?_flt.value:'';
+  if(_sel!==''&&_sel!=null){ gerarEtiquetaLote(parseInt(_sel)); return; }
   abrirEtiquetaBruto(o,{cor:document.getElementById('fbCor').value,cam:document.getElementById('fbCamada').value,anti:document.getElementById('fbAnti').value,vern:document.getElementById('fbVerniz').value,nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value});
 }
 function gerarEtiquetaLote(idx){
   var o=osAtualFb();if(!o)return;var it=(o.itens||[])[idx];if(!it)return;
   var anti=(it.compl&&it.compl.antialergico)?'SIM':'0';
-  abrirEtiquetaBruto(o,{cor:it.cor||'',cam:etqCamadaItem(it),anti:anti,vern:etqVernizItem(it),nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value,sub:'Lote '+(idx+1)+(it.produto?(' — '+it.produto):'')+' · '+(it.banho||'')});
+  abrirEtiquetaBruto(o,{cor:it.cor||'',cam:etqCamadaItem(it),anti:anti,vern:etqVernizItem(it),nota:document.getElementById('fbNota').value,letra:document.getElementById('fbLetra').value,sub:'Lote '+(idx+1)+(it.produto?(' '+it.produto):'')});
 }
 function fotoSrc(v){if(v&&(''+v).indexOf('fid:')===0){return (window.__fotos&&window.__fotos[(''+v).slice(4)])||'';}return v||'';}
 function fotoThumb(ref){if(!ref)return '<div class="thumb-ph">F</div>';var src=fotoSrc(ref);if(src)return '<img src="'+src+'" class="thumb" onclick="verFoto(\''+ref+'\')">';if((''+ref).indexOf('fid:')===0){var fid=(''+ref).slice(4);return '<img data-fid="'+fid+'" class="thumb" style="background:#eee" onclick="verFoto(\''+ref+'\')">';}return '<div class="thumb-ph">F</div>';}
