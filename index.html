@@ -204,7 +204,7 @@
       <div class="nav-item" data-view="usuarios"><span class="ico">US</span> Usuários <span class="cnt" id="cnt-usuarios">0</span></div>
       <div class="nav-item" data-view="precos"><span class="ico">SP</span> Serviços/Preços</div>
     </nav>
-    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-15y</b></div>
+    <div class="foot"><div id="userInfo" style="color:#c8a24a;font-weight:700;margin-bottom:6px;font-size:12px"></div><button onclick="trocarSenha()" style="background:#2f3e4d;color:#dbe7f2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Trocar senha</button><button onclick="logout()" style="background:#5a2320;color:#ffd7d2;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Sair</button><button onclick="document.getElementById('logoInput').click()" style="background:#3a3a3a;color:#ccc;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;width:100%;margin-bottom:8px">Definir logo da empresa</button><input type="file" id="logoInput" accept="image/*" style="display:none">Dados salvos neste navegador.<br>Exporte para Excel como backup.<br><b id="verTagSide" style="color:#c8a24a">v2026-10-15z</b></div>
   </aside>
   <div class="main">
     <div class="topbar"><button class="mobmenu" aria-label="Menu" onclick="document.querySelector('.side').classList.toggle('open');document.getElementById('mobback').classList.toggle('show')">&#9776;</button><h1 id="viewTitle">Comercial</h1><span class="desc" id="viewDesc">Cadastro e acompanhamento de Ordens de Serviço</span></div>
@@ -667,7 +667,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-15y</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-15z</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2042,16 +2042,16 @@ function renderEtqCard(o,opt){
 function buildEtiquetaBrutoHTML(o,opt){
   var dt=new Date();var dtstr=fmt(hojeISO())+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0');
   var num=(opt.nota||o.numOS||'')+(opt.letra||'');
-  var cell='border:0.3mm solid #000;font-size:10pt;padding:0.2mm 1.4mm;line-height:1.05;';
+  var cell='border:0.3mm solid #000;font-size:9.5pt;padding:0.2mm 1.2mm;line-height:1.05;';
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Etiqueta '+num+'</title><style>'
   +'@page{size:45mm 30mm;margin:0}html,body{margin:0;padding:0;background:#fff}'
-  +'.etq{width:45mm;height:30mm;box-sizing:border-box;font-family:Arial,sans-serif;color:#000;overflow:hidden;border:0.4mm solid #000;display:flex;flex-direction:column}'
-  +'.hd{display:flex;justify-content:space-between;align-items:baseline;gap:2mm;font-weight:bold;font-style:italic;font-size:11.5pt;padding:0.3mm 1.4mm;border-bottom:0.4mm solid #000}'
+  +'.etq{width:42.5mm;height:26.5mm;box-sizing:border-box;font-family:Arial,sans-serif;color:#000;overflow:hidden;border:0.4mm solid #000;display:flex;flex-direction:column;margin:1.6mm auto 0}'
+  +'.hd{display:flex;justify-content:space-between;align-items:baseline;gap:2mm;font-weight:bold;font-style:italic;font-size:10.5pt;padding:0.3mm 1.2mm;border-bottom:0.4mm solid #000}'
   +'.hd .num{font-style:italic}'
-  +'.dt{font-weight:bold;font-style:italic;font-size:8pt;padding:0.3mm 1.4mm;border-bottom:0.4mm solid #000}'
+  +'.dt{font-weight:bold;font-style:italic;font-size:7pt;padding:0.3mm 1.2mm;border-bottom:0.4mm solid #000}'
   +'table.t{width:100%;border-collapse:collapse;flex:1}'
   +'table.t td{'+cell+'}table.t td.v{text-align:right;font-weight:bold}'
-  +'.sub{font-size:6.5pt;padding:0.2mm 1.4mm;border-top:0.3mm solid #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+  +'.sub{font-size:6pt;padding:0.2mm 1.2mm;border-top:0.3mm solid #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
   +'.no-print{margin:10px;font-family:Arial;font-size:12px}.no-print button{background:#c8a24a;border:none;padding:9px 18px;border-radius:6px;font-weight:bold;cursor:pointer}'
   +'@media print{.no-print{display:none}}'
   +'</style></head><body>'
