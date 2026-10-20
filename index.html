@@ -1370,22 +1370,38 @@ function dirMesHoje(){var d=new Date();dirYM=d.getFullYear()+'-'+String(d.getMon
 function _loadHtml2Canvas(cb){if(window.html2canvas){cb();return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';s.onload=function(){cb();};s.onerror=function(){alert('Não consegui carregar o gerador de imagem (precisa de internet).');var b=document.getElementById('btnImgDir');if(b){b.textContent='📷 Gerar imagem p/ WhatsApp';b.disabled=false;}};document.head.appendChild(s);}
 function _baixarImgDir(blob,nome){try{var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(a.href);},1500);}catch(e){}alert('Imagem salva (download). Agora é só anexar no WhatsApp e enviar à diretoria.');}
 function gerarImagemDiretoria(){
-  var el=document.getElementById('view-diretoria');if(!el)return;
   var btn=document.getElementById('btnImgDir');if(btn){btn.textContent='Gerando imagem...';btn.disabled=true;}
+  var mes=((document.getElementById('dirMesLabel')||{}).textContent||'');
+  var logo=(typeof logoData!=='undefined'&&logoData)?('<img src="'+logoData+'" style="height:42px;vertical-align:middle;margin-right:4px">'):'';
+  var kpi=(document.getElementById('dir-cards')||{}).innerHTML||'';
+  var farol=(document.getElementById('dirFarol')||{}).innerHTML||'';
+  var trs=document.querySelectorAll('#dirClientes tr');var rankTbl='';for(var i=0;i<Math.min(10,trs.length);i++){rankTbl+='<tr style="border-bottom:1px solid #eee">'+trs[i].innerHTML+'</tr>';}
+  if(!rankTbl)rankTbl='<tr><td style="padding:8px;color:#888">Sem banhos no mês.</td></tr>';
+  var rep=document.createElement('div');rep.id='__dirReport';
+  rep.style.cssText='position:fixed;left:-10000px;top:0;width:560px;background:#fff;color:#1a1a1a;font-family:Arial,sans-serif;padding:20px;box-sizing:border-box;z-index:-1';
+  rep.innerHTML='<div style="display:flex;align-items:center;gap:12px;border-bottom:3px solid #123a6b;padding-bottom:10px;margin-bottom:14px">'+logo+'<div><div style="font-size:21px;font-weight:800;color:#123a6b;line-height:1.1">Diretoria</div><div style="font-size:15px;font-weight:700;color:#8a6d1f">'+mes+'</div></div><div style="margin-left:auto;font-size:11px;color:#999;text-align:right">Gerado em<br>'+fmt(hojeISO())+' '+new Date().toTimeString().slice(0,5)+'</div></div>'+
+    '<div class="cards" style="gap:10px;margin-bottom:16px">'+kpi+'</div>'+
+    '<div style="font-size:16px;font-weight:800;color:#123a6b;margin:4px 0 8px">🏆 Top 10 clientes — volume banhado no mês</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:14.5px;margin-bottom:16px">'+rankTbl+'</table>'+
+    '<div style="font-size:16px;font-weight:800;color:#123a6b;margin:4px 0 8px">Farol por setor <span style="font-size:12px;font-weight:400;color:#777">(máx. 2 dias úteis)</span></div>'+
+    '<div class="cards" style="gap:8px">'+farol+'</div>'+
+    '<div style="text-align:center;font-size:11px;color:#aaa;margin-top:14px">Magri Folheados · Gestão de O.S.</div>';
+  document.body.appendChild(rep);
   _loadHtml2Canvas(function(){
     try{
-      window.html2canvas(el,{backgroundColor:'#ffffff',scale:2,useCORS:true,windowWidth:el.scrollWidth,ignoreElements:function(node){return !!(node.classList&&node.classList.contains('no-capture'));}}).then(function(canvas){
+      window.html2canvas(rep,{backgroundColor:'#ffffff',scale:2,useCORS:true}).then(function(canvas){
+        try{rep.remove();}catch(e){}
         if(btn){btn.textContent='📷 Gerar imagem p/ WhatsApp';btn.disabled=false;}
-        var nome='Diretoria_'+((document.getElementById('dirMesLabel')||{}).textContent||'').replace(/\s+/g,'_')+'.png';
+        var nome='Diretoria_'+mes.replace(/\s+/g,'_')+'.png';
         canvas.toBlob(function(blob){
           if(!blob){alert('Falha ao gerar a imagem.');return;}
           var file=null;try{file=new File([blob],nome,{type:'image/png'});}catch(e){}
           if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
-            navigator.share({files:[file],title:'Diretoria — Magri Folheados',text:'Painel da Diretoria — '+((document.getElementById('dirMesLabel')||{}).textContent||'')}).catch(function(){_baixarImgDir(blob,nome);});
+            navigator.share({files:[file],title:'Diretoria — Magri Folheados',text:'Diretoria — '+mes}).catch(function(){_baixarImgDir(blob,nome);});
           } else { _baixarImgDir(blob,nome); }
         },'image/png');
-      }).catch(function(e){if(btn){btn.textContent='📷 Gerar imagem p/ WhatsApp';btn.disabled=false;}alert('Erro ao gerar imagem: '+((e&&e.message)||e));});
-    }catch(e){if(btn){btn.textContent='📷 Gerar imagem p/ WhatsApp';btn.disabled=false;}alert('Erro: '+((e&&e.message)||e));}
+      }).catch(function(e){try{rep.remove();}catch(_){}if(btn){btn.textContent='📷 Gerar imagem p/ WhatsApp';btn.disabled=false;}alert('Erro ao gerar imagem: '+((e&&e.message)||e));});
+    }catch(e){try{rep.remove();}catch(_){}if(btn){btn.textContent='📷 Gerar imagem p/ WhatsApp';btn.disabled=false;}alert('Erro: '+((e&&e.message)||e));}
   });
 }
 function renderDiretoria(){
