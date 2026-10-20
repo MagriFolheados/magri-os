@@ -1411,8 +1411,15 @@ function renderDiretoria(){
   var volKg=apMes.reduce(function(s,a){return s+(a.peso||0);},0);
   var metalG=apMes.reduce(function(s,a){var tks=a.tanques||(a.tanque?[a.tanque]:[]);return s+((tks.indexOf('Folheação')>-1)?(a.metal||0):0);},0);
   var osSet={};apMes.forEach(function(a){if(a.osId)osSet[a.osId]=1;});var nOS=Object.keys(osSet).length;
-  var volFolh=0,volOutros=0;apMes.forEach(function(a){var isF=(a.categoria==='Folheação')||(a.tipo&&(''+a.tipo).indexOf('Ouro')===0);if(isF)volFolh+=(a.peso||0);else volOutros+=(a.peso||0);});
-  var cc=document.getElementById('dir-cards');if(cc)cc.innerHTML='<div class="card verde"><div class="n">'+volFolh.toFixed(2)+'</div><div class="l">Folheação banhada (kg)</div></div><div class="card"><div class="n">'+volOutros.toFixed(2)+'</div><div class="l">Outros banhos (kg)</div></div><div class="card"><div class="n">'+volKg.toFixed(2)+'</div><div class="l">Total banhado (kg)</div></div><div class="card azul"><div class="n">'+metalG.toFixed(2)+'</div><div class="l">Ouro/metal folheação (g)</div></div><div class="card"><div class="n">'+nOS+'</div><div class="l">O.S. banhadas</div></div><div class="card"><div class="n">'+apMes.length+'</div><div class="l">Apontamentos</div></div>';
+  var _nt=function(s){return (''+(s||'')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');};
+  var volFolh=0,vol1ml=0,volPig=0,volPrata=0;
+  apMes.forEach(function(a){var t=_nt(a.tipo);var cam=parseInt(a.camada)||0;var pe=a.peso||0;
+    var isPig=t.indexOf('pigment')>-1;
+    var isPrata=(t.indexOf('prata')>-1)&&!isPig;
+    var is1ml=!isPig&&!isPrata&&(t.indexOf('precor')>-1||/(^|\D)1\s*(ml|milesimo)/.test(t));
+    var isFolh=!isPig&&!isPrata&&!is1ml&&t.indexOf('flash')<0&&cam>=2;
+    if(isPig)volPig+=pe;if(isPrata)volPrata+=pe;if(is1ml)vol1ml+=pe;if(isFolh)volFolh+=pe;});
+  var cc=document.getElementById('dir-cards');if(cc)cc.innerHTML='<div class="card"><div class="n">'+volKg.toFixed(2)+'</div><div class="l">Total banhado (kg)</div></div><div class="card verde"><div class="n">'+volFolh.toFixed(2)+'</div><div class="l">Folheação · Ouro 2ML+ (kg)</div></div><div class="card"><div class="n">'+vol1ml.toFixed(2)+'</div><div class="l">1 Milésimo (kg)</div></div><div class="card azul"><div class="n">'+volPig.toFixed(2)+'</div><div class="l">Pigmentada / Mikra (kg)</div></div><div class="card"><div class="n">'+volPrata.toFixed(2)+'</div><div class="l">Prata (kg)</div></div>';
   var pc={};apMes.forEach(function(a){var k=a.cliente||'—';pc[k]=(pc[k]||0)+(a.peso||0);});
   var cliPairs=Object.keys(pc).map(function(k){return [k,pc[k]];}).sort(function(x,y){return y[1]-x[1];});
   var tbc=document.getElementById('dirClientes');
