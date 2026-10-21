@@ -672,7 +672,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-21ak</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-21al</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1280,7 +1280,7 @@ function _prazoGo(id,view){var m=document.getElementById('__prazoModal');if(m)m.
 function _autoPrazo(){if(window.__prazoShown)return;window.__prazoShown=true;setTimeout(function(){try{alertaPrazos(true);_updateBadgePrazo();}catch(e){}},1500);}
 try{setInterval(_updateBadgePrazo,20000);}catch(_pe){}
 function osEmProducao(){return dados.filter(function(o){return o.setor!=='Expedido'&&!osAguardandoEnvio(o);});}
-function _delivClass(o){if(o&&o.standby)return 'standby';if(o&&o.statusComercial==='Entregue')return 'noprazo';if(!o||!o.prevEntregaISO)return 'noprazo';var h=new Date(hojeISO()+'T00:00:00');var pe=new Date((''+o.prevEntregaISO).slice(0,10)+'T00:00:00');var dd=Math.round((pe-h)/86400000);if(dd<0)return 'atrasada';if(dd<=2)return 'atencao';return 'noprazo';}
+function _delivClass(o){if(o&&o.standby)return 'standby';if(!o||!o.prevEntregaISO)return 'noprazo';var h=new Date(hojeISO()+'T00:00:00');var pe=new Date((''+o.prevEntregaISO).slice(0,10)+'T00:00:00');var dd=Math.round((pe-h)/86400000);if(dd<0)return 'atrasada';if(dd<=2)return 'atencao';return 'noprazo';}
 function _delivConsol(lista){var r={aberto:0,noprazo:0,atencao:0,atrasada:0};(lista||[]).forEach(function(o){if(o.standby)return;r.aberto++;var c=_delivClass(o);if(c==='atrasada')r.atrasada++;else if(c==='atencao')r.atencao++;else r.noprazo++;});return r;}
 function _prodEmAberto(){var SETP=['Foto/Bruto','Amarração','Banho','Qualidade','Expedição','Verniz'];return (typeof osEmProducao==='function'?osEmProducao():[]).filter(function(o){return SETP.indexOf(o.setor)>-1&&!o.standby;});}
 function _delivDias(o){if(!o||!o.prevEntregaISO)return null;var h=new Date(hojeISO()+'T00:00:00');var pe=new Date((''+o.prevEntregaISO).slice(0,10)+'T00:00:00');return Math.round((pe-h)/86400000);}
