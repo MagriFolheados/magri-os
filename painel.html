@@ -104,6 +104,21 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
   </div>
 </div>
 <div id="erro"></div>
+<div id="alertaFlash"></div>
+<div id="alertaToast"></div>
+<button id="btnSom" onclick="window.__armarSom&&window.__armarSom(true)">🔔 Ativar som</button>
+<style>
+#alertaFlash{position:fixed;inset:0;pointer-events:none;z-index:9998;border:0 solid #ff2a2a;box-shadow:inset 0 0 0 0 rgba(255,42,42,0);opacity:0}
+#alertaFlash.on{animation:flashBorda 1s ease-in-out 5}
+@keyframes flashBorda{0%,100%{border-width:0;box-shadow:inset 0 0 0 0 rgba(255,42,42,0);opacity:0}50%{border-width:16px;box-shadow:inset 0 0 70px 10px rgba(255,42,42,.55);opacity:1}}
+#alertaToast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+#alertaToast .tst{background:#c21515;color:#fff;font-weight:800;font-size:26px;padding:14px 26px;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.45);letter-spacing:.5px;animation:tstIn .35s ease-out, tstOut .6s ease-in 7.4s forwards}
+#alertaToast .tst small{display:block;font-size:14px;font-weight:600;opacity:.85;margin-top:2px}
+@keyframes tstIn{from{opacity:0;transform:translateY(-16px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes tstOut{to{opacity:0;transform:translateY(-16px) scale(.96)}}
+#btnSom{position:fixed;right:14px;bottom:12px;z-index:9999;background:#1f2a44;color:#fff;border:1px solid #3a4a6b;border-radius:10px;padding:8px 14px;font-size:14px;font-weight:700;cursor:pointer;opacity:.9}
+#btnSom:hover{opacity:1}
+</style>
 
 <script>
 (function(){
@@ -123,6 +138,27 @@ function farolCls(o){if(o.statusComercial==='Entregue')return 'verde';var rec=se
 function diasAteData(iso){if(!iso)return null;var d=new Date((''+iso).slice(0,10)+'T00:00:00');var h=new Date();h.setHours(0,0,0,0);return Math.round((d-h)/86400000);}
 function fmtDM(iso){if(!iso)return '—';var p=(''+iso).slice(0,10).split('-');return p.length===3?(p[2]+'/'+p[1]):iso;}
 
+/* ===== Alerta de nova O.S. atrasada (uma vez e para) ===== */
+var _prevAtras=null;      // null = ainda não semeado (não alerta na 1ª carga)
+var _audio=null;var _somArmado=false;
+function _armarSom(testar){try{if(!_audio)_audio=new (window.AudioContext||window.webkitAudioContext)();if(_audio.state==='suspended')_audio.resume();_somArmado=true;var b=document.getElementById('btnSom');if(b)b.style.display='none';if(testar)_beep();}catch(e){}}
+window.__armarSom=_armarSom;
+function _beep(){if(!_somArmado||!_audio)return;try{var seq=[880,1047,1319];var t0=_audio.currentTime;seq.forEach(function(f,i){var o=_audio.createOscillator(),g=_audio.createGain();o.type='sine';o.frequency.value=f;var st=t0+i*0.18;o.connect(g);g.connect(_audio.destination);g.gain.setValueAtTime(0.0001,st);g.gain.exponentialRampToValueAtTime(0.35,st+0.02);g.gain.exponentialRampToValueAtTime(0.0001,st+0.16);o.start(st);o.stop(st+0.17);});}catch(e){}}
+function _dispararAlerta(novas){
+  var fl=document.getElementById('alertaFlash');if(fl){fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on');setTimeout(function(){fl.classList.remove('on');},5200);}
+  var tc=document.getElementById('alertaToast');if(tc){var txt;if(novas.length===1){txt='<div class="tst">⚠ O.S. '+novas[0].num+' ATRASADA<small>'+(novas[0].cli||'')+'</small></div>';}else{var nums=novas.slice(0,3).map(function(x){return x.num;}).join(', ');txt='<div class="tst">⚠ '+novas.length+' O.S. ATRASADAS<small>'+nums+(novas.length>3?'…':'')+'</small></div>';}var el=document.createElement('div');el.innerHTML=txt;var node=el.firstChild;tc.appendChild(node);setTimeout(function(){try{tc.removeChild(node);}catch(e){}},8200);}
+  _beep();
+}
+function _checarAtrasos(at){
+  var cur={};at.forEach(function(d){var dd=diasAteData(d.prevEntregaISO);if(dd!==null&&dd<0)cur[d.__num]=(d.__cli||'');});
+  if(_prevAtras===null){_prevAtras=cur;return;}
+  var novas=Object.keys(cur).filter(function(k){return !(k in _prevAtras);}).map(function(k){return {num:k,cli:cur[k]};});
+  _prevAtras=cur;
+  if(novas.length)_dispararAlerta(novas);
+}
+document.addEventListener('pointerdown',function(){_armarSom(false);},{once:true});
+document.addEventListener('keydown',function(){_armarSom(false);},{once:true});
+
 function relogio(){var n=new Date();document.getElementById('hora').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');var dias=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];document.getElementById('data').textContent=dias[n.getDay()]+', '+String(n.getDate()).padStart(2,'0')+'/'+String(n.getMonth()+1).padStart(2,'0')+'/'+n.getFullYear();}
 setInterval(relogio,1000);relogio();
 function erro(m){var e=document.getElementById('erro');if(m){e.textContent='⚠ '+m;e.style.display='';}else{e.style.display='none';}}
@@ -132,6 +168,7 @@ async function carregar(){
     var ro=await sb.from('ordens').select('setor,num_os,cliente,dados').neq('setor','Expedido').limit(1000);
     if(ro.error){erro('Sem acesso aos dados — verifique o login. ('+ro.error.message+')');return;}
     var at=(ro.data||[]).map(function(x){var d=x.dados||{};d.__num=x.num_os||d.numOS;d.__cli=x.cliente||d.cliente;d.setor=x.setor||d.setor;return d;}).filter(function(d){return d&&!d._del&&!d.cancelada&&!d.standby&&!aguardandoEnvio(d)&&SETORES.indexOf(d.setor)>-1;});
+    _checarAtrasos(at);
     // dois tallies por setor: ENT = atraso de entrega ao cliente / TMP = tempo dentro do setor
     var ent={},tmp={};SETORES.forEach(function(s){ent[s]={v:0,a:0,r:0,tot:0};tmp[s]={v:0,a:0,r:0,tot:0};});
     function recSetor(o){if(o.setor==='Verniz')return (o.verniz&&o.verniz.enviadoEm)||o.dataEntrada;return setorRecebido(o);}
@@ -161,7 +198,7 @@ async function carregar(){
 
 function iniciar(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='flex';carregar();setInterval(carregar,30000);setTimeout(function(){location.replace(location.pathname+'?t='+Date.now());},25*60*1000);}
 function login(msg){document.getElementById('gate').style.display='flex';document.getElementById('app').style.display='none';if(msg)document.getElementById('gerr').textContent=msg;}
-async function entrar(){var raw=document.getElementById('em').value.trim();var pw=document.getElementById('pw').value;if(!raw||!pw){document.getElementById('gerr').textContent='Informe usuário e senha.';return;}var email=raw.indexOf('@')>-1?raw.toLowerCase():(raw.toLowerCase().replace(/\s+/g,'')+'@magrifolheados.com.br');document.getElementById('gerr').textContent='Entrando...';var r=await sb.auth.signInWithPassword({email:email,password:pw});if(r.error){document.getElementById('gerr').textContent='Usuário ou senha inválidos.';return;}iniciar();}
+async function entrar(){var raw=document.getElementById('em').value.trim();var pw=document.getElementById('pw').value;if(!raw||!pw){document.getElementById('gerr').textContent='Informe usuário e senha.';return;}var email=raw.indexOf('@')>-1?raw.toLowerCase():(raw.toLowerCase().replace(/\s+/g,'')+'@magrifolheados.com.br');document.getElementById('gerr').textContent='Entrando...';var r=await sb.auth.signInWithPassword({email:email,password:pw});if(r.error){document.getElementById('gerr').textContent='Usuário ou senha inválidos.';return;}_armarSom(false);iniciar();}
 document.getElementById('go').onclick=entrar;
 document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')entrar();});
 sb.auth.getSession().then(function(res){if(res.data.session)iniciar();else login('');}).catch(function(){login('');});
