@@ -55,10 +55,14 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
 .qc .mini .ml{font-size:9px;color:var(--sub);margin-top:1px;font-weight:600}
 .qc.alert{border-color:rgba(255,93,93,.5);box-shadow:0 0 0 1px rgba(255,93,93,.25) inset}
 .lista{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 16px;flex:0 0 auto;overflow:hidden}
-.lista table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
-.lista th{text-align:left;color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:2px 8px}
-.lista td{padding:4px 8px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lista tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.lista .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.lista .li{display:flex;align-items:center;gap:7px;font-size:13px;padding:3px 2px;border-top:1px solid var(--line);white-space:nowrap}
+.lista .li:nth-child(even){background:rgba(255,255,255,.02)}
+.lista .li .n{font-weight:800;min-width:44px}
+.lista .li .cli{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.lista .li .set{color:var(--sub);width:72px;overflow:hidden;text-overflow:ellipsis}
+.lista .li .dt{color:var(--sub);width:40px;text-align:right}
+.lista .li .pill{font-size:11px;padding:1px 8px;white-space:nowrap}
 .pill{display:inline-block;padding:2px 10px;border-radius:20px;font-weight:800;font-size:14px}
 .pill.r{background:rgba(255,93,93,.18);color:var(--vermelho)}
 .pill.h{background:rgba(255,207,51,.18);color:var(--amarelo)}
@@ -95,11 +99,8 @@ body{background:radial-gradient(1100px 560px at 72% -12%,#122334,#0b1119);color:
   <div class="quad" id="quadTmp"></div>
 
   <div class="lista">
-    <div class="sech">5 O.S. mais atrasadas — prazo de entrega ao cliente</div>
-    <table>
-      <thead><tr><th style="width:90px">Nº O.S.</th><th>Cliente</th><th style="width:130px">Setor</th><th style="width:110px">Entrega</th><th style="width:160px">Situação</th></tr></thead>
-      <tbody id="lb"></tbody>
-    </table>
+    <div class="sech">10 O.S. mais atrasadas — prazo de entrega ao cliente</div>
+    <div class="grid2"><div id="lb"></div><div id="lb2"></div></div>
   </div>
 </div>
 <div id="erro"></div>
@@ -148,9 +149,11 @@ async function carregar(){
     renderQuad('quadEnt',ent,['no prazo','atenção','atrasada']);
     renderQuad('quadTmp',tmp,['≤1 dia','2 dias','3+ dias']);
     // lista por prazo (prevEntregaISO)
-    var comPrazo=at.filter(function(d){return d.prevEntregaISO;}).map(function(d){return {d:d,dd:diasAteData(d.prevEntregaISO)};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,5);
-    var lh='';comPrazo.forEach(function(x){var d=x.d,dd=x.dd;var cls,sit;if(dd<0){cls='r';sit='Atrasada '+Math.abs(dd)+(Math.abs(dd)===1?' dia':' dias');}else if(dd===0){cls='h';sit='Vence hoje';}else if(dd<=2){cls='h';sit='Vence em '+dd+(dd===1?' dia':' dias');}else{cls='g';sit='Vence em '+dd+' dias';}lh+='<tr><td><b>'+(d.__num||'')+'</b></td><td>'+((d.__cli||'')+'').slice(0,40)+'</td><td>'+(d.setor||'')+'</td><td>'+fmtDM(d.prevEntregaISO)+'</td><td><span class="pill '+cls+'">'+sit+'</span></td></tr>';});
-    document.getElementById('lb').innerHTML=lh||'<tr><td colspan="5" class="muted" style="text-align:center;padding:16px">Nenhuma O.S. com prazo definido 👍</td></tr>';
+    var comPrazo=at.filter(function(d){return d.prevEntregaISO;}).map(function(d){return {d:d,dd:diasAteData(d.prevEntregaISO)};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,10);
+    var _row=function(x){var d=x.d,dd=x.dd;var cls,sit;if(dd<0){cls='r';sit='Atras. '+Math.abs(dd)+'d';}else if(dd===0){cls='h';sit='Hoje';}else if(dd<=2){cls='h';sit='Vence '+dd+'d';}else{cls='g';sit='Vence '+dd+'d';}return '<div class="li"><span class="n">'+(d.__num||'')+'</span><span class="cli">'+((d.__cli||'')+'')+'</span><span class="set">'+(d.setor||'')+'</span><span class="dt">'+fmtDM(d.prevEntregaISO)+'</span><span class="pill '+cls+'">'+sit+'</span></div>';};
+    var lh='',lh2='';comPrazo.forEach(function(x,i){if(i<5)lh+=_row(x);else lh2+=_row(x);});
+    document.getElementById('lb').innerHTML=lh||'<div class="muted" style="text-align:center;padding:12px">Nenhuma O.S. com prazo definido 👍</div>';
+    document.getElementById('lb2').innerHTML=lh2;
     erro('');
     var n=new Date();document.getElementById('upd').textContent='atualizado '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
   }catch(e){erro('Erro ao atualizar: '+((e&&e.message)||e));}
