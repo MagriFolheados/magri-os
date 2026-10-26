@@ -136,6 +136,7 @@ function setorRecebido(o){if(o.setor==='Foto/Bruto')return o.fbRecebidoEm;if(o.s
 function aguardandoEnvio(o){if(!o||!o.envioFinPendente)return false;if((o.setor||'')!=='Expedição')return false;var pend=false;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.confExp!=='Sim')pend=true;});});return !pend;}
 function farolCls(o){if(o.statusComercial==='Entregue')return 'verde';var rec=setorRecebido(o);if(!rec)return 'verde';var d=diasUteisEntre(rec);if(d<=0)return 'verde';if(d<=2)return 'amarelo';return 'vermelho';}
 function diasAteData(iso){if(!iso)return null;var d=new Date((''+iso).slice(0,10)+'T00:00:00');var h=new Date();h.setHours(0,0,0,0);return Math.round((d-h)/86400000);}
+function _prazoEf(d){return (d&&d.reenvioNegociado&&d.reenvioData)?d.reenvioData:(d&&d.prevEntregaISO);}
 function fmtDM(iso){if(!iso)return '—';var p=(''+iso).slice(0,10).split('-');return p.length===3?(p[2]+'/'+p[1]):iso;}
 
 /* ===== Alerta de nova O.S. atrasada (uma vez e para) ===== */
@@ -174,7 +175,7 @@ async function carregar(){
     function recSetor(o){if(o.setor==='Verniz')return (o.verniz&&o.verniz.enviadoEm)||o.dataEntrada;return setorRecebido(o);}
     at.forEach(function(d){var s=d.setor;
       // entrega ao cliente (mesmo critério do consolidado)
-      var dd=diasAteData(d.prevEntregaISO);var ec=(dd===null)?'v':(dd<0?'r':(dd<=2?'a':'v'));ent[s].tot++;ent[s][ec]++;
+      var dd=diasAteData(_prazoEf(d));var ec=(dd===null)?'v':(dd<0?'r':(dd<=2?'a':'v'));ent[s].tot++;ent[s][ec]++;
       // tempo no setor: 1 dia verde, 2 dias amarelo, 3+ vermelho
       var tc;if(d.statusComercial==='Entregue'||(d.setor==='Expedição'&&d.expStatus==='Concluído')){tc='v';}else{var ds=diasUteisEntre(recSetor(d));tc=(ds<=1)?'v':(ds===2?'a':'r');}tmp[s].tot++;tmp[s][tc]++;
     });
@@ -186,8 +187,8 @@ async function carregar(){
     renderQuad('quadEnt',ent,['no prazo','atenção','atrasada']);
     renderQuad('quadTmp',tmp,['≤1 dia','2 dias','3+ dias']);
     // lista por prazo (prevEntregaISO)
-    var comPrazo=at.filter(function(d){return d.prevEntregaISO;}).map(function(d){return {d:d,dd:diasAteData(d.prevEntregaISO)};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,10);
-    var _row=function(x){var d=x.d,dd=x.dd;var cls,sit;if(dd<0){cls='r';sit='Atras. '+Math.abs(dd)+'d';}else if(dd===0){cls='h';sit='Hoje';}else if(dd<=2){cls='h';sit='Vence '+dd+'d';}else{cls='g';sit='Vence '+dd+'d';}return '<div class="li"><span class="n">'+(d.__num||'')+'</span><span class="cli">'+((d.__cli||'')+'')+'</span><span class="set">'+(d.setor||'')+'</span><span class="dt">'+fmtDM(d.prevEntregaISO)+'</span><span class="pill '+cls+'">'+sit+'</span></div>';};
+    var comPrazo=at.filter(function(d){return _prazoEf(d);}).map(function(d){return {d:d,dd:diasAteData(_prazoEf(d))};}).sort(function(a,b){return a.dd-b.dd;}).slice(0,10);
+    var _row=function(x){var d=x.d,dd=x.dd;var cls,sit;if(dd<0){cls='r';sit='Atras. '+Math.abs(dd)+'d';}else if(dd===0){cls='h';sit='Hoje';}else if(dd<=2){cls='h';sit='Vence '+dd+'d';}else{cls='g';sit='Vence '+dd+'d';}return '<div class="li"><span class="n">'+(d.__num||'')+'</span><span class="cli">'+((d.__cli||'')+'')+'</span><span class="set">'+(d.setor||'')+'</span><span class="dt">'+fmtDM(_prazoEf(d))+(d.reenvioNegociado?' 🔁':'')+'</span><span class="pill '+cls+'">'+sit+'</span></div>';};
     var lh='',lh2='';comPrazo.forEach(function(x,i){if(i<5)lh+=_row(x);else lh2+=_row(x);});
     document.getElementById('lb').innerHTML=lh||'<div class="muted" style="text-align:center;padding:12px">Nenhuma O.S. com prazo definido 👍</div>';
     document.getElementById('lb2').innerHTML=lh2;
