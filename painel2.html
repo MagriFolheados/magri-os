@@ -86,7 +86,7 @@ setInterval(relogio,1000);relogio();
 
 var SEC=[
   {key:'com',nome:'🛒 Comercial',modo:'single',ms:[{k:'kg',lbl:'Kg',meta:function(){return M.comercial.kg;}}]},
-  {key:'fb',nome:'📷 Foto / Bruto',modo:'or',ms:[{k:'fotos',lbl:'Fotos',meta:function(){return M.foto.fotos;},int:true},{k:'kg',lbl:'Kg',meta:function(){return M.foto.kg;}}]},
+  {key:'fb',nome:'📷 Foto / Bruto',modo:'or',ms:[{k:'fotos',lbl:'Itens',meta:function(){return M.foto.fotos;},int:true},{k:'kg',lbl:'Kg',meta:function(){return M.foto.kg;}}]},
   {key:'qual',nome:'🔬 Qualidade',modo:'single',ms:[{k:'kg',lbl:'Kg apontado',meta:function(){return M.qualidade.kg;}}]},
   {key:'exp',nome:'📦 Expedição',modo:'or',ms:[{k:'kg',lbl:'Kg',meta:function(){return M.expedicao.kg;}},{k:'itens',lbl:'Itens',meta:function(){return M.expedicao.itens;},int:true}]}
 ];
@@ -99,8 +99,8 @@ function computa(ordens,apont){
     // Comercial
     if(o.comUser){var d=(''+(o.dataEntrada||'')).slice(0,10);if(d.slice(0,7)===ym){var t=d===hj;_add(P,o.comUser,'com','os',1,t);_add(P,o.comUser,'com','kg',pesoDecl(o),t);}}
     // Foto/Bruto
-    var f=o.fb||{};var fWho=o.fbUser||f.resp;var fd=(''+(f.concluidoEm||'')).slice(0,10);
-    if(fWho&&fd&&fd.slice(0,7)===ym){var tf=fd===hj;var fotos=0;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.foto)fotos++;});});_add(P,fWho,'fb','fotos',fotos,tf);_add(P,fWho,'fb','kg',pesoDecl(o),tf);}
+    var f=o.fb||{};
+    (o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){var who=sb.criadoPor||o.fbUser||f.resp;var d=(''+(sb.criadoEm||f.concluidoEm||'')).slice(0,10);if(!who||d.slice(0,7)!==ym)return;var t=d===hj;_add(P,who,'fb','fotos',1,t);_add(P,who,'fb','kg',(parseFloat(sb.peso)||0),t);});});
     // Expedição por peça (quem deu o Sim)
     var e=o.exp||{};var cxs=o.caixas||[];var eWho0=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var ed0=(''+(e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'')).slice(0,10);
     (o.itens||[]).forEach(function(it){var subs=it.subitens||[];
