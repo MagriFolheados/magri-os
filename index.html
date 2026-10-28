@@ -709,7 +709,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28bb</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28bc</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -773,11 +773,11 @@
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>🎯 Metas de produtividade (por dia, por usuário)</h2></div><div class="panel-body">
           <div class="hint" style="margin-bottom:8px">Meta <b>diária média</b> por usuário em cada setor. O desempenho aparece na Diretoria (Metas e desempenho).</div>
           <div class="grid">
-            <div><label>Comercial — O.S./dia</label><input type="number" step="0.1" id="mtComOS"></div>
-            <div><label>Comercial — Kg/dia</label><input type="number" step="0.1" id="mtComKg"></div>
+            <div><label>Comercial — Kg/dia (pedidos fechados)</label><input type="number" step="0.1" id="mtComKg"></div>
+            <div><label>Comercial — O.S./dia (informativo)</label><input type="number" step="0.1" id="mtComOS"></div>
             <div><label>Foto/Bruto — Fotos/dia</label><input type="number" step="1" id="mtFotoF"></div>
             <div><label>Foto/Bruto — Kg/dia</label><input type="number" step="0.1" id="mtFotoKg"></div>
-            <div><label>Gancheira — Kg/dia</label><input type="number" step="0.1" id="mtGanKg"></div>
+            <div><label>Gancheira — Kg/dia (COLETIVA, apontado)</label><input type="number" step="0.1" id="mtGanKg"></div>
             <div><label>Qualidade — Kg/dia</label><input type="number" step="0.1" id="mtQualKg"></div>
             <div><label>Expedição — Kg/dia</label><input type="number" step="0.1" id="mtExpKg"></div>
             <div><label>Expedição — Itens/dia</label><input type="number" step="1" id="mtExpIt"></div>
@@ -1301,7 +1301,7 @@ if(!clientesReg){clientesReg=CLIENTES.map(function(n){return {nome:n,cnpj:'',tel
 function salvarClientes(){localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
 let contatos=JSON.parse(localStorage.getItem('magri_contatos_v1')||'[]');if(!Array.isArray(contatos))contatos=[];
 function salvarContatos(){localStorage.setItem('magri_contatos_v1',JSON.stringify(contatos));}
-const KEY_METAS='magri_metas_v1';const METAS_DEFAULT={comercial:{os:10,kg:5},foto:{fotos:300,kg:5},gancheira:{kg:10},qualidade:{kg:10},expedicao:{kg:5,itens:300}};
+const KEY_METAS='magri_metas_v1';const METAS_DEFAULT={comercial:{os:10,kg:7},foto:{fotos:300,kg:5},gancheira:{kg:14},qualidade:{kg:10},expedicao:{kg:5,itens:300}};
 let METAS=JSON.parse(localStorage.getItem(KEY_METAS)||'null')||JSON.parse(JSON.stringify(METAS_DEFAULT));
 ['comercial','foto','gancheira','qualidade','expedicao'].forEach(function(k){if(!METAS[k])METAS[k]=JSON.parse(JSON.stringify(METAS_DEFAULT[k]));});
 function salvarMetas(){localStorage.setItem(KEY_METAS,JSON.stringify(METAS));}
@@ -1548,9 +1548,13 @@ function renderProdUsuario(apMes,dirYM){
     if(fWho&&fDate&&(''+fDate).slice(0,7)===dirYM){var u=_u(fWho);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
     var amWho=o.amUser||o.amResp;
     if(amWho&&(''+(o.amConcluidoEm||'')).slice(0,7)===dirYM){var ua=_u(amWho);ua.amOS++;ua.amKg+=(parseFloat(o.pesoEnganchKg)||0);}
-    var e=o.exp||{};var cxs=o.caixas||[];var eWho=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
-    if(eWho&&(''+eDate).slice(0,7)===dirYM){var u2=_u(eWho);u2.eOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u2.ePec+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);});}else{u2.ePec+=(parseInt(it.qtd)||0);}});u2.eKg+=(typeof pesoFinalTotalOS==='function'?pesoFinalTotalOS(o):0);}
+    var e=o.exp||{};var cxs=o.caixas||[];var eWho0=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
+    (o.itens||[]).forEach(function(it){var subs=it.subitens||[];
+      if(subs.length){subs.forEach(function(sb){if(sb.confExp!=='Sim')return;var who=sb.confExpUser||eWho0;var d=(''+(sb.confExpEm||eDate||'')).slice(0,10);if(!who||d.slice(0,7)!==dirYM)return;var ue=_u(who);ue.ePec+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);ue.eKg+=(parseFloat(sb.pesoFinalExp)||0);ue._eos=ue._eos||{};ue._eos[o.id]=1;});}
+      else{if(eWho0&&(''+eDate).slice(0,7)===dirYM){var ul=_u(eWho0);ul.ePec+=(parseInt(it.qtd)||0);ul.eKg+=(parseFloat(it.pesoFinal)||0);ul._eos=ul._eos||{};ul._eos[o.id]=1;}}
+    });
   });
+  Object.keys(P).forEach(function(n){P[n].eOS=P[n]._eos?Object.keys(P[n]._eos).length:0;});
   var names=Object.keys(P).filter(function(n){var x=P[n];return (x.comOS+x.comKg+x.fbOS+x.fbPec+x.amOS+x.amKg+x.bKg+x.bLanc+x.eOS+x.ePec)>0;});
   names.sort(function(a,b){return (P[b].bKg+P[b].fbKg+P[b].amKg+P[b].eKg)-(P[a].bKg+P[a].fbKg+P[a].amKg+P[a].eKg);});
   tb.innerHTML=names.length?names.map(function(n){var x=P[n];return '<tr><td style="text-align:left;font-weight:700">'+n+'</td><td>'+x.comOS+'</td><td>'+g2(x.comKg)+'</td><td>'+x.fbOS+'</td><td>'+x.fbPec+'</td><td>'+x.fbFoto+'</td><td>'+g2(x.fbKg)+'</td><td>'+x.amOS+'</td><td>'+g2(x.amKg)+'</td><td>'+g2(x.bKg)+'</td><td>'+g2(x.bOuro)+'</td><td>'+x.bLanc+'</td><td>'+x.eOS+'</td><td>'+x.ePec+'</td><td>'+g2(x.eKg)+'</td></tr>';}).join(''):'<tr><td colspan="15" class="hint" style="padding:8px">Sem dados de responsável no mês.</td></tr>';
@@ -1561,9 +1565,8 @@ function renderProdUsuario(apMes,dirYM){
 }
 function _metaFarol(pct){return pct>=100?{cls:'verde',cor:'#2a9d4a',txt:'✔'}:(pct>=80?{cls:'amarelo',cor:'#e0a800',txt:'~'}:{cls:'vermelho',cor:'#e23b3b',txt:'✗'});}
 function _secMetas(){return [
-  {setor:'Comercial',modo:'and',ms:[{k:'comOS',lbl:'O.S.',meta:(METAS.comercial.os||0),unid:'',int:true},{k:'comKg',lbl:'Kg',meta:(METAS.comercial.kg||0),unid:'kg'}]},
+  {setor:'Comercial',modo:'single',ms:[{k:'comKg',lbl:'Kg',meta:(METAS.comercial.kg||0),unid:'kg'}]},
   {setor:'Foto/Bruto',modo:'or',ms:[{k:'fbFoto',lbl:'Fotos',meta:(METAS.foto.fotos||0),unid:'',int:true},{k:'fbKg',lbl:'Kg',meta:(METAS.foto.kg||0),unid:'kg'}]},
-  {setor:'Gancheira',modo:'single',ms:[{k:'amKg',lbl:'Kg enganch.',meta:(METAS.gancheira.kg||0),unid:'kg'}]},
   {setor:'Qualidade',modo:'single',ms:[{k:'bKg',lbl:'Kg apontado',meta:(METAS.qualidade.kg||0),unid:'kg'}]},
   {setor:'Expedição',modo:'or',ms:[{k:'eKg',lbl:'Kg',meta:(METAS.expedicao.kg||0),unid:'kg'},{k:'ePec',lbl:'Itens',meta:(METAS.expedicao.itens||0),unid:'',int:true}]}
 ];}
@@ -1586,6 +1589,9 @@ function renderMetas(P,dirYM){
     });
     html+='</tbody></table></div>';
   });
+  var ganTot=Object.keys(P).reduce(function(s,n){return s+(P[n].bKg||0);},0);var ganMeta=(METAS.gancheira.kg||0);var ganMed=ganTot/du;var ganPct=ganMeta>0?ganMed/ganMeta*100:0;var ganFr=_metaFarol(ganPct);
+  html+='<div style="font-weight:800;color:#4a2b86;margin:12px 0 4px">🪝 Gancheira — meta COLETIVA: '+g2(ganMeta)+' kg/dia ('+g2(ganMeta*du)+' kg/mês) · por kg banhado junto com o banho</div>'+
+    '<div style="display:flex;align-items:center;gap:12px;background:#f7f3fc;border:1px solid #c9b8ea;border-radius:8px;padding:8px 12px;font-size:13px;flex-wrap:wrap"><span>Total apontado no mês: <b>'+g2(ganTot)+' kg</b></span><span>Média/dia: <b style="color:'+ganFr.cor+'">'+g2(ganMed)+' kg</b></span><div style="flex:1;min-width:120px;height:14px;background:#eef0f4;border-radius:7px;overflow:hidden"><div style="width:'+Math.min(100,Math.round(ganPct))+'%;height:100%;background:'+ganFr.cor+'"></div></div><span style="font-weight:800;color:#fff;background:'+ganFr.cor+';padding:2px 10px;border-radius:10px">'+Math.round(ganPct)+'%</span></div>';
   box.innerHTML=html;
   var sel=document.getElementById('metaUser');if(sel){var cur=sel.value;var ns=Object.keys(P).filter(function(n){return secs.some(function(s){return _secUsou(P,n,s);});}).sort();sel.innerHTML='<option value="">— escolher pessoa —</option>'+ns.map(function(n){return '<option'+(n===cur?' selected':'')+'>'+n.replace(/</g,'&lt;')+'</option>';}).join('');}
 }
@@ -2782,10 +2788,10 @@ function abrirExp(id){
 function closeExp(){document.getElementById('expModal').classList.remove('show');render();}
 function coletaExp(){const g=id=>document.getElementById(id).value;return {resp:g('expResp'),pesoFio:g2kg(g('expPesoFio'))};}
 function osAtualExp(){return dados.find(function(x){return x.id===document.getElementById('expId').value;});}
-function expSetSub(li,si,campo,val){var o=osAtualExp();if(!o||!o.itens[li]||!o.itens[li].subitens[si])return;if(campo==='pesoFinalExp')val=g2kg(val);o.itens[li].subitens[si][campo]=val;o.itens[li].subitens[si]._ts=Date.now();o._ts=Date.now();if(window.__pendOrd)window.__pendOrd[String(o.id)]=Date.now();if(campo==='pesoFinalExp'){var _sbw=o.itens[li].subitens[si];var _ft=parseFloat(_sbw.peso)||0,_fn=parseFloat(_sbw.pesoFinalExp)||0;if(_ft>0&&_fn>0&&Math.abs(_fn-_ft)/_ft>0.5){alert('\u26a0 Aten\u00e7\u00e3o: o peso final ('+kg2g(_fn)+' g) est\u00e1 muito diferente do peso da foto ('+kg2g(_ft)+' g) no item '+(_sbw.codigo||'')+' (Lote '+(li+1)+'). Confira se est\u00e1 correto.');}recalcPrecoLote(o.itens[li]);}salvar();renderExpConf(o);}function expSetDefTipo(li,si,v){expSetSub(li,si,'defeitoTipo',v);}
+function expSetSub(li,si,campo,val){var o=osAtualExp();if(!o||!o.itens[li]||!o.itens[li].subitens[si])return;if(campo==='pesoFinalExp')val=g2kg(val);o.itens[li].subitens[si][campo]=val;if(campo==='confExp'&&val==='Sim'){o.itens[li].subitens[si].confExpUser=userAtual();o.itens[li].subitens[si].confExpEm=hojeISO();}o.itens[li].subitens[si]._ts=Date.now();o._ts=Date.now();if(window.__pendOrd)window.__pendOrd[String(o.id)]=Date.now();if(campo==='pesoFinalExp'){var _sbw=o.itens[li].subitens[si];var _ft=parseFloat(_sbw.peso)||0,_fn=parseFloat(_sbw.pesoFinalExp)||0;if(_ft>0&&_fn>0&&Math.abs(_fn-_ft)/_ft>0.5){alert('\u26a0 Aten\u00e7\u00e3o: o peso final ('+kg2g(_fn)+' g) est\u00e1 muito diferente do peso da foto ('+kg2g(_ft)+' g) no item '+(_sbw.codigo||'')+' (Lote '+(li+1)+'). Confira se est\u00e1 correto.');}recalcPrecoLote(o.itens[li]);}salvar();renderExpConf(o);}function expSetDefTipo(li,si,v){expSetSub(li,si,'defeitoTipo',v);}
 function expSetLote(li,campo,val){var o=osAtualExp();if(!o||!o.itens||!o.itens[li])return;if(campo==='pesoFinal'||campo==='pesoLoteReal')val=g2kg(val);o.itens[li][campo]=val;o.itens[li]._ts=Date.now();o._ts=Date.now();if(window.__pendOrd)window.__pendOrd[String(o.id)]=Date.now();salvar();renderExpConf(o);}
 function imprimirConfExp(){var o=osAtualExp();if(!o)return;var rows='',n=0;(o.itens||[]).forEach(function(it,li){if(!loteVisExp(o,it))return;(it.subitens||[]).forEach(function(sb){n++;var th=sb.foto?('<img src="'+fotoSrc(sb.foto)+'" style="width:38px;height:38px;object-fit:contain;border:1px solid #ccc">'):'';rows+='<tr><td>'+n+'</td><td>'+th+'</td><td>'+(li+1)+'</td><td>'+(sb.tipoPeca||'')+'</td><td>'+(sb.codigo||'')+'</td><td style="text-align:center">'+(parseInt(sb.qtd)||0)+'</td><td style="text-align:center">'+(sb.contagemExp||'')+'</td><td style="text-align:center">'+(sb.confExp||'')+'</td><td style="text-align:center">'+(kg2g(sb.peso)||'')+'</td><td style="width:34px"></td></tr>';});});var w=window.open('','_blank');if(!w){alert('Permita pop-ups para imprimir.');return;}w.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Conferência O.S. '+(o.numOS||'')+'</title><style>@page{size:A4;margin:12mm}body{font-family:Arial;font-size:11px;color:#000}h2{color:#123a6b;margin:0 0 2px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:3px 5px}th{background:#123a6b;color:#fff;font-size:10px}tr{page-break-inside:avoid}@media print{.np{display:none}}</style></head><body><div style="margin-bottom:8px"><h2>Conferência — O.S. '+(o.numOS||'')+'</h2><div>Cliente: '+(o.cliente||'')+' · Itens: '+n+' · '+fmt(hojeISO())+'</div></div><div class="np" style="margin-bottom:8px"><button onclick="window.print()" style="padding:8px 16px;font-weight:bold;cursor:pointer">Imprimir</button></div><table><thead><tr><th>#</th><th>Foto</th><th>Lote</th><th>Tipo</th><th>Código</th><th>Qtd</th><th>Cont.</th><th>Confere</th><th>Peso(g)</th><th>OK</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');w.document.close();}
-function validarTudoExp(){if(!sessao||sessao.role!=='Admin'){alert('Apenas o administrador pode validar tudo.');return;}var o=osAtualExp();if(!o)return;if(!confirm('Validar TODOS os itens vis\u00edveis desta O.S. de uma vez (Confere = Sim e contagem = quantidade)?'))return;var n=0;(o.itens||[]).forEach(function(it){if(!loteVisExp(o,it))return;(it.subitens||[]).forEach(function(sb){sb.confExp='Sim';sb.contagemExp=String(parseInt(sb.qtd)||0);sb._ts=Date.now();n++;});});salvar();renderExpConf(o);alert(n+' item(ns) validado(s).');}
+function validarTudoExp(){if(!sessao||sessao.role!=='Admin'){alert('Apenas o administrador pode validar tudo.');return;}var o=osAtualExp();if(!o)return;if(!confirm('Validar TODOS os itens vis\u00edveis desta O.S. de uma vez (Confere = Sim e contagem = quantidade)?'))return;var n=0;(o.itens||[]).forEach(function(it){if(!loteVisExp(o,it))return;(it.subitens||[]).forEach(function(sb){sb.confExp='Sim';sb.contagemExp=String(parseInt(sb.qtd)||0);sb.confExpUser=userAtual();sb.confExpEm=hojeISO();sb._ts=Date.now();n++;});});salvar();renderExpConf(o);alert(n+' item(ns) validado(s).');}
 function expReFiltrar(){var id=document.getElementById('expId').value;var o=dados.find(function(x){return x.id===id;});if(o)renderExpConf(o);}
 function renderExpConf(o){
   var box=document.getElementById('expConfBox');if(!box)return;var html='';var _en=0;var _ft=(document.getElementById('expFiltroTipo')||{}).value||'';var _fl=(document.getElementById('expFiltroLote')||{}).value||'';var _fc=(document.getElementById('expFiltroConf')||{}).value||'';var _fp=!!(document.getElementById('expFiltroPend')||{}).checked;
@@ -2832,7 +2838,7 @@ function renderExpConf(o){
   if(_loteW)html+='<div style="margin-top:10px;margin-bottom:6px;font-weight:800;color:#4a2b86;font-size:14px">⚖ Pesagem por lote (conferência da líder)</div>'+_loteW;
   box.innerHTML=html;
 }
-function expSetConf(li,si,val){var o=dados.find(function(x){return x.id===document.getElementById('expId').value;});if(!o||!o.itens[li]||!o.itens[li].subitens[si])return;o.itens[li].subitens[si].confExp=val;o.itens[li].subitens[si]._ts=Date.now();salvar();}
+function expSetConf(li,si,val){var o=dados.find(function(x){return x.id===document.getElementById('expId').value;});if(!o||!o.itens[li]||!o.itens[li].subitens[si])return;o.itens[li].subitens[si].confExp=val;if(val==='Sim'){o.itens[li].subitens[si].confExpUser=userAtual();o.itens[li].subitens[si].confExpEm=hojeISO();}o.itens[li].subitens[si]._ts=Date.now();salvar();}
 function confResumoExp(o){var subs=[];(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){subs.push(sb.confExp||'');});});if(!subs.length)return '—';if(subs.some(function(c){return c==='Não';}))return 'Não';if(subs.every(function(c){return c==='Sim';}))return 'Sim';return subs.filter(function(c){return c;}).length+'/'+subs.length;}
 function pendRetrabCount(o){var n=0;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.confExp==='Não')n++;});});return n;}
 function pendRetrabBadge(o){var n=pendRetrabCount(o);if(n>0&&o.caixas&&o.caixas.length)return '<div style="margin-top:3px;font-size:10px;font-weight:700;color:#8a6d1f;background:var(--amarelo-bg);border:1px solid #e6d27a;border-radius:5px;padding:1px 6px;display:inline-block">⚠ Aguardando retrabalho: '+n+' pç</div>';return '';}
