@@ -709,7 +709,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28ba</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28bb</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1544,8 +1544,8 @@ function renderProdUsuario(apMes,dirYM){
   (apMes||[]).forEach(function(a){var who=a.user||a.responsavel;if(!who)return;var u=_u(who);u.bKg+=(a.peso||0);u.bOuro+=((a.metal||0)*1000);u.bLanc++;});
   (dados||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
     if(o.comUser&&(''+(o.dataEntrada||'')).slice(0,7)===dirYM){var uc=_u(o.comUser);uc.comOS++;uc.comKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
-    var f=o.fb||{};var fWho=o.fbUser||f.resp;var fDate=f.concluidoEm||o.fbRecebidoEm||'';
-    if(fWho&&(''+fDate).slice(0,7)===dirYM){var u=_u(fWho);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
+    var f=o.fb||{};var fWho=o.fbUser||f.resp;var fDate=f.concluidoEm||'';
+    if(fWho&&fDate&&(''+fDate).slice(0,7)===dirYM){var u=_u(fWho);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
     var amWho=o.amUser||o.amResp;
     if(amWho&&(''+(o.amConcluidoEm||'')).slice(0,7)===dirYM){var ua=_u(amWho);ua.amOS++;ua.amKg+=(parseFloat(o.pesoEnganchKg)||0);}
     var e=o.exp||{};var cxs=o.caixas||[];var eWho=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
