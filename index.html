@@ -546,9 +546,12 @@
         </div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>👤 Produtividade por usuário (mês)</h2></div><div class="panel-body">
           <div class="hint" style="margin-bottom:8px">Trabalho por <b>usuário logado</b> no mês selecionado. Amarração usa o <b>peso engancheirado</b> informado ao encaminhar para o Banho.</div>
-          <div class="table-scroll"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th rowspan="2" style="text-align:left">Usuário</th><th colspan="4" style="background:#123a6b;color:#fff">Foto / Bruto</th><th colspan="2" style="background:#6b3fb0;color:#fff">Amarração</th><th colspan="3" style="background:#8a6d1f;color:#fff">Banho</th><th colspan="3" style="background:#1c6b3a;color:#fff">Expedição</th></tr><tr><th>O.S.</th><th>Peças</th><th>Fotos</th><th>Kg</th><th>O.S.</th><th>Kg</th><th>Kg</th><th>Ouro (g)</th><th>Lanç.</th><th>O.S.</th><th>Peças</th><th>Kg</th></tr></thead><tbody id="dirProd"></tbody></table></div>
+          <div class="table-scroll"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th rowspan="2" style="text-align:left">Usuário</th><th colspan="2" style="background:#444;color:#fff">Comercial</th><th colspan="4" style="background:#123a6b;color:#fff">Foto / Bruto</th><th colspan="2" style="background:#6b3fb0;color:#fff">Gancheira</th><th colspan="3" style="background:#8a6d1f;color:#fff">Qualidade</th><th colspan="3" style="background:#1c6b3a;color:#fff">Expedição</th></tr><tr><th>O.S.</th><th>Kg</th><th>O.S.</th><th>Peças</th><th>Fotos</th><th>Kg</th><th>O.S.</th><th>Kg</th><th>Kg</th><th>Ouro (g)</th><th>Lanç.</th><th>O.S.</th><th>Peças</th><th>Kg</th></tr></thead><tbody id="dirProd"></tbody></table></div>
           <div id="dirProdBars" style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px"></div>
         </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>🎯 Metas e desempenho (mês)</h2>
+          <div class="toolbar" style="gap:6px;flex-wrap:wrap"><select id="metaUser" style="padding:5px;font-size:12px"><option value="">— escolher pessoa —</option></select><button class="btn-excel" style="padding:6px 10px;font-size:12px;background:#6b7b8c" onclick="relatorioMetaIndividual()">👤 Relatório individual (PDF)</button><button class="btn-excel" style="padding:6px 10px;font-size:12px" onclick="relatorioMetaSetor()">🏭 Relatório por setor (PDF)</button></div>
+        </div><div class="panel-body"><div id="dirMetas"></div></div></div>
       </section>
       <section class="view" id="view-relatorios">
         <div class="panel"><div class="panel-body" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
@@ -706,7 +709,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28ax</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28ba</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -766,6 +769,20 @@
           </div>
           <div class="actions"><button class="btn-primary" onclick="addClienteServ()">+ Adicionar ao cliente</button></div>
           <div class="table-scroll"><table><thead><tr><th>Serviço</th><th>Modelo</th><th>Preço</th><th></th></tr></thead><tbody id="pcsLista"></tbody></table></div>
+        </div></div>
+        <div class="panel"><div class="panel-head"><span class="dot"></span><h2>🎯 Metas de produtividade (por dia, por usuário)</h2></div><div class="panel-body">
+          <div class="hint" style="margin-bottom:8px">Meta <b>diária média</b> por usuário em cada setor. O desempenho aparece na Diretoria (Metas e desempenho).</div>
+          <div class="grid">
+            <div><label>Comercial — O.S./dia</label><input type="number" step="0.1" id="mtComOS"></div>
+            <div><label>Comercial — Kg/dia</label><input type="number" step="0.1" id="mtComKg"></div>
+            <div><label>Foto/Bruto — Fotos/dia</label><input type="number" step="1" id="mtFotoF"></div>
+            <div><label>Foto/Bruto — Kg/dia</label><input type="number" step="0.1" id="mtFotoKg"></div>
+            <div><label>Gancheira — Kg/dia</label><input type="number" step="0.1" id="mtGanKg"></div>
+            <div><label>Qualidade — Kg/dia</label><input type="number" step="0.1" id="mtQualKg"></div>
+            <div><label>Expedição — Kg/dia</label><input type="number" step="0.1" id="mtExpKg"></div>
+            <div><label>Expedição — Itens/dia</label><input type="number" step="1" id="mtExpIt"></div>
+          </div>
+          <div class="actions"><button class="btn-primary" onclick="salvarMetasAdmin()">Salvar metas</button> <span class="hint">Foto/Bruto e Expedição: basta atingir uma das duas metas.</span></div>
         </div></div>
       </section>
 
@@ -840,7 +857,7 @@
       </div>
       <div class="sec-title">Registro no Controle de Brutos</div>
       <div class="grid">
-        <div><label>Responsável</label><select id="fbResp"><option value="">—</option><option>RODOLFO</option><option>BRENDA</option><option>GRAZIELLY</option><option>JOSIANE</option><option>MARIELLA</option></select></div>
+        <div><label>Responsável (usuário logado)</label><input type="text" id="fbResp" readonly style="background:#eef2f7;font-weight:600"></div>
         <div><label>Nota</label><input type="text" id="fbNota"></div>
         <div><label>Letra</label><input type="text" id="fbLetra" maxlength="3" placeholder="Ex.: A"></div>
         <div><label>Categoria</label><select id="fbCategoria"><option value="">—</option><option>BANHO</option><option>FOLHEAÇÂO</option><option>VERNIZ</option><option>LIMPEZA</option><option>REBANHO</option></select></div>
@@ -1066,7 +1083,7 @@
           <div><label>Data</label><input type="date" id="apData"></div>
           <div><label>Período</label><select id="apPeriodo"><option>Manhã</option><option>Tarde</option></select></div>
           <div><label>Modo</label><select id="apModo"><option>Normal</option><option>Retrabalho</option><option>Caídos</option><option>Ajuste Cor</option></select></div>
-          <div><label>Responsável</label><select id="apResp"><option value="">—</option><option>RODOLFO</option><option>BRENDA</option><option>GRAZIELLY</option><option>JOSIANE</option><option>MARIELLA</option></select></div>
+          <div><label>Responsável (usuário logado)</label><input type="text" id="apResp" readonly style="background:#eef2f7;font-weight:600"></div>
           <div style="grid-column:1/-1"><label>Tanques consumidos (marque todos os que a peça passa)</label><div id="apTanques" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;font-size:13px;margin-top:4px"></div><div class="hint" id="apTanquesHint"></div></div>
           <div><label>Camada</label><input type="number" id="apCamada" oninput="calcMetal()"></div>
           <div><label>Peso apontado (g)</label><input type="number" step="0.1" id="apPeso" oninput="calcMetal()"></div>
@@ -1094,7 +1111,7 @@
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><label style="font-size:12px;font-weight:600">Filtrar por grupo de peças:</label><select id="expFiltroTipo" onchange="expReFiltrar()" style="padding:5px"><option value="">Todos os grupos</option></select><label style="font-size:12px;font-weight:600">Lote:</label><select id="expFiltroLote" onchange="expReFiltrar()" style="padding:5px"><option value="">Todos os lotes</option></select><button id="btnValidarTudo" class="btn-excel" style="display:none;padding:5px 10px" onclick="validarTudoExp()">✔ Validar tudo (Admin)</button><label style="font-size:12px;font-weight:600">Status:</label><select id="expFiltroConf" onchange="expReFiltrar()" style="padding:5px"><option value="">Todos</option><option value="conf">Conferidos</option><option value="nconf">Não conferidos</option></select><label style="font-size:12px;font-weight:600;color:#b3343e;display:flex;align-items:center;gap:4px"><input type="checkbox" id="expFiltroPend" onchange="expReFiltrar()" style="width:auto;margin:0" checked> Só pendentes (sem peso/qtd)</label><button class="btn-azul" style="padding:5px 10px" onclick="imprimirConfExp()">🖨 Imprimir conferência</button><button class="btn-azul" style="padding:5px 10px;background:#1c6b3a" onclick="relatorioConfExp()">📸 Relatório com fotos</button></div>
       <div id="expConfBox"></div>
       <div class="grid" style="margin-top:10px">
-        <div><label>Responsável</label><select id="expResp"><option value="">—</option><option>RODOLFO</option><option>BRENDA</option><option>GRAZIELLY</option><option>JOSIANE</option><option>MARIELLA</option></select></div>
+        <div><label>Responsável (usuário logado)</label><input type="text" id="expResp" readonly style="background:#eef2f7;font-weight:600"></div>
         <div><label>Peso do fio retirado (g)</label><input type="number" step="0.1" id="expPesoFio" placeholder="0"><div class="hint">Fio de amarração retirado — será deplacado depois</div></div><div><label>Enviar para o Verniz (CAT)?</label><select id="expEnviarCat" onchange="expToggleCatBtns()"><option value="sim">Sim — enviar ao Verniz</option><option value="nao">Não — finalizar (expedir)</option></select><div class="hint" id="expCatHint">A Expedição decide antes de concluir</div></div>
       </div>
       <div id="expReenvioBox" style="margin:6px 0 10px;padding:8px 12px;border:1px solid #f0d78a;background:#fff8e1;border-radius:8px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px">
@@ -1284,6 +1301,13 @@ if(!clientesReg){clientesReg=CLIENTES.map(function(n){return {nome:n,cnpj:'',tel
 function salvarClientes(){localStorage.setItem(KEY_CLI,JSON.stringify(clientesReg));}
 let contatos=JSON.parse(localStorage.getItem('magri_contatos_v1')||'[]');if(!Array.isArray(contatos))contatos=[];
 function salvarContatos(){localStorage.setItem('magri_contatos_v1',JSON.stringify(contatos));}
+const KEY_METAS='magri_metas_v1';const METAS_DEFAULT={comercial:{os:10,kg:5},foto:{fotos:300,kg:5},gancheira:{kg:10},qualidade:{kg:10},expedicao:{kg:5,itens:300}};
+let METAS=JSON.parse(localStorage.getItem(KEY_METAS)||'null')||JSON.parse(JSON.stringify(METAS_DEFAULT));
+['comercial','foto','gancheira','qualidade','expedicao'].forEach(function(k){if(!METAS[k])METAS[k]=JSON.parse(JSON.stringify(METAS_DEFAULT[k]));});
+function salvarMetas(){localStorage.setItem(KEY_METAS,JSON.stringify(METAS));}
+function diasUteisMes(ym){var p=(''+ym).split('-');var y=+p[0],m=+p[1];if(!y||!m)return 22;var d=new Date(y,m-1,1),c=0;while(d.getMonth()===m-1){var w=d.getDay();if(w!==0&&w!==6)c++;d.setDate(d.getDate()+1);}return c||1;}
+function renderMetasAdmin(){try{var S=function(id,v){var el=document.getElementById(id);if(el&&document.activeElement!==el)el.value=v;};S('mtComOS',METAS.comercial.os);S('mtComKg',METAS.comercial.kg);S('mtFotoF',METAS.foto.fotos);S('mtFotoKg',METAS.foto.kg);S('mtGanKg',METAS.gancheira.kg);S('mtQualKg',METAS.qualidade.kg);S('mtExpKg',METAS.expedicao.kg);S('mtExpIt',METAS.expedicao.itens);}catch(e){}}
+function salvarMetasAdmin(){var N=function(id){return parseFloat((''+((document.getElementById(id)||{}).value||'')).replace(',','.'))||0;};METAS.comercial={os:N('mtComOS'),kg:N('mtComKg')};METAS.foto={fotos:N('mtFotoF'),kg:N('mtFotoKg')};METAS.gancheira={kg:N('mtGanKg')};METAS.qualidade={kg:N('mtQualKg')};METAS.expedicao={kg:N('mtExpKg'),itens:N('mtExpIt')};salvarMetas();render();alert('Metas salvas.');}
 function clientesNomes(){var seen={},out=[];for(var i=0;i<clientesReg.length;i++){var n=clientesReg[i]&&clientesReg[i].nome;if(n&&!seen[n]){seen[n]=1;out.push(n);}}return out;}
 function salvar(){try{_logMovs();}catch(e){}localStorage.setItem(KEY,JSON.stringify(dados));}
 async function buscarOSNuvem(){var inp=document.getElementById('buscaNuvemNum');var num=inp?(''+inp.value).trim():'';if(!num){alert('Digite o nº da O.S. que quer buscar.');return;}if(!window.__sb){alert('Busca na nuvem disponível só na versão online.');return;}var btn=document.getElementById('buscaNuvemBtn');var _t=btn?btn.textContent:'';if(btn){btn.disabled=true;btn.textContent='Buscando...';}try{var r=await window.__sb.from('ordens').select('dados').eq('num_os',num);if(r.error){alert('Erro na busca: '+r.error.message);return;}var found=(r.data||[]).map(function(x){return x.dados;}).filter(function(o){return o&&!o._del&&!o.cancelada;});if(!found.length){alert('O.S. '+num+' não encontrada na nuvem. Confira o número.');return;}var add=0;found.forEach(function(o){if(!dados.some(function(x){return String(x.id)===String(o.id);})){dados.push(o);add++;}});if(add){try{localStorage.setItem(KEY,JSON.stringify(dados));}catch(e){}}if(inp)inp.value='';render();alert('O.S. '+num+' carregada da nuvem. Ela já aparece na lista (fica visível até você recarregar a página).');}catch(e){alert('Erro na busca: '+((e&&e.message)||e));}finally{if(btn){btn.disabled=false;btn.textContent=_t||'🔎 Buscar na nuvem';}}}
@@ -1516,10 +1540,10 @@ function renderDiretoria(){
 }
 function renderProdUsuario(apMes,dirYM){
   var tb=document.getElementById('dirProd');if(!tb)return;
-  var P={};function _u(n){n=(''+(n||'')).trim()||'—';if(!P[n])P[n]={fbOS:0,fbPec:0,fbFoto:0,fbKg:0,amOS:0,amKg:0,bKg:0,bOuro:0,bLanc:0,eOS:0,ePec:0,eKg:0};return P[n];}
-  (usuarios||[]).forEach(function(u){var n=(u.nome&&(''+u.nome).trim())||u.user;if(n&&(''+n).toLowerCase()!=='admin')_u(n);});
+  var P={};function _u(n){n=(''+(n||'')).trim()||'—';if(!P[n])P[n]={comOS:0,comKg:0,fbOS:0,fbPec:0,fbFoto:0,fbKg:0,amOS:0,amKg:0,bKg:0,bOuro:0,bLanc:0,eOS:0,ePec:0,eKg:0};return P[n];}
   (apMes||[]).forEach(function(a){var who=a.user||a.responsavel;if(!who)return;var u=_u(who);u.bKg+=(a.peso||0);u.bOuro+=((a.metal||0)*1000);u.bLanc++;});
   (dados||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
+    if(o.comUser&&(''+(o.dataEntrada||'')).slice(0,7)===dirYM){var uc=_u(o.comUser);uc.comOS++;uc.comKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
     var f=o.fb||{};var fWho=o.fbUser||f.resp;var fDate=f.concluidoEm||o.fbRecebidoEm||'';
     if(fWho&&(''+fDate).slice(0,7)===dirYM){var u=_u(fWho);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
     var amWho=o.amUser||o.amResp;
@@ -1527,12 +1551,66 @@ function renderProdUsuario(apMes,dirYM){
     var e=o.exp||{};var cxs=o.caixas||[];var eWho=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
     if(eWho&&(''+eDate).slice(0,7)===dirYM){var u2=_u(eWho);u2.eOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u2.ePec+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);});}else{u2.ePec+=(parseInt(it.qtd)||0);}});u2.eKg+=(typeof pesoFinalTotalOS==='function'?pesoFinalTotalOS(o):0);}
   });
-  var names=Object.keys(P).filter(function(n){var x=P[n];return n!=='—'||x.fbOS||x.amOS||x.bLanc||x.eOS;});
+  var names=Object.keys(P).filter(function(n){var x=P[n];return (x.comOS+x.comKg+x.fbOS+x.fbPec+x.amOS+x.amKg+x.bKg+x.bLanc+x.eOS+x.ePec)>0;});
   names.sort(function(a,b){return (P[b].bKg+P[b].fbKg+P[b].amKg+P[b].eKg)-(P[a].bKg+P[a].fbKg+P[a].amKg+P[a].eKg);});
-  tb.innerHTML=names.length?names.map(function(n){var x=P[n];return '<tr><td style="text-align:left;font-weight:700">'+n+'</td><td>'+x.fbOS+'</td><td>'+x.fbPec+'</td><td>'+x.fbFoto+'</td><td>'+g2(x.fbKg)+'</td><td>'+x.amOS+'</td><td>'+g2(x.amKg)+'</td><td>'+g2(x.bKg)+'</td><td>'+g2(x.bOuro)+'</td><td>'+x.bLanc+'</td><td>'+x.eOS+'</td><td>'+x.ePec+'</td><td>'+g2(x.eKg)+'</td></tr>';}).join(''):'<tr><td colspan="13" class="hint" style="padding:8px">Sem dados de responsável no mês.</td></tr>';
+  tb.innerHTML=names.length?names.map(function(n){var x=P[n];return '<tr><td style="text-align:left;font-weight:700">'+n+'</td><td>'+x.comOS+'</td><td>'+g2(x.comKg)+'</td><td>'+x.fbOS+'</td><td>'+x.fbPec+'</td><td>'+x.fbFoto+'</td><td>'+g2(x.fbKg)+'</td><td>'+x.amOS+'</td><td>'+g2(x.amKg)+'</td><td>'+g2(x.bKg)+'</td><td>'+g2(x.bOuro)+'</td><td>'+x.bLanc+'</td><td>'+x.eOS+'</td><td>'+x.ePec+'</td><td>'+g2(x.eKg)+'</td></tr>';}).join(''):'<tr><td colspan="15" class="hint" style="padding:8px">Sem dados de responsável no mês.</td></tr>';
   function _bars(titulo,obj,unid){var ents=Object.keys(obj).map(function(k){return [k,obj[k]];}).filter(function(p){return p[1]>0;}).sort(function(a,b){return b[1]-a[1];});var max=ents.length?ents[0][1]:1;var body=ents.length?ents.map(function(p){var w=Math.round(p[1]/max*100);var val=(unid==='kg')?g2(p[1]):Math.round(p[1]);return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="width:76px;font-size:11px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p[0]+'</span><div style="flex:1;background:#eef0f4;border-radius:4px;overflow:hidden"><div style="width:'+w+'%;min-width:2px;height:16px;background:var(--ouro)"></div></div><span style="width:66px;font-size:11px;font-weight:700;text-align:right">'+val+' '+unid+'</span></div>';}).join(''):'<div class="hint">Sem dados.</div>';return '<div><div style="font-weight:700;font-size:13px;color:#123a6b;margin-bottom:6px">'+titulo+'</div>'+body+'</div>';}
   var kgBanho={},pecFb={},pecExp={},kgAm={};names.forEach(function(n){if(P[n].bKg>0)kgBanho[n]=P[n].bKg;if(P[n].fbPec>0)pecFb[n]=P[n].fbPec;if(P[n].ePec>0)pecExp[n]=P[n].ePec;if(P[n].amKg>0)kgAm[n]=P[n].amKg;});
-  var bars=document.getElementById('dirProdBars');if(bars)bars.innerHTML=_bars('Kg banhado (Banho)',kgBanho,'kg')+_bars('Kg concluído (Amarração)',kgAm,'kg')+_bars('Peças fotografadas (Foto/Bruto)',pecFb,'pç')+_bars('Peças conferidas (Expedição)',pecExp,'pç');
+  var bars=document.getElementById('dirProdBars');if(bars)bars.innerHTML=_bars('Kg apontado (Qualidade)',kgBanho,'kg')+_bars('Kg concluído (Gancheira)',kgAm,'kg')+_bars('Peças fotografadas (Foto/Bruto)',pecFb,'pç')+_bars('Peças conferidas (Expedição)',pecExp,'pç');
+  window.__prodP=P;window.__prodYM=dirYM;try{renderMetas(P,dirYM);}catch(e){console.warn('metas',e);}
+}
+function _metaFarol(pct){return pct>=100?{cls:'verde',cor:'#2a9d4a',txt:'✔'}:(pct>=80?{cls:'amarelo',cor:'#e0a800',txt:'~'}:{cls:'vermelho',cor:'#e23b3b',txt:'✗'});}
+function _secMetas(){return [
+  {setor:'Comercial',modo:'and',ms:[{k:'comOS',lbl:'O.S.',meta:(METAS.comercial.os||0),unid:'',int:true},{k:'comKg',lbl:'Kg',meta:(METAS.comercial.kg||0),unid:'kg'}]},
+  {setor:'Foto/Bruto',modo:'or',ms:[{k:'fbFoto',lbl:'Fotos',meta:(METAS.foto.fotos||0),unid:'',int:true},{k:'fbKg',lbl:'Kg',meta:(METAS.foto.kg||0),unid:'kg'}]},
+  {setor:'Gancheira',modo:'single',ms:[{k:'amKg',lbl:'Kg enganch.',meta:(METAS.gancheira.kg||0),unid:'kg'}]},
+  {setor:'Qualidade',modo:'single',ms:[{k:'bKg',lbl:'Kg apontado',meta:(METAS.qualidade.kg||0),unid:'kg'}]},
+  {setor:'Expedição',modo:'or',ms:[{k:'eKg',lbl:'Kg',meta:(METAS.expedicao.kg||0),unid:'kg'},{k:'ePec',lbl:'Itens',meta:(METAS.expedicao.itens||0),unid:'',int:true}]}
+];}
+function _secUsou(P,n,sec){return sec.ms.some(function(m){return (P[n][m.k]||0)>0;});}
+function _secStatus(P,n,sec,du){var pcts=sec.ms.map(function(m){var med=(P[n][m.k]||0)/du;return m.meta>0?(med/m.meta*100):0;});var ok;if(sec.modo==='or'){ok=Math.max.apply(null,pcts);}else{ok=Math.min.apply(null,pcts);}return _metaFarol(ok);}
+function renderMetas(P,dirYM){
+  var box=document.getElementById('dirMetas');if(!box)return;
+  var du=diasUteisMes(dirYM);var secs=_secMetas();
+  var html='<div class="hint" style="margin-bottom:8px">Média por dia = total do mês ÷ '+du+' dias úteis do mês. Farol: <b style="color:#2a9d4a">verde</b> ≥100% da meta · <b style="color:#e0a800">amarelo</b> ≥80% · <b style="color:#e23b3b">vermelho</b> &lt;80%.'+(secs.some(function(s){return s.modo==='or';})?' Onde há "ou", basta atingir uma das metas.':'')+'</div>';
+  secs.forEach(function(sec){
+    var us=Object.keys(P).filter(function(n){return _secUsou(P,n,sec);}).sort(function(a,b){return (P[b][sec.ms[0].k]||0)-(P[a][sec.ms[0].k]||0);});
+    html+='<div style="font-weight:800;color:#123a6b;margin:10px 0 4px">'+sec.setor+' <span class="hint" style="font-weight:400;text-transform:none">(meta/dia: '+sec.ms.map(function(m){return (m.int?Math.round(m.meta):g2(m.meta))+' '+(m.unid||m.lbl.toLowerCase());}).join(sec.modo==='or'?' ou ':' e ')+')</span></div>';
+    if(!us.length){html+='<div class="hint" style="padding:2px 0 6px">Sem lançamentos no mês.</div>';return;}
+    html+='<div class="table-scroll"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="text-align:left">Usuário</th>'+sec.ms.map(function(m){return '<th>'+m.lbl+'/dia (meta)</th>';}).join('')+'<th>Status</th></tr></thead><tbody>';
+    us.forEach(function(n){
+      html+='<tr><td style="text-align:left;font-weight:700">'+n.replace(/</g,'&lt;')+'</td>';
+      sec.ms.forEach(function(m){var tot=P[n][m.k]||0;var med=tot/du;var pct=m.meta>0?(med/m.meta*100):0;var fr=_metaFarol(pct);html+='<td><span style="color:'+fr.cor+';font-weight:700">'+(m.int?Math.round(med*10)/10:g2(med))+'</span> <span class="hint">('+(m.int?Math.round(m.meta):g2(m.meta))+') '+Math.round(pct)+'%</span></td>';});
+      var st=_secStatus(P,n,sec,du);html+='<td><span style="display:inline-block;padding:2px 8px;border-radius:10px;background:'+st.cor+';color:#fff;font-weight:700">'+Math.round((sec.modo==='or'?Math.max:Math.min).apply(null,sec.ms.map(function(m){var med=(P[n][m.k]||0)/du;return m.meta>0?med/m.meta*100:0;})))+'%</span></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  box.innerHTML=html;
+  var sel=document.getElementById('metaUser');if(sel){var cur=sel.value;var ns=Object.keys(P).filter(function(n){return secs.some(function(s){return _secUsou(P,n,s);});}).sort();sel.innerHTML='<option value="">— escolher pessoa —</option>'+ns.map(function(n){return '<option'+(n===cur?' selected':'')+'>'+n.replace(/</g,'&lt;')+'</option>';}).join('');}
+}
+function _metaPctSec(P,n,sec,du){return Math.round((sec.modo==='or'?Math.max:Math.min).apply(null,sec.ms.map(function(m){var med=(P[n][m.k]||0)/du;return m.meta>0?med/m.meta*100:0;})));}
+function relatorioMetaSetor(){
+  var P=window.__prodP,ym=window.__prodYM;if(!P){alert('Abra a aba Diretoria primeiro.');return;}
+  var du=diasUteisMes(ym);var secs=_secMetas();
+  var body='<div style="font-size:12px;color:#555;margin-bottom:8px">Mês '+(ym||'')+' · '+du+' dias úteis · média/dia = total ÷ dias úteis</div>';
+  secs.forEach(function(sec){var us=Object.keys(P).filter(function(n){return _secUsou(P,n,sec);}).sort(function(a,b){return (P[b][sec.ms[0].k]||0)-(P[a][sec.ms[0].k]||0);});
+    body+='<h2>'+sec.setor+' — meta/dia: '+sec.ms.map(function(m){return (m.int?Math.round(m.meta):g2(m.meta))+' '+(m.unid||m.lbl.toLowerCase());}).join(sec.modo==='or'?' ou ':' e ')+'</h2><table><thead><tr><th>Usuário</th>'+sec.ms.map(function(m){return '<th>'+m.lbl+' mês</th><th>'+m.lbl+'/dia</th><th>Meta</th><th>%</th>';}).join('')+'<th>Status</th></tr></thead><tbody>';
+    if(!us.length)body+='<tr><td colspan="'+(2+sec.ms.length*4)+'" style="text-align:center;color:#888">Sem lançamentos.</td></tr>';
+    us.forEach(function(n){body+='<tr><td>'+_escR(n)+'</td>';sec.ms.forEach(function(m){var tot=P[n][m.k]||0;var med=tot/du;var pct=m.meta>0?med/m.meta*100:0;body+='<td style="text-align:right">'+(m.int?Math.round(tot):g2(tot))+'</td><td style="text-align:right">'+(m.int?Math.round(med*10)/10:g2(med))+'</td><td style="text-align:right">'+(m.int?Math.round(m.meta):g2(m.meta))+'</td><td style="text-align:right">'+Math.round(pct)+'%</td>';});var st=_metaFarol(_metaPctSec(P,n,sec,du));body+='<td style="text-align:center;color:#fff;font-weight:700;background:'+st.cor+'">'+_metaPctSec(P,n,sec,du)+'%</td></tr>';});
+    body+='</tbody></table>';});
+  _relatPDF('Metas por setor — '+(ym||''),body);
+}
+function relatorioMetaIndividual(){
+  var P=window.__prodP,ym=window.__prodYM;if(!P){alert('Abra a aba Diretoria primeiro.');return;}
+  var n=(document.getElementById('metaUser')||{}).value||'';if(!n){alert('Escolha a pessoa no seletor ao lado do botão.');return;}
+  if(!P[n]){alert('Sem dados dessa pessoa no mês.');return;}
+  var du=diasUteisMes(ym);var secs=_secMetas();
+  var body='<div style="font-size:14px;margin-bottom:8px"><b>Pessoa:</b> '+_escR(n)+' &nbsp;·&nbsp; <b>Mês:</b> '+(ym||'')+' &nbsp;·&nbsp; '+du+' dias úteis</div><table><thead><tr><th>Setor</th><th>Métrica</th><th>Total mês</th><th>Média/dia</th><th>Meta/dia</th><th>%</th><th>Status</th></tr></thead><tbody>';
+  var algum=false;secs.forEach(function(sec){if(!_secUsou(P,n,sec))return;algum=true;sec.ms.forEach(function(m,i){var tot=P[n][m.k]||0;var med=tot/du;var pct=m.meta>0?med/m.meta*100:0;var fr=_metaFarol(pct);body+='<tr>'+(i===0?'<td rowspan="'+sec.ms.length+'"><b>'+sec.setor+'</b></td>':'')+'<td>'+m.lbl+'</td><td style="text-align:right">'+(m.int?Math.round(tot):g2(tot))+'</td><td style="text-align:right">'+(m.int?Math.round(med*10)/10:g2(med))+'</td><td style="text-align:right">'+(m.int?Math.round(m.meta):g2(m.meta))+'</td><td style="text-align:right;color:'+fr.cor+';font-weight:700">'+Math.round(pct)+'%</td>'+(i===0?'<td rowspan="'+sec.ms.length+'" style="text-align:center;color:#fff;font-weight:700;background:'+_metaFarol(_metaPctSec(P,n,sec,du)).cor+'">'+_metaPctSec(P,n,sec,du)+'%</td>':'')+'</tr>';});});
+  if(!algum)body+='<tr><td colspan="7" style="text-align:center;color:#888">Sem lançamentos desta pessoa no mês.</td></tr>';
+  body+='</tbody></table>';
+  _relatPDF('Desempenho individual — '+n+' ('+(ym||'')+')',body);
 }
 function exportResumo(){
   if(!apont.length){alert('Sem apontamentos para exportar.');return;}
@@ -1934,7 +2012,7 @@ document.getElementById('osForm').addEventListener('submit',async function(e){
   if(!editId){var _okResumo=await resumoOSConfirm(header,itensTmp,servicosTmp);if(!_okResumo){return;}}
   var _wasEdit=!!editId;var _nOS=header.numOS||'';
   if(editId){const o=dados.find(x=>x.id===editId);if(o)Object.assign(o,header);}
-  else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Comercial',fb:null}));}
+  else {dados.unshift(Object.assign({id:'os_'+Date.now()},header,{setor:'Comercial',fb:null,comUser:userAtual()}));}
   try{salvar();render();}catch(_e){console.warn('erro ao salvar OS',_e);}resetForm();alert(_wasEdit?('\u2714 Altera\u00e7\u00f5es da O.S. '+_nOS+' salvas.'):('\u2714 O.S. '+_nOS+' cadastrada.'));
   }finally{window.__savingOS=false;if(_sbtn){_sbtn.disabled=false;}}
 });
@@ -2150,7 +2228,7 @@ function abrirFb(id){
   fbFotoData='';
   const set=(id,v)=>document.getElementById(id).value=v||'';
   set('fbFornecedor',f.fornecedor);set('fbQtd',f.qtd);
-  set('fbPesoPacote',f.pesoPacote);set('fbResp',f.resp);set('fbNota',f.nota||o.numOS);set('fbLetra',f.letra);
+  set('fbPesoPacote',f.pesoPacote);set('fbResp',userAtual());set('fbNota',f.nota||o.numOS);set('fbLetra',f.letra);
   var _D=fbDefaultsFromOS(o);
   fbSetSel('fbCategoria',f.categoria||_D.categoria);fbSetSel('fbCamada',f.camada||_D.camada);fbSetSel('fbCor',f.cor||_D.cor);set('fbAnti',f.anti||_D.anti||'Não');
   set('fbVerniz',f.verniz||_D.verniz);set('fbScanner',f.scanner||'Não');set('fbOutros',f.outros);
@@ -2584,7 +2662,7 @@ function addApontLine(){
   const data=g('apData')||hojeISO();
   var _tk=apTanquesSel();
   var _frac=fracMetalBanho(it);var _net=peso*_frac;
-  apont.push({id:'ap_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),osId:osId,itemIdx:apSelItem,data:data,mes:new Date(data+'T12:00:00').getMonth()+1,os:o.numOS,cliente:o.cliente,periodo:g('apPeriodo'),modo:g('apModo'),responsavel:g('apResp'),user:userAtual(),categoria:(it.banho&&it.banho.indexOf('Ouro')===0?'Folheação':'Banho'),tipo:it.banho,cor:it.cor,camada:g('apCamada'),tanques:_tk,tanque:_tk.join(', '),peso:_net,pesoBruto:peso,pedraKg:pedraKgItem(it),metal:Math.max(0,cam-1)*_net});
+  apont.push({id:'ap_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),osId:osId,itemIdx:apSelItem,data:data,mes:new Date(data+'T12:00:00').getMonth()+1,os:o.numOS,cliente:o.cliente,periodo:g('apPeriodo'),modo:g('apModo'),responsavel:userAtual(),user:userAtual(),categoria:(it.banho&&it.banho.indexOf('Ouro')===0?'Folheação':'Banho'),tipo:it.banho,cor:it.cor,camada:g('apCamada'),tanques:_tk,tanque:_tk.join(', '),peso:_net,pesoBruto:peso,pedraKg:pedraKgItem(it),metal:Math.max(0,cam-1)*_net});
   salvarApont();
   document.getElementById('apPeso').value='';document.getElementById('apMetal').value='';
   abrirEntrada(apSelItem);renderApItens(osId);
@@ -2694,7 +2772,7 @@ function abrirExp(id){
   var _lf=document.getElementById('expFiltroLote');if(_lf){var _ll=[];(o.itens||[]).forEach(function(it,li){if(loteVisExp(o,it))_ll.push(li);});var _lk=_lf.value;_lf.innerHTML='<option value="">Todos os lotes</option>'+_ll.map(function(li){return '<option value="'+li+'">Lote '+(li+1)+'</option>';}).join('');if(_lk!==''&&_ll.indexOf(parseInt(_lk))>-1)_lf.value=_lk;else _lf.value='';}
   renderExpConf(o);
   var _parc=osExpParcial(o);var _b1=document.getElementById('btnConcluirExp'),_b2=document.getElementById('btnFecharCaixa'),_b3=document.getElementById('btnVerParcial');if(_b1)_b1.style.display=_parc?'none':'';if(_b2)_b2.style.display=_parc?'none':'';if(_b3)_b3.style.display=_parc?'':'none';var _bvt=document.getElementById('btnValidarTudo');if(_bvt)_bvt.style.display=(sessao&&sessao.role==='Admin')?'':'none';
-  document.getElementById('expResp').value=e.resp||'';var _pf=document.getElementById('expPesoFio');if(_pf)_pf.value=kg2g(e.pesoFio);var _ec=document.getElementById('expEnviarCat');if(_ec){var _hc=(o.itens||[]).some(function(it){return (it.subitens&&it.subitens.length)&&it.compl&&it.compl.cataforetico;});_ec.value=(o.posVerniz?'nao':(_hc?'sim':'nao'));var _hh=document.getElementById('expCatHint');if(_hh)_hh.textContent=_hc?'Esta OS tem item com cataforético — sugerido: enviar ao Verniz.':'Sem cataforético — sugerido: finalizar.';}
+  document.getElementById('expResp').value=userAtual();var _pf=document.getElementById('expPesoFio');if(_pf)_pf.value=kg2g(e.pesoFio);var _ec=document.getElementById('expEnviarCat');if(_ec){var _hc=(o.itens||[]).some(function(it){return (it.subitens&&it.subitens.length)&&it.compl&&it.compl.cataforetico;});_ec.value=(o.posVerniz?'nao':(_hc?'sim':'nao'));var _hh=document.getElementById('expCatHint');if(_hh)_hh.textContent=_hc?'Esta OS tem item com cataforético — sugerido: enviar ao Verniz.':'Sem cataforético — sugerido: finalizar.';}
   document.getElementById('expRetrabMotivo').value='';document.getElementById('expRetrabQtd').value='';
   var _rd=document.getElementById('expReenvioData');if(_rd)_rd.value=(o.reenvioNegociado&&o.reenvioData)?o.reenvioData:'';var _rs=document.getElementById('expReenvioStatus');if(_rs)_rs.textContent=(o.reenvioNegociado&&o.reenvioData)?('✔ sem atraso até '+fmt(o.reenvioData)):'';
   expToggleCatBtns();
@@ -3616,6 +3694,8 @@ function renderRelatorios(){
 function relExportExcel(){var cols=['Nº OS','Cliente','Etiqueta','Entrada','Vencimento','Saída','Setor','Peso (g)','Total (R$)'];var lin=(_relLista||[]).map(function(o){return [o.numOS||'',o.cliente||'',o.etiqueta||'',fmt(o.dataEntrada),(o.prevEntregaISO?fmt(o.prevEntregaISO):''),fmt(o.dataSaida),o.setor||'',g2(_relPesoOS(o)*1000),g2(totalOS(o))];});if(!lin.length){alert('Nenhuma O.S. no período.');return;}baixarXls('Relatorio_Periodo_Magri',cols,lin);}
 function relExportPDF(){var w=window.open('','_blank');if(!w){alert('Permita pop-ups.');return;}var r=_relRangeAtual();var rows=(_relLista||[]).map(function(o){return '<tr><td>'+(o.numOS||'')+'</td><td>'+(o.cliente||'')+'</td><td>'+(o.etiqueta||'')+'</td><td>'+fmt(o.dataEntrada)+'</td><td>'+(o.prevEntregaISO?fmt(o.prevEntregaISO):'—')+'</td><td>'+fmt(o.dataSaida)+'</td><td>'+(o.setor||'')+'</td><td style="text-align:right">'+g2(_relPesoOS(o)*1000)+'</td><td style="text-align:right">'+g2(totalOS(o))+'</td></tr>';}).join('');w.document.write('<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório</title><style>@'+'page{size:A4 landscape;margin:12mm}body{font-family:Arial;font-size:11px}h1{color:#123a6b;font-size:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #999;padding:4px 6px}th{background:#123a6b;color:#fff}@media print{.np{display:none}}</style></head><body><h1>MAGRI FOLHEADOS — Relatório de O.S. ('+r.de.split("-").reverse().join("/")+' a '+r.ate.split("-").reverse().join("/")+')</h1><div class="np"><button onclick="window.print()">Imprimir / Salvar PDF</button></div><table><thead><tr><th>Nº OS</th><th>Cliente</th><th>Etiqueta</th><th>Entrada</th><th>Vencimento</th><th>Saída</th><th>Setor</th><th>Peso(g)</th><th>Total(R$)</th></tr></thead><tbody>'+rows+'</tbody></table></body></html>');w.document.close();}
 function render(){
+  try{var _ua=userAtual();['fbResp','apResp','expResp'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=_ua;});}catch(e){}
+  try{renderMetasAdmin();}catch(e){}
   renderFinanceiro();
   renderPosVenda();
   renderEstoque();
@@ -3872,7 +3952,7 @@ aplicarLogoHeader();try{_comFiltroRestore();}catch(e){}render();if(sessao){aplic
 (function(){
   const SUPA_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
   const SUPA_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
-  const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_contatos_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo','magri_estoque_v1','magri_pecas_v1','magri_tanque_data_v1'];
+  const KEYS_BLOB=['magri_catalogo_v1','magri_devolucoes_v1','magri_tanque_v1','magri_reforco_v1','magri_clientes_v1','magri_contatos_v1','magri_metas_v1','magri_versoes_v1','magri_retrab_v1','magri_users','magri_roleperms','magri_logo','magri_estoque_v1','magri_pecas_v1','magri_tanque_data_v1'];
   const _set=localStorage.setItem.bind(localStorage);
   function _setS(k,v){try{_set(k,v);return true;}catch(e){console.warn('Armazenamento cheio — pulando',k,e&&e.name);window.__lsCheio=true;return false;}}
   /* Guarda o que cabe: mantém todas as O.S. ativas + as expedidas mais recentes que couberem,
@@ -3958,6 +4038,19 @@ function syncRows(table,v,snap,mapper){var arr;try{arr=JSON.parse(v||'[]');}catc
     else if(window.__lsCheio){try{var _wb=document.createElement('div');_wb.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99997;background:#8a6d1f;color:#fff;font-family:Arial;font-size:12px;padding:8px 12px;text-align:center;cursor:pointer';_wb.textContent='⚠ Pouco espaço neste aparelho: o sistema abriu normalmente, mas a lista de clientes pode não aparecer. Libere espaço no celular (apagar fotos/apps) para voltar ao normal. (toque para fechar)';_wb.onclick=function(){_wb.style.display='none';};document.body.appendChild(_wb);}catch(_we){}}
     window.__initLoad=true;var code=document.getElementById('__mainapp').textContent;var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);window.__initLoad=false;
     window.logout=async function(){await sb.auth.signOut();location.reload();};
+    /* ===== Sessão única por aparelho (exceto Admin e Mariella) ===== */
+    try{
+      var _uRow=((cfgMap['magri_users']||[]).find(function(u){return (''+u.user).toLowerCase()===email;})||{});
+      var _nome=(''+(_uRow.nome||'')).toLowerCase();
+      var _mdOk=(role==='Admin')||/(mariella|rodolfo)/i.test(email)||/(mariella|rodolfo)/i.test(_nome);
+      if(!_mdOk){
+        var _devId='d_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+        var _sessKey='sess_'+email;var _myTs=Date.now();var _kicked=false;
+        sb.from('config').upsert({chave:_sessKey,valor:{dev:_devId,ts:_myTs}}).then(function(){},function(){});
+        var _checkSess=async function(){if(_kicked)return;try{var r=await sb.from('config').select('valor').eq('chave',_sessKey).maybeSingle();var v=r&&r.data&&r.data.valor;if(v&&v.dev&&v.dev!==_devId&&(Number(v.ts)||0)>=_myTs){_kicked=true;try{await sb.auth.signOut();}catch(e){}try{localStorage.removeItem('magri_session');}catch(e){}document.body.innerHTML='<div style="position:fixed;inset:0;background:#0f172a;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:9999999"><div><div style="font-size:22px;font-weight:800;margin-bottom:10px">Sessão encerrada</div><div style="font-size:15px;color:#cbd5e1;max-width:420px;line-height:1.5">Sua conta foi aberta em outro aparelho. Cada usuário só pode usar o sistema em um aparelho por vez.<br><br><button onclick="location.reload()" style="padding:10px 20px;border:none;border-radius:8px;background:#38bdf8;color:#0b1220;font-weight:800;cursor:pointer">Entrar de novo</button></div></div></div>';}}catch(e){}};
+        setInterval(_checkSess,30000);setTimeout(_checkSess,6000);
+      }
+    }catch(_se){console.warn('sessao unica',_se);}
   }
   sb.auth.getSession().then(function(res){if(res.data.session)boot();else loginUI();});
 })();
