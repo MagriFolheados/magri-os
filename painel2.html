@@ -76,6 +76,9 @@ function g1(v){return (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigi
 function pesoDecl(o){var t=0;(o.itens||[]).forEach(function(it){t+=(parseFloat(it.peso)||0);});return t||parseFloat(o.peso)||0;}
 function pesoFinalOS(o){var t=0;(o.itens||[]).forEach(function(it){if(it.subitens&&it.subitens.length){it.subitens.forEach(function(sb){t+=(parseFloat(sb.pesoFinalExp)||0);});}else{t+=(parseFloat(it.pesoFinal)||0);}});return t;}
 function corPct(p){return p>=100?'var(--verde)':(p>=80?'var(--amarelo)':'var(--vermelho)');}
+function normNome(n){return (''+(n||'')).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');}
+function excluido(n){return !n||/RODOLFO/.test(n);}
+var GAN_MES=0,GAN_HOJE=0;
 
 var MES7='',DU=22;
 function relogio(){var d=new Date();document.getElementById('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
@@ -88,10 +91,10 @@ var SEC=[
   {key:'exp',nome:'📦 Expedição',modo:'or',ms:[{k:'kg',lbl:'Kg',meta:function(){return M.expedicao.kg;}},{k:'itens',lbl:'Itens',meta:function(){return M.expedicao.itens;},int:true}]}
 ];
 
-function _add(P,user,sec,metric,val,hoje){if(!user)return;user=(''+user).trim();if(!user)return;P[user]=P[user]||{};var s=P[user][sec]=P[user][sec]||{};var mm=s[metric]=s[metric]||{h:0,m:0};mm.m+=val;if(hoje)mm.h+=val;}
+function _add(P,user,sec,metric,val,hoje){if(!user)return;user=normNome(user);if(excluido(user))return;P[user]=P[user]||{};var s=P[user][sec]=P[user][sec]||{};var mm=s[metric]=s[metric]||{h:0,m:0};mm.m+=val;if(hoje)mm.h+=val;}
 
 function computa(ordens,apont){
-  var ym=MES7,hj=hojeISO();var P={};
+  var ym=MES7,hj=hojeISO();var P={};GAN_MES=0;GAN_HOJE=0;
   (ordens||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
     // Comercial
     if(o.comUser){var d=(''+(o.dataEntrada||'')).slice(0,10);if(d.slice(0,7)===ym){var t=d===hj;_add(P,o.comUser,'com','os',1,t);_add(P,o.comUser,'com','kg',pesoDecl(o),t);}}
@@ -105,7 +108,7 @@ function computa(ordens,apont){
       else{if(eWho0&&ed0.slice(0,7)===ym){var t2=ed0===hj;_add(P,eWho0,'exp','itens',(parseInt(it.qtd)||0),t2);_add(P,eWho0,'exp','kg',(parseFloat(it.pesoFinal)||0),t2);}}
     });
   });
-  (apont||[]).forEach(function(a){if(!a)return;var who=a.user||a.responsavel;var d=(''+(a.data||'')).slice(0,10);if(who&&d.slice(0,7)===ym){_add(P,who,'qual','kg',(a.peso||0),d===hj);}});
+  (apont||[]).forEach(function(a){if(!a)return;var who=a.user||a.responsavel;var d=(''+(a.data||'')).slice(0,10);if(d.slice(0,7)===ym){GAN_MES+=(a.peso||0);if(d===hj)GAN_HOJE+=(a.peso||0);if(who)_add(P,who,'qual','kg',(a.peso||0),d===hj);}});
   return P;
 }
 
@@ -120,8 +123,8 @@ function render(P){
   var med=['🥇','🥈','🥉'];
   var dh=document.getElementById('destaque');
   dh.innerHTML=rank.slice(0,3).map(function(x,i){return '<div class="dcard"><div class="medal">'+med[i]+'</div><div><div class="nm">'+(''+x.n).replace(/</g,'&lt;')+'</div><div class="pc">'+Math.round(x.avg)+'% das metas · '+x.nsec+' setor(es)</div></div></div>';}).join('')||'<div class="dcard"><div class="pc">Sem dados no mês ainda.</div></div>';
-  // Gancheira coletiva (kg apontado junto com o banho)
-  var ganMes=0,ganHoje=0;nomes.forEach(function(n){var q=(P[n].qual||{}).kg||{h:0,m:0};ganMes+=q.m;ganHoje+=q.h;});
+  // Gancheira coletiva (kg apontado junto com o banho) — total da equipe
+  var ganMes=GAN_MES,ganHoje=GAN_HOJE;
   var ganMeta=M.gancheira.kg||0;var ganMed=ganMes/DU;var ganPct=ganMeta>0?Math.round(ganMed/ganMeta*100):0;var ganCor=corPct(ganPct);
   document.getElementById('ganColetiva').innerHTML='<div style="background:var(--card);border:1px solid #3a4a6b;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="font-size:16px;font-weight:800;color:#fff">🪝 Gancheira — meta coletiva</div><div style="font-size:12px;color:var(--muted)">kg apontado junto com o banho · meta '+g1(ganMeta)+' kg/dia ('+g1(ganMeta*DU)+' kg/mês)</div><div style="font-size:13px;color:#cbd5e1">hoje <b>'+g1(ganHoje)+'kg</b> · mês <b>'+g1(ganMes)+'kg</b> · média/dia <b style="color:'+ganCor+'">'+g1(ganMed)+'kg</b></div><div style="flex:1;min-width:120px;height:16px;background:#0b1220;border-radius:8px;overflow:hidden"><div style="width:'+Math.min(100,ganPct)+'%;height:100%;background:'+ganCor+'"></div></div><div style="font-size:18px;font-weight:800;color:'+ganCor+'">'+ganPct+'%</div></div>';
   // blocos por setor
