@@ -58,6 +58,7 @@ body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-seri
     <div class="right"><div class="clock" id="clock"></div><div class="upd" id="upd"></div></div>
   </div>
   <div class="destaque" id="destaque"></div>
+  <div id="ganColetiva" style="margin-bottom:10px"></div>
   <div class="grid" id="grid"></div>
 </div>
 
@@ -65,7 +66,7 @@ body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-seri
 var SB_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
 var SB_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
 var sb=supabase.createClient(SB_URL,SB_KEY);
-var METAS_DEFAULT={comercial:{os:10,kg:5},foto:{fotos:300,kg:5},gancheira:{kg:10},qualidade:{kg:10},expedicao:{kg:5,itens:300}};
+var METAS_DEFAULT={comercial:{os:10,kg:7},foto:{fotos:300,kg:5},gancheira:{kg:14},qualidade:{kg:10},expedicao:{kg:5,itens:300}};
 var M=JSON.parse(JSON.stringify(METAS_DEFAULT));
 
 function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -81,9 +82,8 @@ function relogio(){var d=new Date();document.getElementById('clock').textContent
 setInterval(relogio,1000);relogio();
 
 var SEC=[
-  {key:'com',nome:'🛒 Comercial',modo:'and',ms:[{k:'os',lbl:'O.S.',meta:function(){return M.comercial.os;},int:true},{k:'kg',lbl:'Kg',meta:function(){return M.comercial.kg;}}]},
+  {key:'com',nome:'🛒 Comercial',modo:'single',ms:[{k:'kg',lbl:'Kg',meta:function(){return M.comercial.kg;}}]},
   {key:'fb',nome:'📷 Foto / Bruto',modo:'or',ms:[{k:'fotos',lbl:'Fotos',meta:function(){return M.foto.fotos;},int:true},{k:'kg',lbl:'Kg',meta:function(){return M.foto.kg;}}]},
-  {key:'gan',nome:'🪝 Gancheira',modo:'single',ms:[{k:'kg',lbl:'Kg enganch.',meta:function(){return M.gancheira.kg;}}]},
   {key:'qual',nome:'🔬 Qualidade',modo:'single',ms:[{k:'kg',lbl:'Kg apontado',meta:function(){return M.qualidade.kg;}}]},
   {key:'exp',nome:'📦 Expedição',modo:'or',ms:[{k:'kg',lbl:'Kg',meta:function(){return M.expedicao.kg;}},{k:'itens',lbl:'Itens',meta:function(){return M.expedicao.itens;},int:true}]}
 ];
@@ -98,12 +98,12 @@ function computa(ordens,apont){
     // Foto/Bruto
     var f=o.fb||{};var fWho=o.fbUser||f.resp;var fd=(''+(f.concluidoEm||'')).slice(0,10);
     if(fWho&&fd&&fd.slice(0,7)===ym){var tf=fd===hj;var fotos=0;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.foto)fotos++;});});_add(P,fWho,'fb','fotos',fotos,tf);_add(P,fWho,'fb','kg',pesoDecl(o),tf);}
-    // Gancheira
-    var amWho=o.amUser||o.amResp;var ad=(''+(o.amConcluidoEm||'')).slice(0,10);
-    if(amWho&&ad.slice(0,7)===ym){_add(P,amWho,'gan','kg',(parseFloat(o.pesoEnganchKg)||0),ad===hj);}
-    // Expedição
-    var e=o.exp||{};var cxs=o.caixas||[];var eWho=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var ed=(''+(e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'')).slice(0,10);
-    if(eWho&&ed.slice(0,7)===ym){var te=ed===hj;var itens=0;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){itens+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);});}else{itens+=(parseInt(it.qtd)||0);}});_add(P,eWho,'exp','kg',pesoFinalOS(o),te);_add(P,eWho,'exp','itens',itens,te);}
+    // Expedição por peça (quem deu o Sim)
+    var e=o.exp||{};var cxs=o.caixas||[];var eWho0=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var ed0=(''+(e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'')).slice(0,10);
+    (o.itens||[]).forEach(function(it){var subs=it.subitens||[];
+      if(subs.length){subs.forEach(function(sb){if(sb.confExp!=='Sim')return;var who=sb.confExpUser||eWho0;var d=(''+(sb.confExpEm||ed0||'')).slice(0,10);if(!who||d.slice(0,7)!==ym)return;var t=d===hj;_add(P,who,'exp','itens',(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0),t);_add(P,who,'exp','kg',(parseFloat(sb.pesoFinalExp)||0),t);});}
+      else{if(eWho0&&ed0.slice(0,7)===ym){var t2=ed0===hj;_add(P,eWho0,'exp','itens',(parseInt(it.qtd)||0),t2);_add(P,eWho0,'exp','kg',(parseFloat(it.pesoFinal)||0),t2);}}
+    });
   });
   (apont||[]).forEach(function(a){if(!a)return;var who=a.user||a.responsavel;var d=(''+(a.data||'')).slice(0,10);if(who&&d.slice(0,7)===ym){_add(P,who,'qual','kg',(a.peso||0),d===hj);}});
   return P;
@@ -120,6 +120,10 @@ function render(P){
   var med=['🥇','🥈','🥉'];
   var dh=document.getElementById('destaque');
   dh.innerHTML=rank.slice(0,3).map(function(x,i){return '<div class="dcard"><div class="medal">'+med[i]+'</div><div><div class="nm">'+(''+x.n).replace(/</g,'&lt;')+'</div><div class="pc">'+Math.round(x.avg)+'% das metas · '+x.nsec+' setor(es)</div></div></div>';}).join('')||'<div class="dcard"><div class="pc">Sem dados no mês ainda.</div></div>';
+  // Gancheira coletiva (kg apontado junto com o banho)
+  var ganMes=0,ganHoje=0;nomes.forEach(function(n){var q=(P[n].qual||{}).kg||{h:0,m:0};ganMes+=q.m;ganHoje+=q.h;});
+  var ganMeta=M.gancheira.kg||0;var ganMed=ganMes/DU;var ganPct=ganMeta>0?Math.round(ganMed/ganMeta*100):0;var ganCor=corPct(ganPct);
+  document.getElementById('ganColetiva').innerHTML='<div style="background:var(--card);border:1px solid #3a4a6b;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div style="font-size:16px;font-weight:800;color:#fff">🪝 Gancheira — meta coletiva</div><div style="font-size:12px;color:var(--muted)">kg apontado junto com o banho · meta '+g1(ganMeta)+' kg/dia ('+g1(ganMeta*DU)+' kg/mês)</div><div style="font-size:13px;color:#cbd5e1">hoje <b>'+g1(ganHoje)+'kg</b> · mês <b>'+g1(ganMes)+'kg</b> · média/dia <b style="color:'+ganCor+'">'+g1(ganMed)+'kg</b></div><div style="flex:1;min-width:120px;height:16px;background:#0b1220;border-radius:8px;overflow:hidden"><div style="width:'+Math.min(100,ganPct)+'%;height:100%;background:'+ganCor+'"></div></div><div style="font-size:18px;font-weight:800;color:'+ganCor+'">'+ganPct+'%</div></div>';
   // blocos por setor
   var g=document.getElementById('grid');
   g.innerHTML=SEC.map(function(sec){
