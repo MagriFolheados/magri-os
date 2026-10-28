@@ -709,7 +709,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28bc</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28be</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -775,7 +775,7 @@
           <div class="grid">
             <div><label>Comercial — Kg/dia (pedidos fechados)</label><input type="number" step="0.1" id="mtComKg"></div>
             <div><label>Comercial — O.S./dia (informativo)</label><input type="number" step="0.1" id="mtComOS"></div>
-            <div><label>Foto/Bruto — Fotos/dia</label><input type="number" step="1" id="mtFotoF"></div>
+            <div><label>Foto/Bruto — Itens catalogados/dia</label><input type="number" step="1" id="mtFotoF"></div>
             <div><label>Foto/Bruto — Kg/dia</label><input type="number" step="0.1" id="mtFotoKg"></div>
             <div><label>Gancheira — Kg/dia (COLETIVA, apontado)</label><input type="number" step="0.1" id="mtGanKg"></div>
             <div><label>Qualidade — Kg/dia</label><input type="number" step="0.1" id="mtQualKg"></div>
@@ -1306,6 +1306,7 @@ let METAS=JSON.parse(localStorage.getItem(KEY_METAS)||'null')||JSON.parse(JSON.s
 ['comercial','foto','gancheira','qualidade','expedicao'].forEach(function(k){if(!METAS[k])METAS[k]=JSON.parse(JSON.stringify(METAS_DEFAULT[k]));});
 function salvarMetas(){localStorage.setItem(KEY_METAS,JSON.stringify(METAS));}
 function diasUteisMes(ym){var p=(''+ym).split('-');var y=+p[0],m=+p[1];if(!y||!m)return 22;var d=new Date(y,m-1,1),c=0;while(d.getMonth()===m-1){var w=d.getDay();if(w!==0&&w!==6)c++;d.setDate(d.getDate()+1);}return c||1;}
+function _normNome(n){return (''+(n||'')).trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ');}
 function renderMetasAdmin(){try{var S=function(id,v){var el=document.getElementById(id);if(el&&document.activeElement!==el)el.value=v;};S('mtComOS',METAS.comercial.os);S('mtComKg',METAS.comercial.kg);S('mtFotoF',METAS.foto.fotos);S('mtFotoKg',METAS.foto.kg);S('mtGanKg',METAS.gancheira.kg);S('mtQualKg',METAS.qualidade.kg);S('mtExpKg',METAS.expedicao.kg);S('mtExpIt',METAS.expedicao.itens);}catch(e){}}
 function salvarMetasAdmin(){var N=function(id){return parseFloat((''+((document.getElementById(id)||{}).value||'')).replace(',','.'))||0;};METAS.comercial={os:N('mtComOS'),kg:N('mtComKg')};METAS.foto={fotos:N('mtFotoF'),kg:N('mtFotoKg')};METAS.gancheira={kg:N('mtGanKg')};METAS.qualidade={kg:N('mtQualKg')};METAS.expedicao={kg:N('mtExpKg'),itens:N('mtExpIt')};salvarMetas();render();alert('Metas salvas.');}
 function clientesNomes(){var seen={},out=[];for(var i=0;i<clientesReg.length;i++){var n=clientesReg[i]&&clientesReg[i].nome;if(n&&!seen[n]){seen[n]=1;out.push(n);}}return out;}
@@ -1540,12 +1541,14 @@ function renderDiretoria(){
 }
 function renderProdUsuario(apMes,dirYM){
   var tb=document.getElementById('dirProd');if(!tb)return;
-  var P={};function _u(n){n=(''+(n||'')).trim()||'—';if(!P[n])P[n]={comOS:0,comKg:0,fbOS:0,fbPec:0,fbFoto:0,fbKg:0,amOS:0,amKg:0,bKg:0,bOuro:0,bLanc:0,eOS:0,ePec:0,eKg:0};return P[n];}
+  var _sink={comOS:0,comKg:0,fbOS:0,fbPec:0,fbFoto:0,fbKg:0,amOS:0,amKg:0,bKg:0,bOuro:0,bLanc:0,eOS:0,ePec:0,eKg:0,_eos:{},_fbos:{}};
+  var P={};function _u(n){n=_normNome(n);if(!n||/RODOLFO/.test(n))return _sink;if(!P[n])P[n]={comOS:0,comKg:0,fbOS:0,fbPec:0,fbFoto:0,fbKg:0,amOS:0,amKg:0,bKg:0,bOuro:0,bLanc:0,eOS:0,ePec:0,eKg:0};return P[n];}
+  window.__ganMesTot=(apMes||[]).reduce(function(s,a){return s+(a.peso||0);},0);
   (apMes||[]).forEach(function(a){var who=a.user||a.responsavel;if(!who)return;var u=_u(who);u.bKg+=(a.peso||0);u.bOuro+=((a.metal||0)*1000);u.bLanc++;});
   (dados||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
     if(o.comUser&&(''+(o.dataEntrada||'')).slice(0,7)===dirYM){var uc=_u(o.comUser);uc.comOS++;uc.comKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
-    var f=o.fb||{};var fWho=o.fbUser||f.resp;var fDate=f.concluidoEm||'';
-    if(fWho&&fDate&&(''+fDate).slice(0,7)===dirYM){var u=_u(fWho);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
+    var f=o.fb||{};
+    (o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){var who=sb.criadoPor||o.fbUser||f.resp;var d=(''+(sb.criadoEm||f.concluidoEm||'')).slice(0,10);if(!who||d.slice(0,7)!==dirYM)return;var u=_u(who);u.fbFoto++;u.fbPec+=(parseInt(sb.qtd)||0);u.fbKg+=(parseFloat(sb.peso)||0);u._fbos=u._fbos||{};u._fbos[o.id]=1;});});
     var amWho=o.amUser||o.amResp;
     if(amWho&&(''+(o.amConcluidoEm||'')).slice(0,7)===dirYM){var ua=_u(amWho);ua.amOS++;ua.amKg+=(parseFloat(o.pesoEnganchKg)||0);}
     var e=o.exp||{};var cxs=o.caixas||[];var eWho0=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
@@ -1554,7 +1557,7 @@ function renderProdUsuario(apMes,dirYM){
       else{if(eWho0&&(''+eDate).slice(0,7)===dirYM){var ul=_u(eWho0);ul.ePec+=(parseInt(it.qtd)||0);ul.eKg+=(parseFloat(it.pesoFinal)||0);ul._eos=ul._eos||{};ul._eos[o.id]=1;}}
     });
   });
-  Object.keys(P).forEach(function(n){P[n].eOS=P[n]._eos?Object.keys(P[n]._eos).length:0;});
+  Object.keys(P).forEach(function(n){P[n].eOS=P[n]._eos?Object.keys(P[n]._eos).length:0;P[n].fbOS=P[n]._fbos?Object.keys(P[n]._fbos).length:0;});
   var names=Object.keys(P).filter(function(n){var x=P[n];return (x.comOS+x.comKg+x.fbOS+x.fbPec+x.amOS+x.amKg+x.bKg+x.bLanc+x.eOS+x.ePec)>0;});
   names.sort(function(a,b){return (P[b].bKg+P[b].fbKg+P[b].amKg+P[b].eKg)-(P[a].bKg+P[a].fbKg+P[a].amKg+P[a].eKg);});
   tb.innerHTML=names.length?names.map(function(n){var x=P[n];return '<tr><td style="text-align:left;font-weight:700">'+n+'</td><td>'+x.comOS+'</td><td>'+g2(x.comKg)+'</td><td>'+x.fbOS+'</td><td>'+x.fbPec+'</td><td>'+x.fbFoto+'</td><td>'+g2(x.fbKg)+'</td><td>'+x.amOS+'</td><td>'+g2(x.amKg)+'</td><td>'+g2(x.bKg)+'</td><td>'+g2(x.bOuro)+'</td><td>'+x.bLanc+'</td><td>'+x.eOS+'</td><td>'+x.ePec+'</td><td>'+g2(x.eKg)+'</td></tr>';}).join(''):'<tr><td colspan="15" class="hint" style="padding:8px">Sem dados de responsável no mês.</td></tr>';
@@ -1566,7 +1569,7 @@ function renderProdUsuario(apMes,dirYM){
 function _metaFarol(pct){return pct>=100?{cls:'verde',cor:'#2a9d4a',txt:'✔'}:(pct>=80?{cls:'amarelo',cor:'#e0a800',txt:'~'}:{cls:'vermelho',cor:'#e23b3b',txt:'✗'});}
 function _secMetas(){return [
   {setor:'Comercial',modo:'single',ms:[{k:'comKg',lbl:'Kg',meta:(METAS.comercial.kg||0),unid:'kg'}]},
-  {setor:'Foto/Bruto',modo:'or',ms:[{k:'fbFoto',lbl:'Fotos',meta:(METAS.foto.fotos||0),unid:'',int:true},{k:'fbKg',lbl:'Kg',meta:(METAS.foto.kg||0),unid:'kg'}]},
+  {setor:'Foto/Bruto',modo:'or',ms:[{k:'fbFoto',lbl:'Itens catalog.',meta:(METAS.foto.fotos||0),unid:'',int:true},{k:'fbKg',lbl:'Kg',meta:(METAS.foto.kg||0),unid:'kg'}]},
   {setor:'Qualidade',modo:'single',ms:[{k:'bKg',lbl:'Kg apontado',meta:(METAS.qualidade.kg||0),unid:'kg'}]},
   {setor:'Expedição',modo:'or',ms:[{k:'eKg',lbl:'Kg',meta:(METAS.expedicao.kg||0),unid:'kg'},{k:'ePec',lbl:'Itens',meta:(METAS.expedicao.itens||0),unid:'',int:true}]}
 ];}
@@ -1589,7 +1592,7 @@ function renderMetas(P,dirYM){
     });
     html+='</tbody></table></div>';
   });
-  var ganTot=Object.keys(P).reduce(function(s,n){return s+(P[n].bKg||0);},0);var ganMeta=(METAS.gancheira.kg||0);var ganMed=ganTot/du;var ganPct=ganMeta>0?ganMed/ganMeta*100:0;var ganFr=_metaFarol(ganPct);
+  var ganTot=(window.__ganMesTot||0);var ganMeta=(METAS.gancheira.kg||0);var ganMed=ganTot/du;var ganPct=ganMeta>0?ganMed/ganMeta*100:0;var ganFr=_metaFarol(ganPct);
   html+='<div style="font-weight:800;color:#4a2b86;margin:12px 0 4px">🪝 Gancheira — meta COLETIVA: '+g2(ganMeta)+' kg/dia ('+g2(ganMeta*du)+' kg/mês) · por kg banhado junto com o banho</div>'+
     '<div style="display:flex;align-items:center;gap:12px;background:#f7f3fc;border:1px solid #c9b8ea;border-radius:8px;padding:8px 12px;font-size:13px;flex-wrap:wrap"><span>Total apontado no mês: <b>'+g2(ganTot)+' kg</b></span><span>Média/dia: <b style="color:'+ganFr.cor+'">'+g2(ganMed)+' kg</b></span><div style="flex:1;min-width:120px;height:14px;background:#eef0f4;border-radius:7px;overflow:hidden"><div style="width:'+Math.min(100,Math.round(ganPct))+'%;height:100%;background:'+ganFr.cor+'"></div></div><span style="font-weight:800;color:#fff;background:'+ganFr.cor+';padding:2px 10px;border-radius:10px">'+Math.round(ganPct)+'%</span></div>';
   box.innerHTML=html;
@@ -2546,8 +2549,9 @@ async function addSubitem(){
   if(total>0 && (usado+peso)>total+0.000001){alert('O peso dos sub-itens ('+kg2g(usado+peso)+' g) ultrapassaria o peso do lote ('+kg2g(total)+' g).\nDisponível: '+kg2g(total-usado)+' g.');return;}
   var _ehBrinco=/brinco/i.test(tipo);var _tar=_ehBrinco&&document.getElementById('sbTarraxa')&&document.getElementById('sbTarraxa').checked;var _trx=_ehBrinco&&document.getElementById('sbTarraxamento')&&document.getElementById('sbTarraxamento').checked;
   var _obs=document.getElementById('sbObs')?document.getElementById('sbObs').value.trim():'';
-  var novoSb={id:'sb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,fornecedor:document.getElementById('fbFornecedor').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:g2kg(document.getElementById('sbPeso').value),qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx,unidade:(document.getElementById('sbUnid')?document.getElementById('sbUnid').value:'Peça'),obs:_obs};
+  var novoSb={id:'sb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,fornecedor:document.getElementById('fbFornecedor').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:g2kg(document.getElementById('sbPeso').value),qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx,unidade:(document.getElementById('sbUnid')?document.getElementById('sbUnid').value:'Peça'),obs:_obs,criadoPor:userAtual(),criadoEm:hojeISO()};
   if(sbEdit&&(o.itens||[])[sbEdit.li]&&((o.itens[sbEdit.li].subitens)||[])[sbEdit.si]!==undefined){
+    var _old=o.itens[sbEdit.li].subitens[sbEdit.si]||{};novoSb.criadoPor=_old.criadoPor||novoSb.criadoPor;novoSb.criadoEm=_old.criadoEm||novoSb.criadoEm;
     novoSb.id=(o.itens[sbEdit.li].subitens[sbEdit.si]&&o.itens[sbEdit.li].subitens[sbEdit.si].id)||novoSb.id;o.itens[sbEdit.li].subitens[sbEdit.si]=novoSb;sbEdit=null;var _ab=document.getElementById('sbAddBtn');if(_ab)_ab.textContent='+ Adicionar sub-item';
   } else { if(!it.subitens)it.subitens=[];it.subitens.push(novoSb); }
   salvar();
