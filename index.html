@@ -369,9 +369,9 @@
         <div class="cards" id="cards-am"></div>
         <div class="panel">
           <div class="panel-head"><span class="dot"></span><h2>Amarração / Gancheira — O.S. recebidas do Foto/Bruto</h2>
-            <div class="toolbar"><label style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:4px">Responsável: <select id="amResp" onchange="amSetResp()" style="padding:5px"><option value="">—</option><option>RODOLFO</option><option>BRENDA</option><option>GRAZIELLY</option><option>JOSIANE</option><option>MARIELLA</option></select></label><input type="text" id="buscaAm" placeholder="Buscar..."><button class="btn-excel" onclick="exportAm()">Exportar</button></div>
+            <div class="toolbar"><span class="hint" style="font-weight:600;text-transform:none">Responsável: <b id="amUserLbl" style="color:#123a6b">—</b> (usuário logado)</span><input type="text" id="buscaAm" placeholder="Buscar..."><button class="btn-excel" onclick="exportAm()">Exportar</button></div>
           </div>
-          <div class="hint" style="padding:0 4px 8px">Selecione o responsável acima. Ao marcar uma O.S. como <b>Concluído</b>, o kg dela é creditado a esse responsável na produtividade.</div>
+          <div class="hint" style="padding:0 4px 8px">Ao <b>encaminhar para o Banho</b>, informe o <b>peso engancheirado</b> — ele é creditado ao usuário logado na produtividade.</div>
           <div class="table-scroll"><table>
             <thead><tr><th>Foto</th><th>Nº O.S.</th><th>Etiqueta</th><th>Cliente</th><th>Recebido do Foto</th><th>Prazo setor</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tbodyAm"></tbody>
@@ -545,7 +545,7 @@
           <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Volume banhado por dia (mês)</h2></div><div class="panel-body"><table style="width:100%;border-collapse:collapse;font-size:13px"><tbody id="dirDia"></tbody></table></div></div>
         </div>
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>👤 Produtividade por usuário (mês)</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Trabalho por responsável no mês selecionado. Amarração não registra responsável, por isso não entra.</div>
+          <div class="hint" style="margin-bottom:8px">Trabalho por <b>usuário logado</b> no mês selecionado. Amarração usa o <b>peso engancheirado</b> informado ao encaminhar para o Banho.</div>
           <div class="table-scroll"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th rowspan="2" style="text-align:left">Usuário</th><th colspan="4" style="background:#123a6b;color:#fff">Foto / Bruto</th><th colspan="2" style="background:#6b3fb0;color:#fff">Amarração</th><th colspan="3" style="background:#8a6d1f;color:#fff">Banho</th><th colspan="3" style="background:#1c6b3a;color:#fff">Expedição</th></tr><tr><th>O.S.</th><th>Peças</th><th>Fotos</th><th>Kg</th><th>O.S.</th><th>Kg</th><th>Kg</th><th>Ouro (g)</th><th>Lanç.</th><th>O.S.</th><th>Peças</th><th>Kg</th></tr></thead><tbody id="dirProd"></tbody></table></div>
           <div id="dirProdBars" style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px"></div>
         </div></div>
@@ -706,7 +706,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28aw</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28ax</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1172,6 +1172,7 @@ function salvarUsuarios(){localStorage.setItem('magri_users',JSON.stringify(usua
   };
 }
 let sessao=JSON.parse(localStorage.getItem('magri_session')||'null');
+function userAtual(){try{if(!sessao||!sessao.user)return '';var u=(usuarios||[]).find(function(x){return (''+x.user).toLowerCase()===(''+sessao.user).toLowerCase();});return (u&&u.nome&&(''+u.nome).trim())?(''+u.nome).trim():sessao.user;}catch(e){return (sessao&&sessao.user)||'';}}
 const ALL_VIEWS=['gestao','comercial','clientes','posvenda','estoque','financeiro','fotobruto','amarracao','banho','qualidade','expedicao','verniz','reforco','tanque','troca','resumo','diretoria','relatorios','catalogo','cobranca','canceladas'];
 const ROLES_CONFIG=['Comercial','Foto/Bruto','Amarração','Banho','Qualidade','Produção','Expedição','Financeiro'];
 const ROLE_VIEWS_DEFAULT={'Comercial':['gestao','comercial','clientes','posvenda','estoque','catalogo','cobranca','canceladas','relatorios'],'Foto/Bruto':['gestao','fotobruto'],'Amarração':['gestao','amarracao'],'Banho':['gestao','banho','reforco','tanque','troca','resumo'],'Qualidade':['gestao','qualidade'],'Produção':['gestao','amarracao','banho','reforco','tanque','troca','resumo','qualidade','relatorios'],'Expedição':['gestao','expedicao','verniz','catalogo'],'Financeiro':['gestao','financeiro','cobranca','catalogo','resumo','relatorios']};
@@ -1515,16 +1516,16 @@ function renderDiretoria(){
 }
 function renderProdUsuario(apMes,dirYM){
   var tb=document.getElementById('dirProd');if(!tb)return;
-  var USERS=['RODOLFO','BRENDA','GRAZIELLY','JOSIANE','MARIELLA'];
   var P={};function _u(n){n=(''+(n||'')).trim()||'—';if(!P[n])P[n]={fbOS:0,fbPec:0,fbFoto:0,fbKg:0,amOS:0,amKg:0,bKg:0,bOuro:0,bLanc:0,eOS:0,ePec:0,eKg:0};return P[n];}
-  USERS.forEach(_u);
-  (apMes||[]).forEach(function(a){if(!a.responsavel)return;var u=_u(a.responsavel);u.bKg+=(a.peso||0);u.bOuro+=((a.metal||0)*1000);u.bLanc++;});
+  (usuarios||[]).forEach(function(u){var n=(u.nome&&(''+u.nome).trim())||u.user;if(n&&(''+n).toLowerCase()!=='admin')_u(n);});
+  (apMes||[]).forEach(function(a){var who=a.user||a.responsavel;if(!who)return;var u=_u(who);u.bKg+=(a.peso||0);u.bOuro+=((a.metal||0)*1000);u.bLanc++;});
   (dados||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
-    var f=o.fb||{};
-    if(f.resp&&(''+(o.fbRecebidoEm||'')).slice(0,7)===dirYM){var u=_u(f.resp);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
-    if(o.amResp&&o.amStatus==='Concluído'&&(''+(o.amConcluidoEm||'')).slice(0,7)===dirYM){var ua=_u(o.amResp);ua.amOS++;ua.amKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
-    var e=o.exp||{};var cxs=o.caixas||[];var eResp=e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
-    if(eResp&&(''+eDate).slice(0,7)===dirYM){var u2=_u(eResp);u2.eOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u2.ePec+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);});}else{u2.ePec+=(parseInt(it.qtd)||0);}});u2.eKg+=(typeof pesoFinalTotalOS==='function'?pesoFinalTotalOS(o):0);}
+    var f=o.fb||{};var fWho=o.fbUser||f.resp;var fDate=f.concluidoEm||o.fbRecebidoEm||'';
+    if(fWho&&(''+fDate).slice(0,7)===dirYM){var u=_u(fWho);u.fbOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u.fbPec+=(parseInt(sb.qtd)||0);if(sb.foto)u.fbFoto++;});}else{u.fbPec+=(parseInt(it.qtd)||0);}});u.fbKg+=(typeof pesoDeclaradoOS==='function'?pesoDeclaradoOS(o):(parseFloat(o.peso)||0));}
+    var amWho=o.amUser||o.amResp;
+    if(amWho&&(''+(o.amConcluidoEm||'')).slice(0,7)===dirYM){var ua=_u(amWho);ua.amOS++;ua.amKg+=(parseFloat(o.pesoEnganchKg)||0);}
+    var e=o.exp||{};var cxs=o.caixas||[];var eWho=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
+    if(eWho&&(''+eDate).slice(0,7)===dirYM){var u2=_u(eWho);u2.eOS++;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){u2.ePec+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);});}else{u2.ePec+=(parseInt(it.qtd)||0);}});u2.eKg+=(typeof pesoFinalTotalOS==='function'?pesoFinalTotalOS(o):0);}
   });
   var names=Object.keys(P).filter(function(n){var x=P[n];return n!=='—'||x.fbOS||x.amOS||x.bLanc||x.eOS;});
   names.sort(function(a,b){return (P[b].bKg+P[b].fbKg+P[b].amKg+P[b].eKg)-(P[a].bKg+P[a].fbKg+P[a].amKg+P[a].eKg);});
@@ -2041,7 +2042,7 @@ function fecharCaixaExp(){
     if(!confirm('Fechar caixa TOTAL da O.S. '+(o.numOS||'')+' (sem catalogação — sem conferência por peça).\n\nA O.S. vai para o Financeiro liberar o envio (após cobrança). Continuar?'))return;
     var _ql=(o.itens||[]).reduce(function(s,it){return s+(parseInt(it.qtd)||0);},0);
     o.caixas=o.caixas||[];o.caixas.push({id:'cx_'+Date.now(),fechadaEm:hojeISO(),resp:document.getElementById('expResp').value,parcial:false,qtd:_ql,envioFin:'pendente',finRecebPrevio:'',finLiberadoEm:'',transp:false});
-    o.envioFinPendente=true;o.setor='Aguardando Envio';o._ts=Date.now();o.exp=Object.assign(o.exp||{},coletaExp());
+    o.envioFinPendente=true;o.expUser=userAtual();o.setor='Aguardando Envio';o._ts=Date.now();o.exp=Object.assign(o.exp||{},coletaExp());
     salvar();document.getElementById('expModal').classList.remove('show');render();
     try{if(typeof notificarFinanceiroEnvio==='function')notificarFinanceiroEnvio(1);}catch(e){}
     alert('Caixa fechada (total). A O.S. saiu da produção e está no Financeiro aguardando liberação de envio.');return;
@@ -2067,7 +2068,7 @@ function fecharCaixaExp(){
   conf.forEach(function(sb){sb.expBoxed=true;sb._ts=Date.now();});
   o.caixas=o.caixas||[];
   o.caixas.push({id:'cx_'+Date.now(),fechadaEm:hojeISO(),resp:document.getElementById('expResp').value,parcial:parcial,qtd:qtd,envioFin:'pendente',finRecebPrevio:'',finLiberadoEm:'',transp:false});
-  o.envioFinPendente=true;
+  o.envioFinPendente=true;o.expUser=userAtual();
   if(!parcial){o.setor='Aguardando Envio';o._ts=Date.now();}
   o.exp=Object.assign(o.exp||{},coletaExp());
   salvar();document.getElementById('expModal').classList.remove('show');render();
@@ -2180,7 +2181,7 @@ async function salvarFb(concluir){
     precoPacote:_pp,pesoPacote:g('fbPesoPacote'),resp:g('fbResp'),nota:g('fbNota'),letra:g('fbLetra'),
     categoria:g('fbCategoria'),camada:g('fbCamada'),cor:g('fbCor'),anti:g('fbAnti'),verniz:g('fbVerniz'),
     scanner:g('fbScanner'),outros:g('fbOutros'),concluidoEm:o.fb&&o.fb.concluidoEm?o.fb.concluidoEm:''};
-  if(concluir){o.fb.concluidoEm=hojeISO();o.setor='Amarração';o._ts=Date.now();o.amRecebidoEm=hojeISO();o.amStatus=o.amStatus||'Recebido';}
+  if(concluir){o.fb.concluidoEm=hojeISO();o.fbUser=userAtual();o.setor='Amarração';o._ts=Date.now();o.amRecebidoEm=hojeISO();o.amStatus=o.amStatus||'Recebido';}
   salvar();render();
   if(concluir){
     if(window.__sb){
@@ -2498,9 +2499,8 @@ function updatePacoteTotais(){
   if(pp)pp.value=tpp?tpp.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'';
 }
 
-function amSetResp(){try{localStorage.setItem('magri_amResp',(document.getElementById('amResp')||{}).value||'');}catch(e){}}
-function amStatusChange(id,val){const o=dados.find(x=>x.id===id);if(!o)return;o.amStatus=val;o.amConcluidoEm=(val==='Concluído')?(o.amConcluidoEm||hojeISO()):'';if(val==='Concluído'){var _r=(document.getElementById('amResp')||{}).value||'';if(_r)o.amResp=_r;}o._ts=Date.now();if(window.__pendOrd)window.__pendOrd[String(o.id)]=Date.now();salvar();render();}
-function amEncaminhar(id){const o=dados.find(x=>x.id===id);if(!o)return;if(o.amStatus!=='Concluído'){alert('Marque o status como Concluído antes de encaminhar para o Banho.');return;}var tem=confirm('Esta O.S. tem ENGARDENAÇÃO? (cobrada R$ 0,03 por unidade)\n\nOK = SIM   ·   Cancelar = NÃO');o.servicos=(o.servicos||[]).filter(function(x){return (x.servico||'')!=='Engardenação';});if(tem){var q=prompt('Quantas unidades de engardenação?','');if(q===null)return;var qtd=parseInt((''+q).replace(/[^0-9]/g,''))||0;if(qtd<=0){alert('Informe uma quantidade válida de engardenação para encaminhar (ou responda NÃO).');return;}var un=(typeof PRECO_UNIDADE!=='undefined'&&PRECO_UNIDADE['Engardenação'])||0.03;o.servicos.push({servico:'Engardenação',cor:'',qtd:qtd,precoUnit:un,valor:qtd*un});o.engardenacao=true;o.engardenacaoQtd=qtd;}else{o.engardenacao=false;o.engardenacaoQtd=0;}if(BANHO_ATIVO){o.setor='Banho';o._ts=Date.now();o.banhoRecebidoEm=hojeISO();o.banhoStatus=o.banhoStatus||'Recebido';}else{o.setor='Qualidade';o._ts=Date.now();o.qualRecebidoEm=hojeISO();o.qualStatus=o.qualStatus||'Recebido';}salvar();render();alert('O.S. '+(o.numOS||'')+' encaminhada para '+(BANHO_ATIVO?'o Banho':'a Qualidade')+'.'+(o.engardenacao?(' Engardenação: '+o.engardenacaoQtd+' un adicionada à cobrança.'):''));}
+function amStatusChange(id,val){const o=dados.find(x=>x.id===id);if(!o)return;o.amStatus=val;o.amConcluidoEm=(val==='Concluído')?(o.amConcluidoEm||hojeISO()):'';if(val==='Concluído'){o.amUser=userAtual();}o._ts=Date.now();if(window.__pendOrd)window.__pendOrd[String(o.id)]=Date.now();salvar();render();}
+function amEncaminhar(id){const o=dados.find(x=>x.id===id);if(!o)return;if(o.amStatus!=='Concluído'){alert('Marque o status como Concluído antes de encaminhar para o Banho.');return;}var tem=confirm('Esta O.S. tem ENGARDENAÇÃO? (cobrada R$ 0,03 por unidade)\n\nOK = SIM   ·   Cancelar = NÃO');o.servicos=(o.servicos||[]).filter(function(x){return (x.servico||'')!=='Engardenação';});if(tem){var q=prompt('Quantas unidades de engardenação?','');if(q===null)return;var qtd=parseInt((''+q).replace(/[^0-9]/g,''))||0;if(qtd<=0){alert('Informe uma quantidade válida de engardenação para encaminhar (ou responda NÃO).');return;}var un=(typeof PRECO_UNIDADE!=='undefined'&&PRECO_UNIDADE['Engardenação'])||0.03;o.servicos.push({servico:'Engardenação',cor:'',qtd:qtd,precoUnit:un,valor:qtd*un});o.engardenacao=true;o.engardenacaoQtd=qtd;}else{o.engardenacao=false;o.engardenacaoQtd=0;}var _pe=prompt('Peso ENGANCHEIRADO (g) desta O.S. — o peso que vai para o Banho:', o.pesoEnganchKg?kg2g(o.pesoEnganchKg):'');if(_pe!==null){var _peg=parseFloat((''+_pe).replace(',','.'))||0;o.pesoEnganchKg=_peg/1000;}o.amUser=userAtual();o.amConcluidoEm=o.amConcluidoEm||hojeISO();if(BANHO_ATIVO){o.setor='Banho';o._ts=Date.now();o.banhoRecebidoEm=hojeISO();o.banhoStatus=o.banhoStatus||'Recebido';}else{o.setor='Qualidade';o._ts=Date.now();o.qualRecebidoEm=hojeISO();o.qualStatus=o.qualStatus||'Recebido';}salvar();render();alert('O.S. '+(o.numOS||'')+' encaminhada para '+(BANHO_ATIVO?'o Banho':'a Qualidade')+'.'+(o.engardenacao?(' Engardenação: '+o.engardenacaoQtd+' un adicionada à cobrança.'):''));}
 
 function banhoStatusChange(id,val){const o=dados.find(x=>x.id===id);if(!o)return;o.banhoStatus=val;o.banhoConcluidoEm=(val==='Concluído')?(o.banhoConcluidoEm||hojeISO()):'';salvar();render();}
 function qualStatusChange(id,val){var o=dados.find(function(x){return x.id===id;});if(!o)return;o.qualStatus=val;o.qualConcluidoEm=(val==='Concluído')?(o.qualConcluidoEm||hojeISO()):'';salvar();render();}
@@ -2584,7 +2584,7 @@ function addApontLine(){
   const data=g('apData')||hojeISO();
   var _tk=apTanquesSel();
   var _frac=fracMetalBanho(it);var _net=peso*_frac;
-  apont.push({id:'ap_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),osId:osId,itemIdx:apSelItem,data:data,mes:new Date(data+'T12:00:00').getMonth()+1,os:o.numOS,cliente:o.cliente,periodo:g('apPeriodo'),modo:g('apModo'),responsavel:g('apResp'),categoria:(it.banho&&it.banho.indexOf('Ouro')===0?'Folheação':'Banho'),tipo:it.banho,cor:it.cor,camada:g('apCamada'),tanques:_tk,tanque:_tk.join(', '),peso:_net,pesoBruto:peso,pedraKg:pedraKgItem(it),metal:Math.max(0,cam-1)*_net});
+  apont.push({id:'ap_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),osId:osId,itemIdx:apSelItem,data:data,mes:new Date(data+'T12:00:00').getMonth()+1,os:o.numOS,cliente:o.cliente,periodo:g('apPeriodo'),modo:g('apModo'),responsavel:g('apResp'),user:userAtual(),categoria:(it.banho&&it.banho.indexOf('Ouro')===0?'Folheação':'Banho'),tipo:it.banho,cor:it.cor,camada:g('apCamada'),tanques:_tk,tanque:_tk.join(', '),peso:_net,pesoBruto:peso,pedraKg:pedraKgItem(it),metal:Math.max(0,cam-1)*_net});
   salvarApont();
   document.getElementById('apPeso').value='';document.getElementById('apMetal').value='';
   abrirEntrada(apSelItem);renderApItens(osId);
@@ -2778,7 +2778,7 @@ function concluirExp(modo){
   if(irVerniz){if(!confirm('Enviar a O.S. '+(o.numOS||'')+' ao Verniz (cataforético)?\n\nPrazo de 5 dias úteis para retorno. As peças aprovadas seguem; reprovadas/com defeito vão para retrabalho.'))return;}
   else{if(!confirm('⚠ "Expedir direto" encerra a O.S. SEM passar pelo Financeiro (marca como Entregue).\n\nO normal é usar "📦 Fechar caixa → enviar p/ Financeiro".\n\nExpedir direto mesmo assim?'))return;}
   o._ts=Date.now();if(window.__pendOrd)window.__pendOrd[String(id)]=Date.now();
-  const e=coletaExp();
+  const e=coletaExp();o.expUser=userAtual();
   var _subs=[];(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){_subs.push(sb);});});
   if(!_subs.length){
     o.exp=Object.assign(o.exp||{},e,{concluidoEm:hojeISO(),defeitosPeca:0,perdidasTotal:0,perdidasDetalhe:[]});o.expStatus='Concluído';
@@ -3651,7 +3651,7 @@ function render(){
   const totPecas=dados.reduce((s,o)=>s+(o.fb&&o.fb.qtd?parseInt(o.fb.qtd):0),0);
   document.getElementById('cards-fb').innerHTML='<div class="card"><div class="n">'+fbTot+'</div><div class="l">Na fila</div></div><div class="card amarelo"><div class="n">'+fbPend+'</div><div class="l">Pendentes</div></div><div class="card vermelho"><div class="n">'+fbAtr+'</div><div class="l">Atrasadas (>2 du)</div></div><div class="card azul"><div class="n">'+totPecas+'</div><div class="l">Peças contadas</div></div>';
 
-  var _ar=document.getElementById('amResp');if(_ar&&!_ar.value){try{_ar.value=localStorage.getItem('magri_amResp')||'';}catch(e){}}
+  var _al=document.getElementById('amUserLbl');if(_al)_al.textContent=userAtual()||'—';
   const naAm=dados.filter(o=>o.setor==='Amarração');
   const qA=(document.getElementById('buscaAm').value||'').toLowerCase();
   const listaAm=naAm.filter(o=>!qA||JSON.stringify(o).toLowerCase().includes(qA));
