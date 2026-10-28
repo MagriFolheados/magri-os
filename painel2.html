@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magri — Painel da Equipe</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--card2:#243149;--txt:#e2e8f0;--muted:#94a3b8;--verde:#2ecc71;--amarelo:#f1c40f;--vermelho:#e74c3c;--ouro:#c8a24a;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-serif;height:100vh;overflow:hidden}
+#gate{position:fixed;inset:0;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;z-index:50}
+#gate .box{background:#111827;padding:26px 28px;border-radius:14px;width:330px;max-width:90%}
+#gate h1{font-size:20px;color:#38bdf8;margin-bottom:4px}
+#gate .sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+#gate input{width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff}
+#gate button{width:100%;padding:11px;border:none;border-radius:8px;background:#38bdf8;color:#0b1220;font-weight:800;cursor:pointer}
+#gerr{color:#f87171;font-size:12px;margin-top:8px;min-height:16px}
+#app{display:none;flex-direction:column;height:100vh;padding:14px 16px}
+.hd{display:flex;align-items:center;gap:14px;border-bottom:2px solid #334155;padding-bottom:8px;margin-bottom:10px}
+.hd h1{font-size:24px;color:#fff}
+.hd .mes{font-size:17px;color:var(--ouro);font-weight:700}
+.hd .right{margin-left:auto;text-align:right;color:var(--muted);font-size:12px}
+.hd .clock{font-size:20px;color:#fff;font-weight:700}
+.destaque{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.dcard{flex:1;min-width:180px;background:linear-gradient(135deg,#243149,#1b2740);border:1px solid #3a4a6b;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:12px}
+.dcard .medal{font-size:30px}
+.dcard .nm{font-size:19px;font-weight:800;color:#fff}
+.dcard .pc{font-size:13px;color:var(--muted)}
+.grid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;overflow:auto}
+.sec{background:var(--card);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.sec h2{font-size:17px;color:#fff;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.sec .meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.urow{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:8px;margin-bottom:5px;background:var(--card2)}
+.urow .nm{font-weight:700;font-size:14px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.urow .hoje{font-size:12px;color:#cbd5e1;min-width:92px;text-align:right}
+.urow .bar{width:120px;height:14px;background:#0b1220;border-radius:7px;overflow:hidden;flex-shrink:0}
+.urow .bar > div{height:100%}
+.urow .pct{font-size:13px;font-weight:800;min-width:46px;text-align:right}
+.empty{color:var(--muted);font-size:12px;padding:6px 2px}
+.upd{font-size:11px;color:var(--muted)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="gate"><div class="box">
+  <h1>Magri — Painel da Equipe</h1>
+  <div class="sub">Acompanhamento de metas e desempenho</div>
+  <input id="em" type="text" placeholder="Usuário ou e-mail" autocomplete="username">
+  <input id="pw" type="password" placeholder="Senha" autocomplete="current-password">
+  <button id="go">Entrar</button>
+  <div id="gerr"></div>
+</div></div>
+
+<div id="app">
+  <div class="hd">
+    <h1>👥 Equipe — Metas & Desempenho</h1>
+    <div class="mes" id="mesLbl"></div>
+    <div class="right"><div class="clock" id="clock"></div><div class="upd" id="upd"></div></div>
+  </div>
+  <div class="destaque" id="destaque"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+var SB_URL='https://ibdubxoxupoxkskcupxd.supabase.co';
+var SB_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
+var sb=supabase.createClient(SB_URL,SB_KEY);
+var METAS_DEFAULT={comercial:{os:10,kg:5},foto:{fotos:300,kg:5},gancheira:{kg:10},qualidade:{kg:10},expedicao:{kg:5,itens:300}};
+var M=JSON.parse(JSON.stringify(METAS_DEFAULT));
+
+function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function ymAtual(){return hojeISO().slice(0,7);}
+function diasUteisMes(ym){var p=(''+ym).split('-');var y=+p[0],m=+p[1];if(!y||!m)return 22;var d=new Date(y,m-1,1),c=0;while(d.getMonth()===m-1){var w=d.getDay();if(w!==0&&w!==6)c++;d.setDate(d.getDate()+1);}return c||1;}
+function g1(v){return (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});}
+function pesoDecl(o){var t=0;(o.itens||[]).forEach(function(it){t+=(parseFloat(it.peso)||0);});return t||parseFloat(o.peso)||0;}
+function pesoFinalOS(o){var t=0;(o.itens||[]).forEach(function(it){if(it.subitens&&it.subitens.length){it.subitens.forEach(function(sb){t+=(parseFloat(sb.pesoFinalExp)||0);});}else{t+=(parseFloat(it.pesoFinal)||0);}});return t;}
+function corPct(p){return p>=100?'var(--verde)':(p>=80?'var(--amarelo)':'var(--vermelho)');}
+
+var MES7='',DU=22;
+function relogio(){var d=new Date();document.getElementById('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+setInterval(relogio,1000);relogio();
+
+var SEC=[
+  {key:'com',nome:'🛒 Comercial',modo:'and',ms:[{k:'os',lbl:'O.S.',meta:function(){return M.comercial.os;},int:true},{k:'kg',lbl:'Kg',meta:function(){return M.comercial.kg;}}]},
+  {key:'fb',nome:'📷 Foto / Bruto',modo:'or',ms:[{k:'fotos',lbl:'Fotos',meta:function(){return M.foto.fotos;},int:true},{k:'kg',lbl:'Kg',meta:function(){return M.foto.kg;}}]},
+  {key:'gan',nome:'🪝 Gancheira',modo:'single',ms:[{k:'kg',lbl:'Kg enganch.',meta:function(){return M.gancheira.kg;}}]},
+  {key:'qual',nome:'🔬 Qualidade',modo:'single',ms:[{k:'kg',lbl:'Kg apontado',meta:function(){return M.qualidade.kg;}}]},
+  {key:'exp',nome:'📦 Expedição',modo:'or',ms:[{k:'kg',lbl:'Kg',meta:function(){return M.expedicao.kg;}},{k:'itens',lbl:'Itens',meta:function(){return M.expedicao.itens;},int:true}]}
+];
+
+function _add(P,user,sec,metric,val,hoje){if(!user)return;user=(''+user).trim();if(!user)return;P[user]=P[user]||{};var s=P[user][sec]=P[user][sec]||{};var mm=s[metric]=s[metric]||{h:0,m:0};mm.m+=val;if(hoje)mm.h+=val;}
+
+function computa(ordens,apont){
+  var ym=MES7,hj=hojeISO();var P={};
+  (ordens||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
+    // Comercial
+    if(o.comUser){var d=(''+(o.dataEntrada||'')).slice(0,10);if(d.slice(0,7)===ym){var t=d===hj;_add(P,o.comUser,'com','os',1,t);_add(P,o.comUser,'com','kg',pesoDecl(o),t);}}
+    // Foto/Bruto
+    var f=o.fb||{};var fWho=o.fbUser||f.resp;var fd=(''+(f.concluidoEm||o.fbRecebidoEm||'')).slice(0,10);
+    if(fWho&&fd.slice(0,7)===ym){var tf=fd===hj;var fotos=0;(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.foto)fotos++;});});_add(P,fWho,'fb','fotos',fotos,tf);_add(P,fWho,'fb','kg',pesoDecl(o),tf);}
+    // Gancheira
+    var amWho=o.amUser||o.amResp;var ad=(''+(o.amConcluidoEm||'')).slice(0,10);
+    if(amWho&&ad.slice(0,7)===ym){_add(P,amWho,'gan','kg',(parseFloat(o.pesoEnganchKg)||0),ad===hj);}
+    // Expedição
+    var e=o.exp||{};var cxs=o.caixas||[];var eWho=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var ed=(''+(e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'')).slice(0,10);
+    if(eWho&&ed.slice(0,7)===ym){var te=ed===hj;var itens=0;(o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){itens+=(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0);});}else{itens+=(parseInt(it.qtd)||0);}});_add(P,eWho,'exp','kg',pesoFinalOS(o),te);_add(P,eWho,'exp','itens',itens,te);}
+  });
+  (apont||[]).forEach(function(a){if(!a)return;var who=a.user||a.responsavel;var d=(''+(a.data||'')).slice(0,10);if(who&&d.slice(0,7)===ym){_add(P,who,'qual','kg',(a.peso||0),d===hj);}});
+  return P;
+}
+
+function secPct(P,n,sec){var pcts=sec.ms.map(function(m){var tot=((P[n][sec.key]||{})[m.k]||{}).m||0;var med=tot/DU;var meta=m.meta()||0;return meta>0?(med/meta*100):0;});if(sec.modo==='or')return Math.max.apply(null,pcts);return Math.min.apply(null,pcts);}
+function secUsou(P,n,sec){return sec.ms.some(function(m){return (((P[n][sec.key]||{})[m.k])||{}).m>0;});}
+
+function render(P){
+  document.getElementById('mesLbl').textContent=({'01':'Janeiro','02':'Fevereiro','03':'Março','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'}[MES7.slice(5,7)]||'')+' '+MES7.slice(0,4)+' · '+DU+' dias úteis';
+  var nomes=Object.keys(P);
+  // destaque: média dos % dos setores que a pessoa atuou
+  var rank=nomes.map(function(n){var ps=[];SEC.forEach(function(s){if(secUsou(P,n,s))ps.push(secPct(P,n,s));});var avg=ps.length?ps.reduce(function(a,b){return a+b;},0)/ps.length:0;return {n:n,avg:avg,nsec:ps.length};}).filter(function(x){return x.nsec>0;}).sort(function(a,b){return b.avg-a.avg;});
+  var med=['🥇','🥈','🥉'];
+  var dh=document.getElementById('destaque');
+  dh.innerHTML=rank.slice(0,3).map(function(x,i){return '<div class="dcard"><div class="medal">'+med[i]+'</div><div><div class="nm">'+(''+x.n).replace(/</g,'&lt;')+'</div><div class="pc">'+Math.round(x.avg)+'% das metas · '+x.nsec+' setor(es)</div></div></div>';}).join('')||'<div class="dcard"><div class="pc">Sem dados no mês ainda.</div></div>';
+  // blocos por setor
+  var g=document.getElementById('grid');
+  g.innerHTML=SEC.map(function(sec){
+    var us=nomes.filter(function(n){return secUsou(P,n,sec);}).sort(function(a,b){return secPct(P,b,sec)-secPct(P,a,sec);});
+    var metaTxt=sec.ms.map(function(m){return (m.int?Math.round(m.meta()):g1(m.meta()))+' '+m.lbl.toLowerCase();}).join(sec.modo==='or'?' ou ':' e ');
+    var rows=us.map(function(n){
+      var pct=Math.round(secPct(P,n,sec));var cor=corPct(pct);
+      var hojeTxt=sec.ms.map(function(m){var h=(((P[n][sec.key]||{})[m.k])||{}).h||0;return (m.int?Math.round(h):g1(h))+(m.lbl==='Kg'||m.lbl==='Kg enganch.'||m.lbl==='Kg apontado'?'kg':(m.lbl==='O.S.'?' OS':(m.lbl==='Fotos'?'f':(m.lbl==='Itens'?'it':''))));}).join(' · ');
+      return '<div class="urow"><span class="nm">'+(''+n).replace(/</g,'&lt;')+'</span><span class="hoje">hoje '+hojeTxt+'</span><div class="bar"><div style="width:'+Math.min(100,pct)+'%;background:'+cor+'"></div></div><span class="pct" style="color:'+cor+'">'+pct+'%</span></div>';
+    }).join('');
+    return '<div class="sec"><h2>'+sec.nome+'</h2><div class="meta">Meta/dia: '+metaTxt+' · barra = % da meta no mês · "hoje" = produzido hoje</div>'+(rows||'<div class="empty">Sem lançamentos no mês.</div>')+'</div>';
+  }).join('');
+  var n=new Date();document.getElementById('upd').textContent='atualizado '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+}
+
+async function loadAll(tb){var out=[],f=0,pg=1000;while(true){var r=await sb.from(tb).select('dados').order('id',{ascending:true}).range(f,f+pg-1);if(r.error){break;}var d=r.data||[];out=out.concat(d.map(function(x){return x.dados;}));if(d.length<pg)break;f+=pg;}return out;}
+
+async function carregar(){
+  try{
+    MES7=ymAtual();DU=diasUteisMes(MES7);
+    try{var cm=await sb.from('config').select('valor').eq('chave','magri_metas_v1').maybeSingle();if(cm&&cm.data&&cm.data.valor){M=cm.data.valor;['comercial','foto','gancheira','qualidade','expedicao'].forEach(function(k){if(!M[k])M[k]=JSON.parse(JSON.stringify(METAS_DEFAULT[k]));});}}catch(e){}
+    var ordens=await loadAll('ordens');
+    var apont=await loadAll('apontamentos');
+    var P=computa(ordens,apont);
+    render(P);
+  }catch(e){console.warn('carregar',e);}
+}
+
+function iniciar(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='flex';carregar();setInterval(carregar,60000);setTimeout(function(){location.replace(location.pathname+'?t='+Date.now());},25*60*1000);}
+function login(msg){document.getElementById('gate').style.display='flex';document.getElementById('app').style.display='none';if(msg)document.getElementById('gerr').textContent=msg;}
+async function entrar(){var raw=document.getElementById('em').value.trim();var pw=document.getElementById('pw').value;if(!raw||!pw){document.getElementById('gerr').textContent='Informe usuário e senha.';return;}var email=raw.indexOf('@')>-1?raw.toLowerCase():(raw.toLowerCase().replace(/\s+/g,'')+'@magrifolheados.com.br');document.getElementById('gerr').textContent='Entrando...';var r=await sb.auth.signInWithPassword({email:email,password:pw});if(r.error){document.getElementById('gerr').textContent='Usuário ou senha inválidos.';return;}iniciar();}
+document.getElementById('go').onclick=entrar;
+document.getElementById('pw').addEventListener('keydown',function(e){if(e.key==='Enter')entrar();});
+sb.auth.getSession().then(function(res){if(res.data.session)iniciar();else login('');}).catch(function(){login('');});
+</script>
+</body>
+</html>
