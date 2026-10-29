@@ -709,7 +709,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-28be</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-29bg</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2727,7 +2727,7 @@ function salvarApontAvulso(){
   ['avTipo','avCor','avCamada','avPeso','avCliente','avRef'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});var tq=document.querySelectorAll('#__avModal .avTk:checked');for(var i=0;i<tq.length;i++)tq[i].checked=false;_avCalc();
   alert('Apontamento avulso salvo.');
 }
-function _avRenderLista(){var tb=document.getElementById('avLista');if(!tb)return;var lista=(apont||[]).filter(function(a){return a.avulso;}).slice(0,40);tb.innerHTML=lista.length?lista.map(function(a){return '<tr><td>'+fmt(a.data)+'</td><td>'+(a.tipo||'')+'</td><td>'+(a.cor||'')+'</td><td class="num">'+(a.camada||'')+'</td><td class="num">'+kg2g(a.peso)+'</td><td style="font-size:11px">'+(a.tanque||'')+'</td><td>'+(a.responsavel||'')+'</td><td class="row-act"><button class="btn-del" onclick="delApontAvulso(\''+a.id+'\')">x</button></td></tr>';}).join(''):'<tr><td colspan="8" class="hint" style="text-align:center;padding:12px">Nenhum apontamento avulso ainda.</td></tr>';}
+function _avRenderLista(){var tb=document.getElementById('avLista');if(!tb)return;var lista=(apont||[]).filter(function(a){return a.avulso;}).sort(function(a,b){return (''+(b.data||'')).localeCompare(''+(a.data||''))||(''+(b.id||'')).localeCompare(''+(a.id||''));}).slice(0,60);tb.innerHTML=lista.length?lista.map(function(a){return '<tr><td>'+fmt(a.data)+'</td><td>'+(a.tipo||'')+'</td><td>'+(a.cor||'')+'</td><td class="num">'+(a.camada||'')+'</td><td class="num">'+kg2g(a.peso)+'</td><td style="font-size:11px">'+(a.tanque||'')+'</td><td>'+(a.responsavel||'')+'</td><td class="row-act"><button class="btn-del" onclick="delApontAvulso(\''+a.id+'\')">x</button></td></tr>';}).join(''):'<tr><td colspan="8" class="hint" style="text-align:center;padding:12px">Nenhum apontamento avulso ainda.</td></tr>';}
 function delApontAvulso(id){if(!confirm('Excluir este apontamento avulso?'))return;apont=apont.filter(function(a){return a.id!==id;});salvarApont();render();_avRenderLista();}
 function concluirBanho(){
   const osId=document.getElementById('apontOsId').value;const o=dados.find(x=>x.id===osId);if(!o)return;
@@ -3167,6 +3167,20 @@ function tabelaLotesHTML(o,pesoFn,cortesiaOn){var html='';var ouroTot=0,totLotes
 function servAdicHTML(o){if(!(o.servicos||[]).length)return {html:'',total:0};var t=0;var rows='';(o.servicos||[]).forEach(function(x){var cheio=(x.valorCheio!==undefined?x.valorCheio:x.valor)||0;var un=x.precoUnit||((x.qtd>0)?(cheio/x.qtd):cheio);var desc=x.cortesia?cheio:(x.desconto||0);t+=(x.valor||0);var qtdC=x.aDefinir?'a definir':(x.qtd||'');var valC=x.aDefinir?'a definir':(x.cortesia?'Cortesia':('R$ '+g2(x.valor)));rows+='<tr><td>'+(x.servico||'')+(x.cor?' ('+x.cor+')':'')+'</td><td class="num">'+qtdC+'</td><td class="num">R$ '+g2(un)+'</td><td class="num">'+(desc>0?('R$ '+g2(desc)):'')+'</td><td class="num">'+valC+'</td></tr>';});
   var html='<div class="itemh">Serviços adicionais (na conclusão)</div><table><thead><tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Vlr Unit.</th><th class="num">Desconto</th><th class="num">Valor</th></tr></thead><tbody>'+rows+'<tr class="tl"><td colspan="4">Total Serviços Adicionais</td><td class="num">R$ '+g2(t)+'</td></tr></tbody></table>';return {html:html,total:t};}
 function transporteInfo(o){var m=(o.modalidade||''),t=(o.transporte||'');if(!m&&!t)return '—';return (m||'')+((m&&t)?' · ':'')+(t||'');}
+function _parcelaInfo(v){v=Math.max(0,v||0);if(v<=1000)return {max:1,txt:'<b>1x sem taxa</b> (R$ '+g2(v)+')'};var max=v<=3000?2:(v<=5000?3:4);return {max:max,txt:'<b>até '+max+'x</b> (ex.: '+max+'x de R$ '+g2(v/max)+') <b>+ taxa da máquina</b> · parcelas menores também disponíveis'};}
+function condPagamentoHTML(adiant,conclusao){
+  var pi=_parcelaInfo(conclusao);var _c=function(a,b){return '<tr><td style="border:1px solid #ccc;padding:4px 8px">'+a+'</td><td style="border:1px solid #ccc;padding:4px 8px">'+b+'</td></tr>';};
+  var tab='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px"><thead><tr><th style="text-align:left;background:#123a6b;color:#fff;padding:5px 8px">Valor dos serviços</th><th style="text-align:left;background:#123a6b;color:#fff;padding:5px 8px">Parcelamento no cartão</th></tr></thead><tbody>'+_c('Até R$ 1.000,00','1x sem taxa')+_c('R$ 1.001,00 a R$ 3.000,00','até 2x + taxa')+_c('R$ 3.001,00 a R$ 5.000,00','até 3x + taxa')+_c('Acima de R$ 5.001,00','até 4x + taxa')+'</tbody></table>';
+  return '<h2>💳 Condições de Pagamento</h2>'+
+  '<div class="no-print" style="margin:2px 0 8px;font-size:13px">Tipo de cliente: <button type="button" id="pgN" onclick="setTipoCli(\'novo\')" style="font-weight:800;padding:4px 12px;cursor:pointer">Cliente novo</button> <button type="button" id="pgA" onclick="setTipoCli(\'antigo\')" style="font-weight:400;padding:4px 12px;cursor:pointer">Cliente antigo</button></div>'+
+  '<table class="fin"><tbody>'+
+  '<tr class="tl"><td><b>Metal (ouro)</b> — <span id="pgMetal">pago à vista, no ato do pedido (podemos segurar o valor por até 3 dias)</span></td><td class="num"><b>R$ '+g2(adiant)+'</b></td></tr>'+
+  '<tr class="tl"><td><b>Serviços</b> — pagos na finalização do pedido, à vista ou parcelados no cartão</td><td class="num"><b>R$ '+g2(conclusao)+'</b></td></tr>'+
+  '</tbody></table>'+
+  '<div class="nota" style="margin-top:6px"><b>Parcelamento dos serviços (R$ '+g2(conclusao)+'):</b> '+pi.txt+'</div>'+tab+
+  '<div class="nota">Parcelamento no cartão de crédito, com a taxa da máquina aplicada conforme o número de parcelas.</div>'+
+  '<scr'+'ipt>function setTipoCli(t){var el=document.getElementById("pgMetal");if(el)el.textContent=(t==="antigo")?"à vista, na finalização do pedido":"pago à vista, no ato do pedido (podemos segurar o valor por até 3 dias)";var a=document.getElementById("pgA"),n=document.getElementById("pgN");if(a&&n){a.style.fontWeight=(t==="antigo")?"800":"400";n.style.fontWeight=(t==="novo")?"800":"400";}}</scr'+'ipt>';
+}
 function buildOrcamentoHTML(o){
   var cots=[];(o.itens||[]).forEach(function(it){if(ehOuroBanho(it.banho)&&!ehEspecial(it)){var c=parseFloat(it.cotacao)||0;if(c>0&&cots.indexOf(c)<0)cots.push(c);}});
   var cotStr=cots.length?(cots.map(function(c){return 'R$ '+g2(c);}).join(' / ')+'/g'):'—';
@@ -3184,6 +3198,7 @@ function buildOrcamentoHTML(o){
   '<tr class="tl"><td>Valor dos Serviços</td><td class="num">R$ '+g2(conclusao)+'</td></tr>'+
   '<tr class="tl" style="border-top:2px solid #123a6b"><td><b>TOTAL</b></td><td class="num"><b>R$ '+g2(adiant+conclusao)+'</b></td></tr>'+
   '</tbody></table>'+
+  condPagamentoHTML(adiant,conclusao)+
   '<div class="nota">* O <b>metal (ouro)</b> é pago à vista; os <b>serviços</b> (mão de obra, complementares, prata, ródio e adicionais) na conclusão. Todos os itens aplicados estão listados, inclusive os sem custo. Valores estimados sobre o peso declarado; o valor final é confirmado após a pesagem pós-produção.</div>'+
   (o.observacao?('<div class="itemh">Observações</div><div class="nota" style="white-space:pre-wrap;margin-top:8px">'+String(o.observacao).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>'):'')+'<div class="nota" style="margin-top:22px">De acordo com os itens e valores acima:<br><br>____________________________________  &nbsp;&nbsp; Data: ____ / ____ / ______<br>Cliente: '+(o.cliente||'')+'</div>'+
   '</body></html>';
