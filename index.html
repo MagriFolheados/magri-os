@@ -257,6 +257,7 @@
                 <div><label>Data previsão de entrega</label><input type="text" id="prevEntrega" readonly><div class="hint">Sugestão automática: entrada + 7 dias. Ajuste ao lado se precisar.</div></div>
                 <div id="prevEntregaBox"><label>Data de entrega (editável)</label><input type="date" id="prevEntregaManual" onchange="prevEntregaManualChange()"><div class="hint" style="color:#a9862f">Em branco = usa a sugestão (entrada + 7 dias). Preencha para definir outra data.</div></div>
                 <div><label>Modalidade</label><select id="modalidade"><option value="">—</option><option>Entrega</option><option>Retirada</option></select></div>
+                <div><label>Tipo de cliente (pagamento)</label><select id="tipoClientePag"><option value="novo">Cliente novo (metal no ato do pedido)</option><option value="antigo">Cliente antigo (metal na finalização)</option></select><div class="hint">Interno — define a condição do metal no orçamento. Não aparece para o cliente.</div></div>
                 <div><label>Tipo de transporte</label><select id="transporte"><option value="">—</option></select></div>
                 <div style="grid-column:1/-1"><label>Observação</label><textarea id="observacao" rows="2" placeholder="Anotações da OS (opcional)" style="width:100%;resize:vertical"></textarea></div>
               </div>
@@ -713,7 +714,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-29bi</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-29bk</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -2019,7 +2020,7 @@ document.getElementById('osForm').addEventListener('submit',async function(e){
   if(!(''+g('cliente')).trim()){alert('Informe o Cliente para salvar a O.S.');var _c=document.getElementById('cliente');if(_c)_c.focus();return;}
   if(!(''+g('numOS')).trim()){alert('Informe o Nº da O.S. para salvar.');var _n=document.getElementById('numOS');if(_n)_n.focus();return;}
   const editId=document.getElementById('editId').value;
-  const header={dataEntrada:g('dataEntrada')||hojeISO(),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),notaCliente:g('notaCliente'),catalogar:g('catalogar')||'Sim',peso:g2kg(g('peso')),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),itens:itensTmp.slice(),servicos:servicosTmp.slice()};
+  const header={dataEntrada:g('dataEntrada')||hojeISO(),numOS:g('numOS'),etiqueta:g('etiqueta'),cliente:g('cliente'),notaCliente:g('notaCliente'),catalogar:g('catalogar')||'Sim',peso:g2kg(g('peso')),statusComercial:g('statusComercial'),prevCat:g('prevCat'),prevEntregaISO:document.getElementById('prevEntrega').dataset.iso||'',observacao:g('observacao'),modalidade:g('modalidade'),transporte:g('transporte'),tipoClientePag:g('tipoClientePag')||'novo',itens:itensTmp.slice(),servicos:servicosTmp.slice()};
   var _origOS=editId?dados.find(function(x){return String(x.id)===String(editId);}):null;var _numChanged=_origOS?(String(_origOS.numOS||'')!==String(header.numOS||'')):true;var _dupOS=_numChanged?dados.find(function(x){return x.id!==editId&&String(x.numOS||x.numos||'')===String(header.numOS||'');}):null;if(_dupOS){if(!editId&&confirm('Já existe a O.S. '+(header.numOS||'')+' ('+(_dupOS.cliente||'')+'). Abrir para editar em vez de criar outra?')){resetForm();editarCom(_dupOS.id);return;}alert('\u26d4 Já existe uma O.S. com o número '+(header.numOS||'')+'. Não é permitido repetir. Use outro número (ex.: '+(header.numOS||'')+'-1).');return;}
   if(!editId&&window.__sb){try{var _cq=await window.__sb.from('ordens').select('id').eq('num_os',String(header.numOS||''));if(_cq&&_cq.data&&_cq.data.length){alert('\u26d4 J\u00e1 existe uma O.S. com o n\u00famero '+(header.numOS||'')+' na nuvem (pode ter sido criada em outro aparelho). Use outro n\u00famero, por exemplo '+(header.numOS||'')+'-1.');return;}}catch(_ce){}}
   if(!editId){var _okResumo=await resumoOSConfirm(header,itensTmp,servicosTmp);if(!_okResumo){return;}}
@@ -2187,7 +2188,7 @@ function editarCom(id){
   const o=dados.find(x=>x.id===id);if(!o)return;
   if(o.setor&&o.setor!=='Comercial'){if(!confirm('Esta O.S. está no setor "'+o.setor+'". Deseja editar mesmo assim? As alterações passam a valer para a produção.'))return;}
   document.getElementById('editId').value=o.id;
-  ['dataEntrada','numOS','etiqueta','cliente','notaCliente','peso','statusComercial','prevCat','observacao','modalidade','transporte'].forEach(function(k){const el=document.getElementById(k);if(el)el.value=o[k]||'';});var _pEl=document.getElementById('peso');if(_pEl)_pEl.value=kg2g(o.peso);var _catEl=document.getElementById('catalogar');if(_catEl)_catEl.value=o.catalogar||'Sim';
+  ['dataEntrada','numOS','etiqueta','cliente','notaCliente','peso','statusComercial','prevCat','observacao','modalidade','transporte','tipoClientePag'].forEach(function(k){const el=document.getElementById(k);if(el)el.value=o[k]||(k==='tipoClientePag'?'novo':'');});var _pEl=document.getElementById('peso');if(_pEl)_pEl.value=kg2g(o.peso);var _catEl=document.getElementById('catalogar');if(_catEl)_catEl.value=o.catalogar||'Sim';
   itensTmp=(o.itens||[]).map(function(x){return Object.assign({},x);});renderItens();
   servicosTmp=(o.servicos||[]).map(function(x){return Object.assign({},x);});renderServicos();servRefresh();
   recalc();
@@ -2550,7 +2551,7 @@ async function addSubitem(){
   if(sbFotoPend){var _ab=document.getElementById('sbAddBtn');var _abt=_ab?_ab.textContent:'';if(_ab){_ab.disabled=true;_ab.textContent='Aguardando a foto subir...';}var _t0=Date.now();while(sbFotoPend&&(Date.now()-_t0)<20000){await new Promise(function(r){setTimeout(r,300);});}if(_ab){_ab.disabled=false;_ab.textContent=_abt;}if(sbFotoPend){alert('A foto ainda está subindo (internet lenta). Aguarde mais um pouco e tente novamente.');return;}}
   const usado=(it.subitens||[]).reduce(function(sm,x,xi){return sm+((sbEdit&&sbEdit.li===idx&&sbEdit.si===xi)?0:(parseFloat(x.peso)||0));},0);
   const total=parseFloat(it.peso)||0;
-  if(total>0 && (usado+peso)>total+0.000001){alert('O peso dos sub-itens ('+kg2g(usado+peso)+' g) ultrapassaria o peso do lote ('+kg2g(total)+' g).\nDisponível: '+kg2g(total-usado)+' g.');return;}
+  if(total>0 && (usado+peso)>total+0.000001){if(!confirm('⚠ A soma das peças ('+kg2g(usado+peso)+' g) ficou maior que o Peso do lote informado pelo Comercial ('+kg2g(total)+' g).\n\nIsso costuma acontecer quando o Comercial pôs um peso arredondado e a foto/bruto pesou peça por peça. Normalmente pode continuar.\n\nConfirma e salva assim mesmo?')){return;}}
   var _ehBrinco=/brinco/i.test(tipo);var _tar=_ehBrinco&&document.getElementById('sbTarraxa')&&document.getElementById('sbTarraxa').checked;var _trx=_ehBrinco&&document.getElementById('sbTarraxamento')&&document.getElementById('sbTarraxamento').checked;
   var _obs=document.getElementById('sbObs')?document.getElementById('sbObs').value.trim():'';
   var novoSb={id:'sb_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),tipoPeca:tipo,codigo:document.getElementById('sbCodigo').value,fornecedor:document.getElementById('fbFornecedor').value,precoUnit:document.getElementById('sbPrecoUnit').value,peso:g2kg(document.getElementById('sbPeso').value),qtd:qtd,foto:sbFotoData,tarraxa:!!_tar,tarraxamento:!!_trx,unidade:(document.getElementById('sbUnid')?document.getElementById('sbUnid').value:'Peça'),obs:_obs,criadoPor:userAtual(),criadoEm:hojeISO()};
@@ -3172,20 +3173,19 @@ function servAdicHTML(o){if(!(o.servicos||[]).length)return {html:'',total:0};va
   var html='<div class="itemh">Serviços adicionais (na conclusão)</div><table><thead><tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Vlr Unit.</th><th class="num">Desconto</th><th class="num">Valor</th></tr></thead><tbody>'+rows+'<tr class="tl"><td colspan="4">Total Serviços Adicionais</td><td class="num">R$ '+g2(t)+'</td></tr></tbody></table>';return {html:html,total:t};}
 function transporteInfo(o){var m=(o.modalidade||''),t=(o.transporte||'');if(!m&&!t)return '—';return (m||'')+((m&&t)?' · ':'')+(t||'');}
 function _parcelaInfo(v){v=Math.max(0,v||0);if(v<=1000)return {max:1,txt:'<b>1x sem taxa</b> (R$ '+g2(v)+')'};var max=v<=3000?2:(v<=5000?3:4);return {max:max,txt:'<b>até '+max+'x</b> (ex.: '+max+'x de R$ '+g2(v/max)+') <b>+ taxa da máquina</b> · parcelas menores também disponíveis'};}
-function condPagamentoHTML(adiant,conclusao){
+function condPagamentoHTML(adiant,conclusao,tipo){
   var v=Math.max(0,conclusao||0);var mx=v<=1000?1:(v<=3000?2:(v<=5000?3:4));
   var ops='';for(var nn=1;nn<=mx;nn++){var val=g2(v/nn);if(nn===1){ops+='<li>'+(v<=1000?('<b>1x</b> de R$ '+val+' <span style="color:#777">(sem taxa)</span>'):('<b>À vista (1x)</b>: R$ '+val))+'</li>';}else{ops+='<li><b>'+nn+'x</b> de R$ '+val+' <span style="color:#777">+ taxa da máquina</span></li>';}}
   var cell='padding:7px 10px;border:1px solid #cdd6e4';var vcell=cell+';text-align:right;font-weight:800;white-space:nowrap';
+  var metalTxt=(tipo==='antigo')?'à vista, na finalização do pedido':'pago à vista, no ato do pedido (podemos segurar o valor por até 3 dias)';
   return '<h2>💳 Condições de Pagamento</h2>'+
-  '<div class="no-print" style="margin:2px 0 8px;font-size:13px">Tipo de cliente: <button type="button" id="pgN" onclick="setTipoCli(\'novo\')" style="font-weight:800;padding:4px 12px;cursor:pointer">Cliente novo</button> <button type="button" id="pgA" onclick="setTipoCli(\'antigo\')" style="font-weight:400;padding:4px 12px;cursor:pointer">Cliente antigo</button></div>'+
   '<table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>'+
-  '<tr><td style="'+cell+'"><b>Metal (ouro)</b> — <span id="pgMetal">pago à vista, no ato do pedido (podemos segurar o valor por até 3 dias)</span></td><td style="'+vcell+';width:150px">R$ '+g2(adiant)+'</td></tr>'+
+  '<tr><td style="'+cell+'"><b>Metal (ouro)</b> — '+metalTxt+'</td><td style="'+vcell+';width:150px">R$ '+g2(adiant)+'</td></tr>'+
   '<tr><td style="'+cell+'"><b>Serviços</b> — pagos na finalização, à vista ou parcelados no cartão</td><td style="'+vcell+'">R$ '+g2(conclusao)+'</td></tr>'+
   '</tbody></table>'+
   '<div class="itemh" style="margin-top:10px">Parcelamento dos serviços — R$ '+g2(conclusao)+'</div>'+
   '<ul style="margin:4px 0 0 20px;font-size:13px;line-height:1.8">'+ops+'</ul>'+
-  '<div class="nota">Parcelamento no cartão de crédito, com a taxa da máquina conforme o número de parcelas.</div>'+
-  '<scr'+'ipt>function setTipoCli(t){var el=document.getElementById("pgMetal");if(el)el.textContent=(t==="antigo")?"à vista, na finalização do pedido":"pago à vista, no ato do pedido (podemos segurar o valor por até 3 dias)";var a=document.getElementById("pgA"),n=document.getElementById("pgN");if(a&&n){a.style.fontWeight=(t==="antigo")?"800":"400";n.style.fontWeight=(t==="novo")?"800":"400";}}</scr'+'ipt>';
+  '<div class="nota">Parcelamento no cartão de crédito, com a taxa da máquina conforme o número de parcelas.</div>';
 }
 function buildOrcamentoHTML(o){
   var cots=[];(o.itens||[]).forEach(function(it){if(ehOuroBanho(it.banho)&&!ehEspecial(it)){var c=parseFloat(it.cotacao)||0;if(c>0&&cots.indexOf(c)<0)cots.push(c);}});
@@ -3204,7 +3204,7 @@ function buildOrcamentoHTML(o){
   '<tr class="tl"><td>Valor dos Serviços</td><td class="num">R$ '+g2(conclusao)+'</td></tr>'+
   '<tr class="tl" style="border-top:2px solid #123a6b"><td><b>TOTAL</b></td><td class="num"><b>R$ '+g2(adiant+conclusao)+'</b></td></tr>'+
   '</tbody></table>'+
-  condPagamentoHTML(adiant,conclusao)+
+  condPagamentoHTML(adiant,conclusao,o.tipoClientePag)+
   '<div class="nota">* O <b>metal (ouro)</b> é pago à vista; os <b>serviços</b> (mão de obra, complementares, prata, ródio e adicionais) na conclusão. Todos os itens aplicados estão listados, inclusive os sem custo. Valores estimados sobre o peso declarado; o valor final é confirmado após a pesagem pós-produção.</div>'+
   (o.observacao?('<div class="itemh">Observações</div><div class="nota" style="white-space:pre-wrap;margin-top:8px">'+String(o.observacao).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>'):'')+'<div class="nota" style="margin-top:22px">De acordo com os itens e valores acima:<br><br>____________________________________  &nbsp;&nbsp; Data: ____ / ____ / ______<br>Cliente: '+(o.cliente||'')+'</div>'+
   '</body></html>';
