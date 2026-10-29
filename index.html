@@ -250,7 +250,7 @@
                 <div><label>Nota do cliente</label><input type="text" id="notaCliente" placeholder="Nº de referência do cliente"><div class="hint">Número que o cliente usa como referência (rastreável na busca)</div></div>
                 <div id="perfilClienteBox" style="grid-column:1/-1;display:none;background:#fff8e1;border:1px solid #f0d78a;border-radius:8px;padding:8px 12px;font-size:13px;color:#6b4e00"><b>👤 Perfil do cliente:</b> <span id="perfilClienteTxt" style="white-space:pre-wrap"></span></div>
                 <div><label>Catalogação <span class="req">*</span></label><select id="catalogar"><option>Sim</option><option>Não</option></select><div class="hint">"Não" = só etiqueta do lote (sem foto/subitem)</div></div>
-                <div><label>Peso total (g)</label><input type="number" step="0.1" id="peso" placeholder="0" oninput="updateSaldoPeso()"></div>
+                <div><label>Peso total (g)</label><input type="text" inputmode="decimal" id="peso" placeholder="0" oninput="updateSaldoPeso()"></div>
                 <div><label>Status Comercial</label><select id="statusComercial"><option>Recebido</option><option>Entregue</option><option>Não fechado</option></select></div>
                 <div><label>Prev. envio CAT</label><input type="date" id="prevCat" readonly><div class="hint">Auto: entrada + 10 dias úteis (só com cataforético)</div></div>
                 <div id="prevCatBox"><label>Prev. envio CAT (editável)</label><input type="date" id="prevCatManual" onchange="prevCatManualChange()"><div class="hint" style="color:#a9862f">Em branco = sugestão automática (entrada + 10 dias úteis). Preencha para definir outra data.</div></div>
@@ -316,7 +316,7 @@
             <div><label>Situação</label><select id="esStatus"><option>Recebido</option><option>Aguardando</option></select></div>
             <div><label>Data (recebimento / previsão)</label><input type="date" id="esData"></div>
             <div><label>Tipo / descrição</label><input type="text" id="esTipo" placeholder="Ex.: brinco, corrente, anel"></div>
-            <div><label>Peso p/ banhar (g)</label><input type="number" step="0.1" id="esPeso" placeholder="0"><div class="hint">Opcional — preencha ao receber, para liberar pro banho</div></div>
+            <div><label>Peso p/ banhar (g)</label><input type="text" inputmode="decimal" id="esPeso" placeholder="0"><div class="hint">Opcional — preencha ao receber, para liberar pro banho</div></div>
             <div style="grid-column:1/-1"><label>Observação</label><input type="text" id="esObs" placeholder="Ex.: falta chegar da Lucco, confirmar com o cliente..."></div>
           </div>
           <div class="actions" style="margin-top:8px"><button class="btn-primary" onclick="addEstoque()">+ Adicionar ao estoque</button></div>
@@ -714,7 +714,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-29bk</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-10-29bl</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -805,8 +805,8 @@
       <div class="sec-title">Dados do lote</div>
       <div class="grid">
         <div><label>Produto / Lote</label><input type="text" id="itProduto" placeholder="Ex.: brinco de argola"></div>
-        <div><label>Peso do lote (g)</label><input type="number" step="0.1" id="itPeso" oninput="calcItem()"></div>
-        <div><label>Peso sem pedra (g)</label><input type="number" step="0.1" id="itPesoSemPedra" placeholder="= total se não houver pedra" oninput="calcItem()"></div>
+        <div><label>Peso do lote (g)</label><input type="text" inputmode="decimal" id="itPeso" oninput="calcItem()"></div>
+        <div><label>Peso sem pedra (g)</label><input type="text" inputmode="decimal" id="itPesoSemPedra" placeholder="= total se não houver pedra" oninput="calcItem()"></div>
         <div><label>Qtd de peças</label><input type="number" id="itQtd" min="0"></div>
         <div><label>Cor <span class="req" id="corStar" style="display:none">*</span></label><select id="itCor"><option value="">—</option><option>AU 18</option><option>AU 24</option><option>CHAMPANHE</option><option>VERDE</option><option>MONT</option><option>ROSE</option><option>PRATA</option><option>RODIO BRANCO</option><option>NIQUEL FREE</option><option>NÍQUEL</option><option>COBRE</option></select></div>
       </div>
@@ -879,7 +879,7 @@
       <div class="grid">
         <div><label>Item / Lote da OS</label><select id="sbItem" onchange="sbRefresh()"></select></div><div style="grid-column:1/-1" class="hint">💡 Preencha <b>Código</b> e <b>Fornecedor</b> primeiro — se a peça já estiver no banco, o tipo, o preço e a foto são preenchidos automaticamente.</div><div><label>Código da peça</label><input type="text" id="sbCodigo" onchange="buscarPecaSb()"></div><div><label>Fornecedor da peça bruta</label><input type="text" id="fbFornecedor" onchange="buscarPecaSb()"></div>
         <div><label>Tipo de peça</label><input type="text" id="sbTipo" list="tiposPeca" placeholder="Ex.: brinco, argola" oninput="sbTipoChange()"></div>
-        <div><label>Peso (g)</label><input type="number" step="0.1" id="sbPeso"></div>
+        <div><label>Peso (g)</label><input type="text" inputmode="decimal" id="sbPeso"></div>
         <div><label>Qtd (contagem)</label><input type="number" id="sbQtd" min="0"></div><div><label>Unidade</label><select id="sbUnid"><option>Peça</option><option>Par</option><option>Duo</option><option>Trio</option><option>Conjunto</option><option>Dúzia</option><option>Cento</option><option>Kg</option></select></div>
         
         
@@ -1091,7 +1091,7 @@
           <div><label>Responsável (usuário logado)</label><input type="text" id="apResp" readonly style="background:#eef2f7;font-weight:600"></div>
           <div style="grid-column:1/-1"><label>Tanques consumidos (marque todos os que a peça passa)</label><div id="apTanques" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;font-size:13px;margin-top:4px"></div><div class="hint" id="apTanquesHint"></div></div>
           <div><label>Camada</label><input type="number" id="apCamada" oninput="calcMetal()"></div>
-          <div><label>Peso apontado (g)</label><input type="number" step="0.1" id="apPeso" oninput="calcMetal()"></div>
+          <div><label>Peso apontado (g)</label><input type="text" inputmode="decimal" id="apPeso" oninput="calcMetal()"></div>
           <div><label>Metal (calc)</label><input type="text" id="apMetal" readonly><div class="hint">(Camada − 1) × Peso</div></div>
         </div>
         <div class="actions"><button class="btn-primary" onclick="addApontLine()">+ Adicionar apontamento</button><button class="btn-ghost" onclick="fecharEntrada()">Fechar</button></div>
@@ -1117,7 +1117,7 @@
       <div id="expConfBox"></div>
       <div class="grid" style="margin-top:10px">
         <div><label>Responsável (usuário logado)</label><input type="text" id="expResp" readonly style="background:#eef2f7;font-weight:600"></div>
-        <div><label>Peso do fio retirado (g)</label><input type="number" step="0.1" id="expPesoFio" placeholder="0"><div class="hint">Fio de amarração retirado — será deplacado depois</div></div><div><label>Enviar para o Verniz (CAT)?</label><select id="expEnviarCat" onchange="expToggleCatBtns()"><option value="sim">Sim — enviar ao Verniz</option><option value="nao">Não — finalizar (expedir)</option></select><div class="hint" id="expCatHint">A Expedição decide antes de concluir</div></div>
+        <div><label>Peso do fio retirado (g)</label><input type="text" inputmode="decimal" id="expPesoFio" placeholder="0"><div class="hint">Fio de amarração retirado — será deplacado depois</div></div><div><label>Enviar para o Verniz (CAT)?</label><select id="expEnviarCat" onchange="expToggleCatBtns()"><option value="sim">Sim — enviar ao Verniz</option><option value="nao">Não — finalizar (expedir)</option></select><div class="hint" id="expCatHint">A Expedição decide antes de concluir</div></div>
       </div>
       <div id="expReenvioBox" style="margin:6px 0 10px;padding:8px 12px;border:1px solid #f0d78a;background:#fff8e1;border-radius:8px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px">
         <b>🔁 Reenvio negociado</b>
@@ -2822,7 +2822,7 @@ function renderExpConf(o){
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px">'+
         '<div><label style="font-size:11px;text-transform:none">Contagem do setor</label><input type="number" value="'+(sb.contagemExp||'')+'" onchange="expSetSub('+li+','+si+',\'contagemExp\',this.value)" style="width:100%;padding:6px"><div class="hint">'+stat+'</div>'+_catCmp+'</div>'+
         '<div><label style="font-size:11px;text-transform:none">Qtd com defeito</label><input type="number" min="0" value="'+(sb.defeito||'')+'" onchange="expSetSub('+li+','+si+',\'defeito\',this.value)" style="width:100%;padding:6px"><div class="hint">Vai para retrabalho por peça</div></div><div><label style="font-size:11px;text-transform:none">Tipo de defeito</label><input type="text" value="'+(sb.defeitoTipo||'')+'" onchange="expSetDefTipo('+li+','+si+',this.value)" style="width:100%;padding:6px" placeholder="Ex.: mancha, risco"></div>'+
-        '<div><label style="font-size:11px;text-transform:none">'+_pesoLbl+'</label><input type="number" step="0.001" value="'+kg2g(sb.pesoFinalExp)+'" onchange="expSetSub('+li+','+si+',\'pesoFinalExp\',this.value)" style="width:100%;padding:6px"></div>'+'<div><label style="font-size:11px;text-transform:none">Perdidas no processo</label><input type="number" min="0" value="'+(sb.perdidas||'')+'" onchange="expSetSub('+li+','+si+',\'perdidas\',this.value)" style="width:100%;padding:6px"><div class="hint">Peças quebradas/perdidas</div></div>'+'<div><label style="font-size:11px;text-transform:none">Motivo da perda</label><input type="text" value="'+(sb.perdidaMotivo||'')+'" onchange="expSetSub('+li+','+si+',\'perdidaMotivo\',this.value)" style="width:100%;padding:6px" placeholder="Ex.: quebrou no banho"></div>'+
+        '<div><label style="font-size:11px;text-transform:none">'+_pesoLbl+'</label><input type="text" inputmode="decimal" value="'+kg2g(sb.pesoFinalExp)+'" onchange="expSetSub('+li+','+si+',\'pesoFinalExp\',this.value)" style="width:100%;padding:6px"></div>'+'<div><label style="font-size:11px;text-transform:none">Perdidas no processo</label><input type="number" min="0" value="'+(sb.perdidas||'')+'" onchange="expSetSub('+li+','+si+',\'perdidas\',this.value)" style="width:100%;padding:6px"><div class="hint">Peças quebradas/perdidas</div></div>'+'<div><label style="font-size:11px;text-transform:none">Motivo da perda</label><input type="text" value="'+(sb.perdidaMotivo||'')+'" onchange="expSetSub('+li+','+si+',\'perdidaMotivo\',this.value)" style="width:100%;padding:6px" placeholder="Ex.: quebrou no banho"></div>'+
         '<div style="grid-column:1/-1"><label style="font-size:11px;text-transform:none">📝 Observação do item (Expedição)</label><input type="text" value="'+((sb.obsExp||'').replace(/"/g,'&quot;'))+'" onchange="expSetSub('+li+','+si+',\'obsExp\',this.value)" style="width:100%;padding:6px" placeholder="Anote algo importante deste item (ex.: separar, conferir fecho, cliente pediu...)"></div>'+
       '</div>'+
     '</div>';
