@@ -718,7 +718,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-11-03bp</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-11-03bq</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -1422,7 +1422,7 @@ function _escR(x){return (''+(x==null?'':x)).replace(/&/g,'&amp;').replace(/</g,
 function _nSub(o){return (o.itens||[]).reduce(function(s,it){return s+((it.subitens||[]).length);},0);}
 // ===== Relatório de O.S. em aberto p/ WhatsApp (seleção + filtro por fornecedor) =====
 function _fornSetOS(o){var s={};(o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.fornecedor)s[(''+sb.fornecedor).trim()]=1;});});if(o.fb&&o.fb.fornecedor)s[(''+o.fb.fornecedor).trim()]=1;return Object.keys(s).filter(Boolean);}
-function _osAbertas(){return (dados||[]).filter(function(o){return o&&!o._del&&!o.cancelada&&o.setor!=='Expedido'&&o.statusComercial!=='Entregue';});}
+function _osAbertas(){return (dados||[]).filter(function(o){return o&&!o._del&&!o.cancelada&&o.setor!=='Expedido'&&!osAguardandoEnvio(o);});}
 function _relWppSort(a,b){return (''+(a.prevEntregaISO||'9999-99-99')).localeCompare(''+(b.prevEntregaISO||'9999-99-99'));}
 var __relWppSel=null;
 function abrirRelWpp(){if(!__relWppSel)__relWppSel={};_relWppEnsure();_relWppFillForn();_relWppRenderLista();document.getElementById('__relWpp').style.display='flex';}
