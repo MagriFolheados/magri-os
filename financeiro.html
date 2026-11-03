@@ -2519,6 +2519,24 @@ render();
     function _finToastReload(){try{var el=document.getElementById('__finconf');if(!el){el=document.createElement('div');el.id='__finconf';el.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1f6f43;color:#fff;font-family:Arial;font-size:13px;padding:12px 14px;text-align:center;font-weight:bold';document.body.appendChild(el);}el.textContent='\u2713 Sincronizado com outro dispositivo. Atualizando\u2026';el.style.display='';setTimeout(function(){location.reload();},1500);}catch(e){location.reload();}}
 var _finBusy=false,_finDirty=false,_finTimer=null;function _finSyncKick(){_finDirty=true;if(_finTimer)clearTimeout(_finTimer);_finTimer=setTimeout(_finFlush,700);}async function _finFlush(){if(_finBusy||!_finDirty)return;_finBusy=true;_finDirty=false;try{var v=localStorage.getItem(DB_KEY);var nova=JSON.parse(v||'null')||{};var cur=await sb.from('financeiro').select('atualizado_em').eq('id',1).maybeSingle();var cloudVer=(cur.data&&cur.data.atualizado_em)||null;var lv=window.__finVer?Date.parse(window.__finVer):NaN;var cv=cloudVer?Date.parse(cloudVer):NaN;if(!isNaN(lv)&&!isNaN(cv)&&cv>lv+3000){try{var full=await sb.from('financeiro').select('dados,atualizado_em').eq('id',1).maybeSingle();var cloudD=(full.data&&full.data.dados)||{};var merged=_finMerge(cloudD,nova);var ts2=new Date().toISOString();var up2=await sb.from('financeiro').upsert({id:1,dados:merged,atualizado_em:ts2});if(!(up2&&up2.error)){window.__finVer=ts2;_set(DB_KEY,JSON.stringify(merged));_finToastReload();}else{console.warn('fin merge',up2.error.message);_finDirty=true;}}catch(e){console.warn('fin merge',e&&e.message);_finDirty=true;}_finBusy=false;return;}var ts=new Date().toISOString();var up=await sb.from('financeiro').upsert({id:1,dados:nova,atualizado_em:ts});if(up&&up.error){console.warn('fin sync',up.error.message);_finDirty=true;}else{window.__finVer=ts;}}catch(e){console.warn('fin sync',e&&e.message);_finDirty=true;}_finBusy=false;if(_finDirty){if(_finTimer)clearTimeout(_finTimer);_finTimer=setTimeout(_finFlush,1200);}}
 localStorage.setItem=function(k,v){_set(k,v);try{if(k===DB_KEY){_finSyncKick();}}catch(e){console.warn(e);}};try{document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'&&_finDirty)_finFlush();});window.addEventListener('beforeunload',function(){if(_finDirty){try{_finFlush();}catch(e){}}});}catch(e){}
+    // === Auto-refresh entre dispositivos: puxa alteração de outra máquina quando esta está ociosa ===
+    try{window.__finLastInteract=Date.now();var _finTouch=function(){window.__finLastInteract=Date.now();};['keydown','input','change','mousedown','touchstart','focusin'].forEach(function(ev){document.addEventListener(ev,_finTouch,true);});
+    setInterval(async function(){try{
+      if(_finBusy||_finDirty)return;                                   // tem alteração local pendente → não mexe
+      if((Date.now()-(window.__finLastInteract||0))<15000)return;      // usuário ativo nos últimos 15s → espera
+      var ae=document.activeElement;if(ae&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName))return; // digitando num campo
+      if(document.visibilityState==='hidden')return;
+      var cur=await sb.from('financeiro').select('atualizado_em').eq('id',1).maybeSingle();
+      var cv=(cur&&cur.data&&cur.data.atualizado_em)?Date.parse(cur.data.atualizado_em):NaN;
+      var lv=window.__finVer?Date.parse(window.__finVer):NaN;
+      if(!isNaN(cv)&&(isNaN(lv)||cv>lv+3000)){                         // nuvem mais nova que esta máquina
+        if(_finBusy||_finDirty)return;
+        try{var el=document.getElementById('__finconf');if(!el){el=document.createElement('div');el.id='__finconf';el.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1f6f43;color:#fff;font-family:Arial;font-size:13px;padding:12px 14px;text-align:center;font-weight:bold';document.body.appendChild(el);}el.textContent='✓ Atualização de outro dispositivo — sincronizando…';el.style.display='';}catch(e){}
+        setTimeout(function(){if(!_finDirty&&!_finBusy)location.reload();},1200); // re-checa antes de recarregar
+      }
+    }catch(e){}},25000);}catch(e){}
+    // marcador de versão (confirma que o cache atualizou)
+    try{var _vb=document.createElement('div');_vb.textContent='sync v2';_vb.style.cssText='position:fixed;bottom:2px;right:6px;z-index:99998;font:10px Arial;color:#94a3b8;opacity:.6;pointer-events:none';document.body.appendChild(_vb);}catch(e){}
     var d=document.getElementById('__gate');if(d)d.remove();
     var code=document.getElementById('__mainfin').textContent;var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
   }
