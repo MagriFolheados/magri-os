@@ -148,6 +148,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--brand)}
       <div class="tools">
         <button class="btn ghost sm" onclick="exportData()">⬇ Backup</button>
         <button class="btn ghost sm" onclick="document.getElementById('importFile').click()">⬆ Importar</button>
+        <button class="btn ghost sm" onclick="modalRestaurarNuvem()" title="Recuperar/juntar um backup salvo na nuvem">☁ Restaurar da nuvem</button>
         <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
         <button class="btn ghost sm" onclick="document.getElementById('ordemOSFile').click()" title="Importar Ordem de Recebimento gerada no sistema de produção">⬇ Ordem O.S.</button>
         <input type="file" id="ordemOSFile" accept="application/json" style="display:none" onchange="importarOrdemOS(event)">
@@ -266,6 +267,54 @@ function importData(ev){
   };
   r.readAsText(f);
   ev.target.value='';
+}
+/* ---------- RESTAURAR BACKUP DA NUVEM (recuperação / merge) ---------- */
+function _rbSaldo(D){let tot=0;(D.contas||[]).forEach(function(c){const ini=Number(c.saldoInicial)||0;let s=ini;if(c.tipo==='cheque'){s=ini+(D.cheques||[]).filter(k=>k.natureza==='recebido'&&['carteira','depositado'].includes(k.status)).reduce((a,k)=>a+Number(k.valor||0),0);}else if(c.tipo==='credito'){s=ini+(D.recebiveis||[]).filter(r=>r.contaId===c.id&&r.status==='previsto').reduce((a,r)=>a+(Number(r.valorLiquido||0)-Number(r.recebidoLiq||0)),0);}else{(D.movimentos||[]).forEach(m=>{if(m.contaId!==c.id)return;s+=(m.tipo==='entrada'?Number(m.valor||0):-Number(m.valor||0));});}tot+=s;});return Math.round(tot*100)/100;}
+function _rbUnion(a,b){const map={},order=[];(a||[]).forEach(r=>{if(r&&r.id!=null){if(!(r.id in map))order.push(r.id);map[r.id]=r;}});(b||[]).forEach(r=>{if(r&&r.id!=null){if(!(r.id in map))order.push(r.id);map[r.id]=r;}});return order.map(id=>map[id]);}
+function _rbExtrai(row){var d=row&&row.dados;if(!d)return null;if(d.lancamentos)return d;if(d.financeiro&&d.financeiro.lancamentos)return d.financeiro;return null;}
+function _rbMerge(base,outro){var ARR=['produtos','pessoas','lancamentos','vendas','compras','contas','movimentos','cheques','recebiveis','conciliacoes'];var out=Object.assign({},base,outro);ARR.forEach(function(k){out[k]=_rbUnion(base[k],outro[k]);});out.seq={};var allk=Object.assign({},base.seq||{},outro.seq||{});Object.keys(allk).forEach(function(k){out.seq[k]=Math.max((base.seq&&base.seq[k])||0,(outro.seq&&outro.seq[k])||0);});return out;}
+let _rbCache={};
+async function modalRestaurarNuvem(){
+  if(!window.__sb){ toast('Disponível só na versão online (nuvem).',true); return; }
+  toast('Buscando backups na nuvem...');
+  try{
+    const r=await window.__sb.from('backups').select('id').order('id',{ascending:false}).limit(90);
+    if(r.error){ toast('Erro: '+r.error.message,true); return; }
+    const ids=(r.data||[]).map(x=>x.id);
+    const rows=ids.map(id=>`<tr><td style="padding:4px 8px">${esc(id)}</td><td style="padding:4px 8px;text-align:right"><button class="btn sm" onclick="_rbVer('${esc(id)}')">Ver / restaurar</button></td></tr>`).join('');
+    abrirModal(`<div class="modal-head"><h3>☁ Restaurar backup da nuvem</h3><button class="close-x" onclick="fecharModal()">×</button></div>
+      <div class="modal-body"><p class="hint" style="margin-bottom:8px">Backups salvos na nuvem (automáticos e manuais). Clique em "Ver / restaurar" para conferir o saldo e escolher <b>Juntar</b> (merge, não perde nada) ou <b>Substituir</b>.</p>
+      <div id="rbPrev"></div>
+      <div style="max-height:44vh;overflow:auto;border:1px solid #2a3b5e;border-radius:8px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#13203a;position:sticky;top:0"><th style="padding:6px 8px;text-align:left">Backup</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>
+      <div class="modal-foot"><button class="btn ghost" onclick="fecharModal()">Fechar</button></div>`, true);
+  }catch(e){ toast('Erro: '+((e&&e.message)||e),true); }
+}
+async function _rbGet(id){ if(_rbCache[id])return _rbCache[id]; const r=await window.__sb.from('backups').select('dados').eq('id',id).maybeSingle(); const D=_rbExtrai(r.data); _rbCache[id]=D; return D; }
+async function _rbVer(id){
+  const box=document.getElementById('rbPrev'); if(box) box.innerHTML='<p class="hint">Carregando '+esc(id)+'...</p>';
+  try{
+    const D=await _rbGet(id);
+    if(!D){ if(box) box.innerHTML='<p class="hint" style="color:#ef6b6b">Este backup não tem dados de financeiro.</p>'; return; }
+    const sB=_rbSaldo(D), sA=_rbSaldo(DB); const merged=_rbMerge(DB,D); const sM=_rbSaldo(merged);
+    if(box) box.innerHTML=`<div style="background:#13203a;border:1px solid #2a3b5e;border-radius:8px;padding:10px 12px;margin-bottom:10px">
+      <div style="font-weight:800;margin-bottom:6px">${esc(id)}</div>
+      <div style="font-size:13px;line-height:1.7">Backup: <b>${(D.lancamentos||[]).length}</b> lanç · <b>${(D.movimentos||[]).length}</b> mov · saldo <b>${fmt(sB)}</b><br>
+      Atual: <b>${(DB.lancamentos||[]).length}</b> lanç · saldo <b>${fmt(sA)}</b><br>
+      Juntando (merge): <b>${merged.lancamentos.length}</b> lanç · saldo <b style="color:#4fd18b">${fmt(sM)}</b></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn primary" onclick="_rbAplicar('${esc(id)}','merge')">Juntar com o atual (não perde nada)</button>
+        <button class="btn" onclick="_rbAplicar('${esc(id)}','replace')">Substituir tudo por este</button></div></div>`;
+  }catch(e){ if(box) box.innerHTML='<p class="hint" style="color:#ef6b6b">Erro: '+esc((e&&e.message)||e)+'</p>'; }
+}
+async function _rbAplicar(id, modo){
+  try{
+    const D=await _rbGet(id); if(!D){ toast('Backup sem dados.',true); return; }
+    const result = (modo==='merge')? _rbMerge(DB,D) : D;
+    const sNovo=_rbSaldo(result);
+    if(!confirm((modo==='merge'?'JUNTAR este backup com os dados atuais':'SUBSTITUIR TUDO pelos dados deste backup')+'?\n\nNovo saldo total: '+fmt(sNovo)+'\nLançamentos: '+(result.lancamentos||[]).length+'\n\nIsto sincroniza para a nuvem e todos passarão a ver estes dados. Confirmar?')) return;
+    DB=result; salvar(); render(); fecharModal();
+    toast((modo==='merge'?'Backup juntado':'Dados restaurados')+' — saldo '+fmt(sNovo)+'. Sincronizando com a nuvem...');
+  }catch(e){ toast('Erro: '+((e&&e.message)||e),true); }
 }
 
 /* ---------- CAIXA / CONTAS (regime de caixa) ---------- */
@@ -1871,8 +1920,22 @@ function modalLancamento(tipo, id){
     </div>
     <div style="text-align:right;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">Valor líquido a ${isRec?'receber':'pagar'}: <b id="lLiq" style="font-size:16px">${fmt(valorLiq(l))}</b></div>
     </div>
-    <div class="modal-foot"><button class="btn ghost" onclick="fecharModal()">Cancelar</button><button class="btn primary" onclick="salvarLancamento('${tipo}',${id||'null'})">Salvar</button></div>
+    <div class="modal-foot"><button class="btn ghost" onclick="fecharModal()">Cancelar</button>${id?'':`<button class="btn" onclick="salvarEParcelar('${tipo}')" title="Cria o título e abre as parcelas (valor de cada uma editável)">Salvar e parcelar</button>`}<button class="btn primary" onclick="salvarLancamento('${tipo}',${id||'null'})">Salvar</button></div>
   `);
+}
+function salvarEParcelar(tipo){
+  const desc=document.getElementById('lDesc').value.trim();
+  const valor=parseFloat(document.getElementById('lValor').value);
+  if(!desc||!valor){ toast('Preencha descrição e valor.', true); return; }
+  const dados={ tipo, descricao:desc, valor, categoria:document.getElementById('lCat').value,
+    documento:document.getElementById('lDoc').value.trim(),
+    juros:parseFloat(document.getElementById('lJuros').value)||0,
+    desconto:parseFloat(document.getElementById('lDesc2').value)||0,
+    contraparte:document.getElementById('lParte').value.trim(), vencimento:document.getElementById('lVenc').value,
+    data:document.getElementById('lData').value, status:'pendente',
+    forma:document.getElementById('lForma').value.trim(), origem:'manual' };
+  const id=addLancamentoRet(dados);
+  modalParcelar(id);
 }
 function calcLiq(){
   const v=parseFloat(document.getElementById('lValor').value)||0;
@@ -2506,7 +2569,10 @@ render();
   const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
   window.__sb=sb;
   function overlay(html){var d=document.getElementById('__gate');if(!d){d=document.createElement('div');d.id='__gate';d.style.cssText='position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;color:#fff';document.body.appendChild(d);}d.innerHTML=html;}
-  function loginUI(msg){overlay('<div style="background:#111827;padding:26px 28px;border-radius:14px;width:330px;max-width:90%"><div style="font-size:20px;font-weight:800;color:#38bdf8;margin-bottom:4px">Magri — Financeiro</div><div style="font-size:12px;color:#94a3b8;margin-bottom:16px">Acesso restrito (Financeiro / Admin)</div><input id="__em" type="email" placeholder="E-mail" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff"><input id="__pw" type="password" placeholder="Senha" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff"><button id="__go" style="width:100%;padding:11px;border:none;border-radius:8px;background:#38bdf8;color:#0b1220;font-weight:800;cursor:pointer">Entrar</button><div id="__er" style="color:#f87171;font-size:12px;margin-top:8px;min-height:16px">'+(msg||'')+'</div></div>');document.getElementById('__go').onclick=doLogin;document.getElementById('__pw').onkeydown=function(e){if(e.key==='Enter')doLogin();};}
+  function loginUI(msg){overlay('<div style="background:#111827;padding:26px 28px;border-radius:14px;width:330px;max-width:90%"><div style="font-size:20px;font-weight:800;color:#38bdf8;margin-bottom:4px">Magri — Financeiro</div><div style="font-size:12px;color:#94a3b8;margin-bottom:16px">Acesso restrito (Financeiro / Admin)</div><input id="__em" type="email" placeholder="E-mail" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff"><input id="__pw" type="password" placeholder="Senha" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff"><button id="__go" style="width:100%;padding:11px;border:none;border-radius:8px;background:#38bdf8;color:#0b1220;font-weight:800;cursor:pointer">Entrar</button><div style="text-align:center;margin-top:10px"><a href="#" id="__fp" style="color:#38bdf8;font-size:12px;text-decoration:none">Esqueci a senha</a></div><div id="__er" style="color:#f87171;font-size:12px;margin-top:8px;min-height:16px">'+(msg||'')+'</div></div>');document.getElementById('__go').onclick=doLogin;document.getElementById('__pw').onkeydown=function(e){if(e.key==='Enter')doLogin();};var _fp=document.getElementById('__fp');if(_fp)_fp.onclick=function(e){e.preventDefault();forgotPw();};}
+  async function forgotPw(){var em=((document.getElementById('__em')||{}).value||'').trim();var er=document.getElementById('__er');if(!em){if(er){er.style.color='#fbbf24';er.textContent='Digite o e-mail no campo acima e clique em "Esqueci a senha".';}return;}if(er){er.style.color='#94a3b8';er.textContent='Enviando link de redefinição...';}try{var redir=location.href.split('#')[0].split('?')[0];var r=await sb.auth.resetPasswordForEmail(em,{redirectTo:redir});if(r.error){if(er){er.style.color='#f87171';er.textContent='Erro: '+r.error.message;}}else if(er){er.style.color='#4ade80';er.textContent='Link enviado para '+em+'. Abra o e-mail e clique no link para criar a nova senha.';}}catch(e){if(er){er.style.color='#f87171';er.textContent='Erro: '+((e&&e.message)||e);}}}
+  function novaSenhaUI(){overlay('<div style="background:#111827;padding:26px 28px;border-radius:14px;width:340px;max-width:90%"><div style="font-size:20px;font-weight:800;color:#38bdf8;margin-bottom:4px">Criar nova senha</div><div style="font-size:12px;color:#94a3b8;margin-bottom:16px">Digite a nova senha para sua conta.</div><input id="__np1" type="password" placeholder="Nova senha (mín. 6)" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff"><input id="__np2" type="password" placeholder="Repita a nova senha" style="width:100%;padding:10px;margin-bottom:8px;border-radius:8px;border:1px solid #334155;background:#0b1220;color:#fff"><button id="__oknp" style="width:100%;padding:11px;border:none;border-radius:8px;background:#38bdf8;color:#0b1220;font-weight:800;cursor:pointer">Salvar senha</button><div id="__er2" style="color:#f87171;font-size:12px;margin-top:8px;min-height:16px"></div></div>');document.getElementById('__oknp').onclick=salvarNovaSenha;document.getElementById('__np2').onkeydown=function(e){if(e.key==='Enter')salvarNovaSenha();};}
+  async function salvarNovaSenha(){var p1=document.getElementById('__np1').value,p2=document.getElementById('__np2').value;var er=document.getElementById('__er2');if(!p1||p1.length<6){er.style.color='#f87171';er.textContent='A senha precisa ter ao menos 6 caracteres.';return;}if(p1!==p2){er.style.color='#f87171';er.textContent='As senhas não conferem.';return;}er.style.color='#94a3b8';er.textContent='Salvando...';try{var r=await sb.auth.updateUser({password:p1});if(r.error){er.style.color='#f87171';er.textContent='Erro: '+r.error.message;return;}er.style.color='#4ade80';er.textContent='Senha alterada! Entrando...';try{history.replaceState(null,'',location.pathname);}catch(e){}setTimeout(function(){location.reload();},1200);}catch(e){er.style.color='#f87171';er.textContent='Erro: '+((e&&e.message)||e);}}
   function loadingUI(){overlay('<div style="text-align:center"><div style="font-size:18px;color:#38bdf8;font-weight:700">Carregando financeiro da nuvem...</div></div>');}
   async function doLogin(){var email=document.getElementById('__em').value.trim();var password=document.getElementById('__pw').value;document.getElementById('__er').textContent='Entrando...';var r=await sb.auth.signInWithPassword({email:email,password:password});if(r.error){document.getElementById('__er').textContent='Erro: '+r.error.message;return;}boot();}
   async function boot(){
@@ -2542,11 +2608,13 @@ localStorage.setItem=function(k,v){_set(k,v);try{if(k===DB_KEY){_finSyncKick();}
       }
     }catch(e){}},25000);}catch(e){}
     // marcador de versão (confirma que o cache atualizou)
-    try{var _vb=document.createElement('div');_vb.textContent='sync v2';_vb.style.cssText='position:fixed;bottom:2px;right:6px;z-index:99998;font:10px Arial;color:#94a3b8;opacity:.6;pointer-events:none';document.body.appendChild(_vb);}catch(e){}
+    try{var _vb=document.createElement('div');_vb.textContent='sync v5';_vb.style.cssText='position:fixed;bottom:2px;right:6px;z-index:99998;font:10px Arial;color:#94a3b8;opacity:.6;pointer-events:none';document.body.appendChild(_vb);}catch(e){}
     var d=document.getElementById('__gate');if(d)d.remove();
     var code=document.getElementById('__mainfin').textContent;var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
   }
-  sb.auth.getSession().then(function(res){if(res.data.session)boot();else loginUI();});
+  var _recovery=/type=recovery/.test(location.hash||'')||/type=recovery/.test(location.search||'');
+  try{sb.auth.onAuthStateChange(function(event){if(event==='PASSWORD_RECOVERY'){_recovery=true;novaSenhaUI();}});}catch(e){}
+  sb.auth.getSession().then(function(res){if(_recovery){novaSenhaUI();return;}if(res.data.session)boot();else loginUI();});
 })();
 </script>
 \n<script>(function(){function mkSair(){if(document.getElementById("__btnSair"))return;var b=document.createElement("button");b.id="__btnSair";b.textContent="⏻ Sair do sistema";b.style.cssText="display:block;width:calc(100% - 24px);margin:10px 12px;padding:9px;border:none;border-radius:8px;background:#5a2320;color:#ffd7d2;font-weight:700;cursor:pointer;font-size:13px";b.onclick=function(){if(!confirm("Sair do sistema financeiro?"))return;try{if(window.__sb&&window.__sb.auth){window.__sb.auth.signOut();}}catch(e){}setTimeout(function(){location.reload();},300);};var all=document.querySelectorAll("*"),a=null;for(var i=0;i<all.length;i++){var el=all[i];if(el.children.length===0&&/Dados salvos neste navegador/i.test(el.textContent||"")){a=el;break;}}if(a&&a.parentNode){a.parentNode.insertBefore(b,a);}else{b.style.cssText="position:fixed;top:12px;right:12px;z-index:99999;padding:8px 14px;border:none;border-radius:8px;background:#5a2320;color:#ffd7d2;font-weight:700;cursor:pointer";document.body.appendChild(b);}}if(document.readyState!=="loading"){setTimeout(mkSair,900);}else{document.addEventListener("DOMContentLoaded",function(){setTimeout(mkSair,900);});}})();</script></body>
