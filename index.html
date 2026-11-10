@@ -720,7 +720,7 @@
       </section>
       <section class="view" id="view-precos">
         <div class="panel"><div class="panel-head"><span class="dot"></span><h2>Manutenção / Fotos</h2></div><div class="panel-body">
-          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-11-10bz</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
+          <div class="hint" style="margin-bottom:8px">Versão do sistema: <b id="verTag">2026-11-10ca</b>. Se no celular aparecer versão diferente (ou vazia), ele está com <b>cache antigo</b> — feche a aba e reabra pelo link, ou limpe os dados do site.</div>
           <div class="hint" style="margin-bottom:8px">Corrige o problema de foto no celular: envia as fotos antigas (guardadas dentro do aparelho) para a nuvem e deixa só o link, liberando espaço local. Rode <b>uma vez</b>, de preferência no computador.</div>
           <div class="actions" style="flex-wrap:wrap;gap:8px"><button class="btn-primary" onclick="migrarFotosNuvem()">Migrar fotos antigas p/ nuvem</button><button class="btn-excel" onclick="backupAgora()">Fazer backup agora</button><button class="btn-azul" onclick="abrirRecuperar()">Recuperar itens de backup</button><button class="btn-ghost" onclick="verFotosOrfas()">Ver fotos sem vínculo (órfãs)</button></div>
           <div class="hint" id="migStatus" style="margin-top:8px"></div>
@@ -3252,7 +3252,7 @@ function rowsDoLote(it,pb){var rows=[];var b=it.banho||'';var cot=parseFloat(it.
   else if(PRECO_PRATA[b]!==undefined){var v=pesoG*PRECO_PRATA[b];rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:PRECO_PRATA[b]*1000,peso:pb,serv:v,ouro:0,total:v});}
   else if(b==='Ródio Branco'){var v=pesoG*PRECO_RODIO_BRANCO;rows.push({tipo:'Banho Ródio Branco',fator:'',cor:it.cor||'',camada:'',vlkg:PRECO_RODIO_BRANCO*1000,peso:pb,serv:v,ouro:0,total:v});}
   else {var _d=customBanho(b);if(_d&&_d.modelo==='grama'){var vg=pesoG*(parseFloat(_d.precoG)||0);var av=!!_d.avista;rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:(parseFloat(_d.precoG)||0)*1000,peso:pb,serv:av?0:vg,ouro:av?vg:0,total:vg});}else if(_d&&_d.modelo==='kg'){var vk=pb*(parseFloat(_d.precoKg)||0);rows.push({tipo:'Banho '+b,fator:'',cor:it.cor||'',camada:'',vlkg:(parseFloat(_d.precoKg)||0),peso:pb,serv:vk,ouro:0,total:vk});}}
-  var c=it.compl||{};Object.keys(PRECO_COMPL).forEach(function(k){if(c[k]){var v=pesoG*PRECO_COMPL[k];rows.push({tipo:COMPL_LABEL[k],fator:'',cor:'',camada:'',vlkg:PRECO_COMPL[k]*1000,peso:pb,serv:v,ouro:0,total:v});}});
+  var c=it.compl||{};Object.keys(PRECO_COMPL).forEach(function(k){if(k==='protetor'&&_protCortesiaMO(it))return;if(c[k]){var v=pesoG*PRECO_COMPL[k];rows.push({tipo:COMPL_LABEL[k],fator:'',cor:'',camada:'',vlkg:PRECO_COMPL[k]*1000,peso:pb,serv:v,ouro:0,total:v});}});
   if(c.antialergicoCortesia)rows.push({tipo:'Hipoalergênico',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
   if(c.niquelfreeCortesia)rows.push({tipo:'Níquel Free',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
   if(c.niquelCortesia)rows.push({tipo:'Níquel',cortesia:true,fator:'',cor:'',camada:'',vlkg:0,peso:pb,serv:0,ouro:0,total:0});
