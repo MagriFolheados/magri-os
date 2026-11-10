@@ -39,6 +39,15 @@ body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-seri
 .urow .bar > div{height:100%}
 .urow .pct{font-size:12px;font-weight:800;min-width:40px;text-align:right}
 .empty{color:var(--muted);font-size:12px;padding:6px 2px}
+.ctrlbar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;background:#172033;border:1px solid #2a3750;border-radius:10px;padding:8px 12px}
+.ctrlbar label{font-size:13px;color:#cbd5e1;font-weight:700}
+.ctrlbar select{background:#0b1220;color:#fff;border:1px solid #334155;border-radius:7px;padding:6px 9px;font-size:13px}
+.indiv{background:var(--card);border:1px solid #3a4a6b;border-radius:12px;padding:12px 16px}
+.indiv h2{font-size:17px;color:#fff;margin-bottom:8px}
+.daybars{display:flex;align-items:flex-end;gap:1px;height:92px;border-bottom:1px solid #2a3750;margin-bottom:4px}
+.daybars .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
+.daybars .col i{display:block;width:74%;border-radius:2px 2px 0 0}
+.daybars .col span{font-size:8px;color:#64748b;margin-top:1px}
 .upd{font-size:11px;color:var(--muted)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -59,6 +68,8 @@ body{background:var(--bg);color:var(--txt);font-family:Arial,Helvetica,sans-seri
     <div class="mes" id="mesLbl"></div>
     <div class="right"><div class="clock" id="clock"></div><div class="upd" id="upd"></div></div>
   </div>
+  <div class="ctrlbar"><label>Mês</label><select id="selMes" onchange="mesChange()"></select><label style="margin-left:10px">Funcionário</label><select id="selFunc" onchange="funcChange()"><option value="">Todos (visão da equipe)</option></select><span id="selInfo" style="color:var(--muted);font-size:12px"></span></div>
+  <div id="indivBox" style="margin-bottom:10px"></div>
   <div id="empresaBox" style="margin-bottom:10px"></div>
   <div class="destaque" id="destaque"></div>
   <div id="ganColetiva" style="margin-bottom:10px"></div>
@@ -71,6 +82,25 @@ var SB_KEY='sb_publishable_O2K1r_rmv9pWSOF_1M1Mkg_jIUqwtPZ';
 var sb=supabase.createClient(SB_URL,SB_KEY);
 var METAS_DEFAULT={comercial:{os:10,kg:7},foto:{fotos:300,kg:6},banhado:{kg:14},expedicao:{kg:6,itens:300},posvenda:{dia:5},empresa:{banhoMes:300}};
 var PV_HOJE=0,PV_MES=0;
+var ORD=[],AP=[];var SEL_MES='',SEL_FUNC='';try{SEL_MES=localStorage.getItem('p2_selmes')||'';SEL_FUNC=localStorage.getItem('p2_selfunc')||'';}catch(e){}
+var MESNOME={'01':'Janeiro','02':'Fevereiro','03':'Março','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'};
+function _mesesOpts(){var out=[],d=new Date();for(var i=0;i<12;i++){var dt=new Date(d.getFullYear(),d.getMonth()-i,1);out.push(dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'));}return out;}
+function mesChange(){SEL_MES=document.getElementById('selMes').value;try{localStorage.setItem('p2_selmes',SEL_MES);}catch(e){}carregar();}
+function funcChange(){SEL_FUNC=document.getElementById('selFunc').value;try{localStorage.setItem('p2_selfunc',SEL_FUNC);}catch(e){}if(window.__P)render(window.__P);}
+function computaDiaPessoa(ym,pessoa){var dias={};function add(d,it,kg){if(!d||(''+d).slice(0,7)!==ym)return;var k=(''+d).slice(0,10);if(!dias[k])dias[k]={itens:0,kg:0};dias[k].itens+=(it||0);dias[k].kg+=(kg||0);}
+  (ORD||[]).forEach(function(o){if(!o||o._del||o.cancelada)return;
+    if(o.comUser&&normNome(o.comUser)===pessoa)add(o.dataEntrada,0,pesoDecl(o));
+    (o.itens||[]).forEach(function(it){(it.subitens||[]).forEach(function(sb){if(sb.criadoPor&&normNome(sb.criadoPor)===pessoa)add(sb.criadoEm,1,(parseFloat(sb.peso)||0));});});
+    if((o.amUser||o.amResp)&&normNome(o.amUser||o.amResp)===pessoa)add(o.amConcluidoEm,0,(parseFloat(o.pesoEnganchKg)||0));
+    var e=o.exp||{};var cxs=o.caixas||[];var eWho0=o.expUser||e.resp||(cxs.length?cxs[cxs.length-1].resp:'');var eDate=e.concluidoEm||(cxs.length?cxs[cxs.length-1].fechadaEm:'')||o.dataSaida||'';
+    (o.itens||[]).forEach(function(it){var subs=it.subitens||[];if(subs.length){subs.forEach(function(sb){if(sb.confExp!=='Sim')return;var who=sb.confExpUser||eWho0;if(who&&normNome(who)===pessoa)add(sb.confExpEm||eDate,(parseInt(sb.contagemExp)||parseInt(sb.qtd)||0),(parseFloat(sb.pesoFinalExp)||0));});}else{if(eWho0&&normNome(eWho0)===pessoa)add(eDate,1,(parseFloat(it.pesoFinal)||0));}});
+  });
+  (AP||[]).forEach(function(a){var who=a.user||a.responsavel;if(who&&normNome(who)===pessoa)add(a.data,0,(a.peso||0));});
+  return dias;}
+function _dayCols(ym,map,campo,cor){var p=(''+ym).split('-');var nd=new Date(+p[0],+p[1],0).getDate();var vals=[];for(var d=1;d<=nd;d++){var k=ym+'-'+String(d).padStart(2,'0');vals.push((map[k]&&map[k][campo])||0);}var max=Math.max.apply(null,vals.concat([1]));return '<div class="daybars">'+vals.map(function(v,i){var h=Math.round(v/max*84);return '<div class="col"><i style="height:'+h+'px;background:'+(v>0?cor:'#1e293b')+'"></i><span>'+(i+1)+'</span></div>';}).join('')+'</div>';}
+function _indivHTML(P,pessoa){var sb='';SEC.forEach(function(sec){if(!secUsou(P,pessoa,sec))return;var rk=Math.round(secRankMes(P,pessoa,sec));var c=corPct(rk);sb+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="width:130px;font-size:12px;color:#cbd5e1;text-align:right">'+sec.nome+'</span><div style="flex:1;height:14px;background:#0b1220;border-radius:7px;overflow:hidden"><div style="width:'+Math.min(100,rk)+'%;height:100%;background:'+c+'"></div></div><span style="width:44px;text-align:right;font-weight:800;color:'+c+'">'+rk+'%</span></div>';});if(!sb)sb='<div class="empty">Sem setor com meta no mês.</div>';
+  var dmap=computaDiaPessoa(MES7,pessoa);var itTot=0,kgTot=0;Object.keys(dmap).forEach(function(k){itTot+=dmap[k].itens;kgTot+=dmap[k].kg;});
+  return '<div class="indiv"><h2>👤 '+esc(pessoa)+' — '+(MESNOME[MES7.slice(5,7)]||'')+' '+MES7.slice(0,4)+'</h2><div style="font-weight:700;color:#cbd5e1;font-size:13px;margin-bottom:4px">Desempenho por setor (vs meta)</div>'+sb+'<div style="font-weight:700;color:#cbd5e1;font-size:13px;margin:10px 0 2px">Itens por dia <span style="color:var(--muted);font-weight:400">(total '+Math.round(itTot)+')</span></div>'+_dayCols(MES7,dmap,'itens','#2ecc71')+'<div style="font-weight:700;color:#cbd5e1;font-size:13px;margin:8px 0 2px">Kg por dia <span style="color:var(--muted);font-weight:400">(total '+g1(kgTot)+')</span></div>'+_dayCols(MES7,dmap,'kg','#a855f7')+'</div>';}
 var M=JSON.parse(JSON.stringify(METAS_DEFAULT));
 function _ajustaMetas(){if(!M.banhado){M.banhado={kg:(M.gancheira&&M.gancheira.kg)||14};}['comercial','foto','banhado','expedicao'].forEach(function(k){if(!M[k])M[k]=JSON.parse(JSON.stringify(METAS_DEFAULT[k]));});if(!(M.foto.kg>0)||M.foto.kg===5)M.foto.kg=6;if(!(M.expedicao.kg>0)||M.expedicao.kg===5)M.expedicao.kg=6;if(!M.empresa)M.empresa={banhoMes:300};if(!(M.empresa.banhoMes>0))M.empresa.banhoMes=300;if(!M.posvenda)M.posvenda={dia:5};if(!(M.posvenda.dia>0))M.posvenda.dia=5;}
 
@@ -141,8 +171,14 @@ function _blocoSetor(P,nomes,sec,mode){
 }
 
 function render(P){
-  document.getElementById('mesLbl').textContent=({'01':'Janeiro','02':'Fevereiro','03':'Março','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'}[MES7.slice(5,7)]||'')+' '+MES7.slice(0,4)+' · '+DU+' dias úteis';
+  window.__P=P;
+  document.getElementById('mesLbl').textContent=(MESNOME[MES7.slice(5,7)]||'')+' '+MES7.slice(0,4)+' · '+DU+' dias úteis';
   var nomes=Object.keys(P);
+  // seletores de mês e funcionário
+  var sm=document.getElementById('selMes');if(sm){if(!sm.dataset.filled){sm.innerHTML=_mesesOpts().map(function(ym){return '<option value="'+ym+'">'+(MESNOME[ym.slice(5,7)]||'')+' '+ym.slice(0,4)+'</option>';}).join('');sm.dataset.filled='1';}sm.value=MES7;}
+  var sf=document.getElementById('selFunc');if(sf){var curF=SEL_FUNC;var ns=nomes.slice().sort();sf.innerHTML='<option value="">Todos (visão da equipe)</option>'+ns.map(function(n){return '<option'+(n===curF?' selected':'')+'>'+esc(n)+'</option>';}).join('');if(curF&&ns.indexOf(curF)>-1)sf.value=curF;else SEL_FUNC='';}
+  var ib=document.getElementById('indivBox');if(ib)ib.innerHTML=(SEL_FUNC&&P[SEL_FUNC])?_indivHTML(P,SEL_FUNC):'';
+  var si=document.getElementById('selInfo');if(si)si.textContent=SEL_FUNC?('Mostrando gráficos individuais de '+SEL_FUNC):'';
   // ===== Meta da empresa: % por setor (média da equipe) + coletivo =====
   var bMetaEmp=(M.empresa&&M.empresa.banhoMes)||300;var bPctEmp=bMetaEmp>0?Math.min(300,Math.round(GAN_MES/bMetaEmp*100)):0;
   var pvMetaE=(M.posvenda&&M.posvenda.dia)||5;var pvPctEmp=(pvMetaE*DU)>0?Math.round(PV_MES/(pvMetaE*DU)*100):0;var pvHojePct=pvMetaE>0?Math.round(PV_HOJE/pvMetaE*100):0;var pvCorH=corPct(pvHojePct);var pvCorM=corPct(pvPctEmp);
@@ -168,19 +204,20 @@ function render(P){
   html+='<div class="stage-h">📈 Evolução da meta mensal — '+DU+' dias úteis (meta do mês = meta/dia × '+DU+')</div>';
   html+='<div class="stagegrid">'+SEC.map(function(s){return _blocoSetor(P,nomes,s,'mes');}).join('')+'</div>';
   document.getElementById('grid').innerHTML=html;
-  var n=new Date();document.getElementById('upd').textContent='v3 · atualizado '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+  var n=new Date();document.getElementById('upd').textContent='v4 · atualizado '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
 }
 
 async function loadAll(tb){var out=[],f=0,pg=1000;while(true){var r=await sb.from(tb).select('dados').order('id',{ascending:true}).range(f,f+pg-1);if(r.error){break;}var d=r.data||[];out=out.concat(d.map(function(x){return x.dados;}));if(d.length<pg)break;f+=pg;}return out;}
 
 async function carregar(){
   try{
-    MES7=ymAtual();DU=diasUteisMes(MES7);
+    MES7=SEL_MES||ymAtual();DU=diasUteisMes(MES7);
     try{var cm=await sb.from('config').select('valor').eq('chave','magri_metas_v1').maybeSingle();if(cm&&cm.data&&cm.data.valor){M=cm.data.valor;}}catch(e){}
     _ajustaMetas();
     try{var cc=await sb.from('config').select('valor').eq('chave','magri_contatos_v1').maybeSingle();var ctts=(cc&&cc.data&&cc.data.valor)||[];if(!Array.isArray(ctts))ctts=[];var hj=hojeISO();PV_HOJE=ctts.filter(function(c){return (''+(c.data||'')).slice(0,10)===hj;}).length;PV_MES=ctts.filter(function(c){return (''+(c.data||'')).slice(0,7)===MES7;}).length;}catch(e){PV_HOJE=0;PV_MES=0;}
     var ordens=await loadAll('ordens');
     var apont=await loadAll('apontamentos');
+    ORD=ordens;AP=apont;
     var P=computa(ordens,apont);
     render(P);
   }catch(e){console.warn('carregar',e);}
