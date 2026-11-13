@@ -1414,7 +1414,7 @@ function caixaRecebiveis(){
     <td class="num hint">${fmtN(r.taxa)}%</td>
     <td class="num"><b>${fmt(r.valorLiquido)}</b>${Number(r.recebidoLiq||0)>0.005?`<div class="hint">recebido ${fmt(r.recebidoLiq)} · saldo ${fmt(Number(r.valorLiquido)-Number(r.recebidoLiq))}</div>`:''}</td>
     <td>${r.status==='recebido'?`<span class="pill pago">recebido ${dataBR(r.dataRecebido)}</span>`:(Number(r.recebidoLiq||0)>0.005?'<span class="pill pendente">parcial</span>':'<span class="pill pendente">previsto</span>')}</td>
-    <td class="num">${r.status==='previsto'?`<button class="btn sm primary" onclick="receberRecebivel(${r.id})">Receber</button>`:''} ${(Number(r.recebidoLiq||0)>0.005||r.status==='recebido')?`<button class="btn sm ghost" onclick="estornarRecebivel(${r.id})">Estornar</button>`:''} <button class="icon-btn" onclick="delRecebivel(${r.id})">🗑</button></td>
+    <td class="num">${r.status==='previsto'?`<button class="btn sm primary" onclick="receberRecebivel(${r.id})">Receber</button>`:''} ${(Number(r.recebidoLiq||0)>0.005||r.status==='recebido')?`<button class="btn sm ghost" onclick="estornarRecebivel(${r.id})">Estornar</button>`:''} <button class="icon-btn" onclick="editRecebivel(${r.id})" title="Editar valores">✎</button> <button class="icon-btn" onclick="delRecebivel(${r.id})">🗑</button></td>
   </tr>`).join('');
   return `
   <div class="grid kpis" style="margin-bottom:16px">
@@ -1438,6 +1438,46 @@ function caixaRecebiveis(){
 }
 function _recDesc(r){if(!r)return '';if(r.desc)return r.desc;if(r.vendaId){var v=(DB.vendas||[]).find(function(x){return x.id===r.vendaId;});if(v)return v.cliente||v.descricao||'';}return '';}
 function editRecDesc(id){var r=DB.recebiveis.find(function(x){return x.id===id;});if(!r){if(typeof toast==='function')toast('Recebível não encontrado.',true);return;}var v=prompt('Descrição / identificação deste recebível:', r.desc||'');if(v===null)return;r.desc=(''+v).trim();salvar();render();}
+function editRecebivel(id){
+  const r=DB.recebiveis.find(function(x){return x.id===id;}); if(!r){ toast('Recebível não encontrado.',true); return; }
+  const jaRec=Number(r.recebidoLiq||0);
+  abrirModal(`
+    <div class="modal-head"><h3>Editar recebível (cartão)</h3><button class="close-x" onclick="fecharModal()">×</button></div>
+    <div class="modal-body">
+      <p class="hint" style="margin-bottom:12px">${esc(nomeConta(r.contaId))}${r.operadora?' · '+esc(r.operadora):''} · parcela ${r.parcela}/${r.totalParcelas}${jaRec>0.005?` · já recebido <b>${fmt(jaRec)}</b>`:''}</p>
+      <div class="form-grid">
+        <div class="field"><label>Data prevista</label><input id="erData" type="date" value="${r.dataPrevista||''}"></div>
+        <div class="field"><label>Operadora</label><input id="erOper" value="${esc(r.operadora||'')}"></div>
+        <div class="field"><label>Valor bruto (R$)</label><input id="erBruto" type="number" step="0.01" value="${Number(r.valorBruto||0).toFixed(2)}" oninput="_erCalc()"></div>
+        <div class="field"><label>Taxa (%)</label><input id="erTaxa" type="number" step="0.01" value="${Number(r.taxa||0)}" oninput="_erCalc()"></div>
+        <div class="field"><label>Valor líquido (R$)</label><input id="erLiq" type="number" step="0.01" value="${Number(r.valorLiquido||0).toFixed(2)}"></div>
+      </div>
+      <div class="hint" style="margin-top:8px">Ao mudar o bruto ou a taxa, o líquido recalcula sozinho — mas você pode ajustar o líquido na mão (ex.: centavos a mais ou a menos do cartão em cada parcela).</div>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" onclick="fecharModal()">Cancelar</button><button class="btn primary" onclick="salvarEditRecebivel(${id})">Salvar</button></div>
+  `);
+}
+function _erCalc(){
+  var eb=document.getElementById('erBruto'), et=document.getElementById('erTaxa'), el=document.getElementById('erLiq');
+  if(!eb||!et||!el) return;
+  if(document.activeElement===el) return;
+  var b=parseFloat(eb.value)||0, t=parseFloat(et.value)||0;
+  el.value=(Math.round(b*(1-t/100)*100)/100).toFixed(2);
+}
+function salvarEditRecebivel(id){
+  const r=DB.recebiveis.find(function(x){return x.id===id;}); if(!r){ toast('Recebível não encontrado.',true); return; }
+  var b=parseFloat(document.getElementById('erBruto').value);
+  var t=parseFloat(document.getElementById('erTaxa').value);
+  var liq=parseFloat(document.getElementById('erLiq').value);
+  var data=document.getElementById('erData').value||r.dataPrevista;
+  var oper=(document.getElementById('erOper').value||'').trim();
+  if(isNaN(b)) b=0; if(isNaN(t)) t=0; if(isNaN(liq)) liq=0;
+  if(!(liq>0)&&!(b>0)){ toast('Informe ao menos o valor.',true); return; }
+  var jaRec=Number(r.recebidoLiq||0);
+  if(jaRec>0.005 && liq<jaRec-0.005){ if(!confirm('O novo líquido ('+fmt(liq)+') é menor que o que já foi recebido ('+fmt(jaRec)+'). Salvar assim mesmo?')) return; }
+  r.valorBruto=b; r.taxa=t; r.valorLiquido=liq; r.dataPrevista=data; r.operadora=oper;
+  salvar(); fecharModal(); render(); toast('Recebível atualizado.');
+}
 function modalRecebiveis(){
   const contasCred=contasPorTipo('credito');
   if(!contasCred.length){ toast('Cadastre uma conta do tipo Cartão/Crédito primeiro.', true); setCaixaTab('contas'); return; }
@@ -2608,7 +2648,7 @@ localStorage.setItem=function(k,v){_set(k,v);try{if(k===DB_KEY){_finSyncKick();}
       }
     }catch(e){}},25000);}catch(e){}
     // marcador de versão (confirma que o cache atualizou)
-    try{var _vb=document.createElement('div');_vb.textContent='sync v5';_vb.style.cssText='position:fixed;bottom:2px;right:6px;z-index:99998;font:10px Arial;color:#94a3b8;opacity:.6;pointer-events:none';document.body.appendChild(_vb);}catch(e){}
+    try{var _vb=document.createElement('div');_vb.textContent='sync v6';_vb.style.cssText='position:fixed;bottom:2px;right:6px;z-index:99998;font:10px Arial;color:#94a3b8;opacity:.6;pointer-events:none';document.body.appendChild(_vb);}catch(e){}
     var d=document.getElementById('__gate');if(d)d.remove();
     var code=document.getElementById('__mainfin').textContent;var sc=document.createElement('script');sc.textContent=code;document.body.appendChild(sc);
   }
